@@ -1,5 +1,7 @@
 import os
+import time
 from developer_functions.general_dev.signals_calc import process_assets_from_file
+import schedule
 
 
 def signals_auto_update():
@@ -22,12 +24,10 @@ def signals_auto_update():
     process_assets_from_file(file_path_forex, 'forex', output_file=output_file_forex)
 
 
-def function_one():
-    print("Виклик функції one")
+# Запускає функцію кожну 1 хвилину
+schedule.every(1).minutes.do(signals_auto_update)
 
-
-# Планування виклику функцій
-
-
-# Виклик функції планування
-# signals_auto_update()
+# Цикл для виконання запланованих завдань
+while True:
+    schedule.run_pending()
+    time.sleep(1)
