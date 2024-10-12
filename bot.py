@@ -3,8 +3,9 @@ from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackContext, Updater
 
 from buttoms_and_function_call import *
-from general.send_signal_to_user import process_signals
-from general.universal_functions import handle_ticker_input, symbol_info
+from developer_functions.general_dev.send_signal_to_user import process_signals
+from general.universal_functions import symbol_info
+from general.user_list import handle_user_interaction
 from keyboards import *
 from state_update_menu import update_menu_state
 
@@ -19,11 +20,17 @@ TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
 
 def start(update: Update, context: CallbackContext) -> None:
     context.user_data['menu_stack'] = ['start']
+
+    # Виклик функції з передачею необхідних аргументів
+    handle_user_interaction(update, context)
+
+    # Відправляємо повідомлення користувачу
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text='https://t.me/stashkiv_mykhailo created'
                                   ' this bot to provide people with access to the'
                                   ' best ideas for investments and speculations.',
                              reply_markup=create_start_keyboard())
+
     update_menu_state('start')
 
 

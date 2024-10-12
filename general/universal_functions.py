@@ -2,8 +2,8 @@ import yfinance as yf
 from telegram.ext import MessageHandler, Filters
 
 from crypto.get_crypto_data import *
-from general.chart import generate_chart
-from state_update_menu import menu_state, update_menu_state
+from developer_functions.general_dev.chart import generate_chart
+from state_update_menu import menu_state
 from stock.get_stock_data import get_stock_metrics
 
 

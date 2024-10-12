@@ -2,12 +2,14 @@ from telegram import KeyboardButton, ReplyKeyboardMarkup
 from state_update_menu import update_menu_state
 
 
+keyboard = [
+    [KeyboardButton("Menu")],
+    [KeyboardButton("Help")],
+    [KeyboardButton("About Bot")]
+]
+
+
 def create_start_keyboard():
-    keyboard = [
-        [KeyboardButton("About Bot")],
-        [KeyboardButton("Help")],
-        [KeyboardButton("Menu")]
-    ]
     return ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
 
 
