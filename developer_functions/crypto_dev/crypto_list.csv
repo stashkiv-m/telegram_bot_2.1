@@ -1,0 +1,501 @@
+Ticker,name
+btc,Bitcoin
+eth,Ethereum
+usdt,Tether
+bnb,BNB
+sol,Solana
+xrp,XRP
+usdc,USDC
+steth,Lido Staked Ether
+doge,Dogecoin
+ton,Toncoin
+ada,Cardano
+trx,TRON
+avax,Avalanche
+shib,Shiba Inu
+wsteth,Wrapped stETH
+wbtc,Wrapped Bitcoin
+link,Chainlink
+weth,WETH
+bch,Bitcoin Cash
+dot,Polkadot
+near,NEAR Protocol
+uni,Uniswap
+dai,Dai
+leo,LEO Token
+ltc,Litecoin
+sui,Sui
+pepe,Pepe
+icp,Internet Computer
+weeth,Wrapped eETH
+fet,Artificial Superintelligence Alliance
+tao,Bittensor
+apt,Aptos
+kas,Kaspa
+pol,POL (ex-MATIC)
+etc,Ethereum Classic
+xlm,Stellar
+imx,Immutable
+stx,Stacks
+xmr,Monero
+fdusd,First Digital USD
+render,Render
+okb,OKB
+usde,Ethena USDe
+fil,Filecoin
+aave,Aave
+op,Optimism
+arb,Arbitrum
+cro,Cronos
+hbar,Hedera
+wif,dogwifhat
+inj,Injective
+mnt,Mantle
+vet,VeChain
+atom,Cosmos Hub
+ftm,Fantom
+rune,THORChain
+grt,The Graph
+sei,Sei
+wbt,WhiteBIT Coin
+weth,Binance-Peg WETH
+floki,FLOKI
+bonk,Bonk
+theta,Theta Network
+ar,Arweave
+bgb,Bitget Token
+reth,Rocket Pool ETH
+mkr,Maker
+solvbtc,Solv Protocol SolvBTC
+meth,Mantle Staked Ether
+pyth,Pyth Network
+tia,Celestia
+hnt,Helium
+jup,Jupiter
+matic,Polygon
+ldo,Lido DAO
+algo,Algorand
+ondo,Ondo
+gt,Gate
+jasmy,JasmyCoin
+qnt,Quant
+om,MANTRA
+bsv,Bitcoin SV
+core,Core
+ezeth,Renzo Restaked ETH
+wld,Worldcoin
+gala,GALA
+brett,Brett
+kcs,KuCoin
+btt,BitTorrent
+beam,Beam
+flow,Flow
+not,Notcoin
+eeth,ether.fi Staked ETH
+popcat,Popcat
+strk,Starknet
+klay,Klaytn
+msol,Marinade Staked SOL
+ordi,ORDI
+axs,Axie Infinity
+eos,EOS
+w,Wormhole
+ckb,Nervos Network
+flr,Flare
+egld,MultiversX
+ftn,Fasttoken
+cfx,Conflux
+tkx,Tokenize Xchange
+neo,NEO
+aero,Aerodrome Finance
+xtz,Tezos
+usdd,USDD
+xec,eCash
+akt,Akash Network
+ena,Ethena
+sats,SATS (Ordinals)
+pendle,Pendle
+sand,The Sandbox
+pyusd,PayPal USD
+rseth,Kelp DAO Restaked ETH
+dydx,dYdX
+ron,Ronin
+mina,Mina Protocol
+xaut,Tether Gold
+wbtc,Arbitrum Bridged WBTC (Arbitrum One)
+ens,Ethereum Name Service
+frax,Frax
+chz,Chiliz
+mog,Mog Coin
+mana,Decentraland
+aioz,AIOZ Network
+nexo,NEXO
+cake,PancakeSwap
+lunc,Terra Luna Classic
+zro,LayerZero
+weth,Arbitrum Bridged WETH (Arbitrum One)
+ape,ApeCoin
+axl,Axelar
+snx,Synthetix Network
+cbeth,Coinbase Wrapped Staked ETH
+mew,cat in a dogs world
+zk,ZKsync
+lpt,Livepeer
+bome,BOOK OF MEME
+rose,Oasis Network
+astr,Astar
+dexe,DeXe
+paxg,PAX Gold
+jupsol,Jupiter Staked SOL
+tusd,TrueUSD
+iota,IOTA
+super,SuperVerse
+prime,Echelon Prime
+ray,Raydium
+frxeth,Frax Ether
+weth,L2 Standard Bridged WETH (Blast)
+tfuel,Theta Fuel
+blur,Blur
+mplx,Metaplex
+arkm,Arkham
+weth,L2 Standard Bridged WETH (Base)
+safe,Safe
+neiro,Neiro
+osmo,Osmosis
+gmt,GMT
+zec,Zcash
+gno,Gnosis
+dogs,Dogs
+xdc,XDC Network
+nft,APENFT
+btg,Bitcoin Gold
+dog,DOG•GO•TO•THE•MOON (Runes)
+comp,Compound
+twt,Trust Wallet
+kava,Kava
+turbo,Turbo
+iotx,IoTeX
+usdb,USDB
+lbtc,Lombard Staked BTC
+usdc.e,Bridged USDC (Polygon PoS Bridge)
+pepecoin,PepeCoin
+weth,Polygon PoS Bridged WETH (Polygon POS)
+people,ConstitutionDAO
+ethw,EthereumPoW
+dym,Dymension
+babydoge,Baby Doge Coin
+bdx,Beldex
+wemix,WEMIX
+aevo,Aevo
+celo,Celo
+rsr,Reserve Rights
+1inch,1inch
+busd,Binance-Peg BUSD
+hmstr,Hamster Kombat
+sfp,SafePal
+btc.b,Bitcoin Avalanche Bridged (BTC.b)
+glm,Golem
+crv,Curve DAO
+sfrxeth,Staked Frax Ether
+amp,Amp
+agix,SingularityNET
+sweth,Swell Ethereum
+manta,Manta Network
+usdy,Ondo US Dollar Yield
+mx,MX
+meme,Memecoin
+ksm,Kusama
+woo,WOO
+hot,Holo
+ethfi,Ether.fi
+ethx,Stader ETHx
+sundog,Sundog
+jto,Jito
+corgiai,CorgiAI
+luna,Terra
+dash,Dash
+zrx,0x Protocol
+gal,Galxe
+ankr,Ankr Network
+enj,Enjin Coin
+zil,Zilliqa
+ilv,Illuvium
+elf,aelf
+jst,JUST
+sc,Siacoin
+qai,QuantixAI
+polyx,Polymesh
+alt,AltLayer
+zeta,ZetaChain
+superoethb,Super OETH
+g,Gravity
+avail,Avail
+bat,Basic Attention
+cwbtc,cWBTC
+mmx,MMX
+giga,Gigachad
+qtum,Qtum
+saga,Saga
+vrsc,Verus
+ant,Aragon
+moodeng,Moo Deng
+rvn,Ravencoin
+ultima,Ultima
+usd0,Usual USD
+ath,Aethir
+wbtc,Polygon Bridged WBTC (Polygon POS)
+gas,Gas
+savax,BENQI Liquid Staked AVAX
+osak,Osaka Protocol
+t,Threshold Network
+cbbtc,Coinbase Wrapped BTC
+ohm,Olympus
+gmx,GMX
+qubic,Qubic
+metis,Metis
+tbtc,tBTC
+rpl,Rocket Pool
+ethdydx,dYdX
+trac,OriginTrail
+lseth,Liquid Staked ETH
+mask,Mask Network
+doge,Binance-Peg Dogecoin
+npc,Non-Playable Coin
+flux,Flux
+cet,CoinEx
+cat,Simon's Cat
+ocean,Ocean Protocol
+ousg,OUSG
+uma,UMA
+qgold,Quorium
+xrd,Radix
+skl,SKALE
+blast,Blast
+bico,Biconomy
+usdt,Mantle Bridged USDT (Mantle)
+agi,Delysium
+mwc,MimbleWimbleCoin
+nxm,Nexus Mutual
+paal,PAAL AI
+xch,Chia
+sun,Sun Token
+dcr,Decred
+coti,COTI
+usdc.e,Arbitrum Bridged USDC (Arbitrum)
+ygg,Yield Guild Games
+io,io.net
+eth,Bridged Ether (StarkGate)
+gfi,Goldfinch
+wbeth,Wrapped Beacon ETH
+ecoin,Ecoin
+trb,Tellor Tributes
+venom,Venom
+wmt,World Mobile Token
+nos,Nosana
+band,Band Protocol
+api3,API3
+ponke,PONKE
+cfg,Centrifuge
+fxs,Frax Share
+yfi,yearn.finance
+ceth,cETH
+ont,Ontology
+kda,Kadena
+id,SPACE ID
+usdx,usdx.money USDX
+rlb,Rollbit Coin
+abt,Arcblock
+one,Harmony
+cvx,Convex Finance
+chr,Chromia
+xem,NEM
+tribe,Tribe
+edu,Open Campus
+ssv,SSV Network
+borg,SwissBorg
+vtho,VeThor
+gomining,Gomining Token
+audio,Audius
+sxp,Solar
+ctc,Creditcoin
+myth,Mythos
+glmr,Moonbeam
+lrc,Loopring
+chex,CHEX Token
+honey,Hivemapper
+sushi,Sushi
+cspr,Casper Network
+bigtime,Big Time
+weth,Wrapped Ether (Mantle Bridge)
+alusd,Alchemix USD
+kub,Bitkub Coin
+0x0,0x0.ai: AI Smart Contract
+icx,ICON
+merl,Merlin Chain
+drift,Drift Protocol
+zig,Zignaly
+andy,ANDY ETH
+gho,GHO
+bb,BounceBit
+ssol,Solayer Staked SOL
+basedai,BasedAI
+lsk,Lisk
+vanry,Vanar Chain
+mpl,Maple
+alph,Alephium
+banana,Banana Gun
+taiko,Taiko
+deusd,Elixir deUSD
+pzeth,Renzo Restaked LST
+joe,JOE
+okt,OKT Chain
+tlos,Telos
+tel,Telcoin
+eurs,STASIS EURO
+bitcoin,HarryPotterObamaSonic10Inu (ETH)
+ntrn,Neutron
+azero,Aleph Zero
+xai,Xai
+ustc,TerraClassicUSD
+dai,Polygon PoS Bridged DAI (Polygon POS)
+ageth,Kelp Gain
+ozo,Ozone Chain
+cdt,Blox
+moca,Moca Coin
+eth+,ETHPlus
+zen,Horizen
+trump,MAGA
+waxp,WAX
+lcx,LCX
+bal,Balancer
+h2o,H2O Dao
+xvs,Venus
+usdc,Cronos Bridged USDC (Cronos)
+ong,Ontology Gas
+cati,Catizen
+zent,Zentry
+xno,Nano
+pixel,Pixels
+waves,Waves
+nmr,Numeraire
+elg,Escoin
+dgb,DigiByte
+quil,Wrapped QUIL
+mrs,Metars Genesis
+aitech,Solidus Ai Tech
+powr,Powerledger
+rlc,iExec RLC
+bone,Bone ShibaSwap
+mother,Mother Iggy
+velo,Velo
+tru,TrueFi
+kag,Kinesis Silver
+reef,Reef
+kau,Kinesis Gold
+orbs,Orbs
+iq,IQ
+mumu,MUMU THE BULL
+wexo,Wexo
+nmt,NetMind Token
+c98,Coin98
+ctsi,Cartesi
+oseth,StakeWise Staked ETH
+orca,Orca
+sgb,Songbird
+vvs,VVS Finance
+slp,Smooth Love Potion
+spx,SPX6900
+$michi,michi
+pundix,Pundi X
+crown,Crown by Third Time Games
+mobile,Helium Mobile
+orai,Oraichain
+pci,Paycoin
+dusk,Dusk
+apu,Apu Apustaja
+uxlink,UXLINK
+syn,Synapse
+coq,Coq Inu
+weth,L2 Standard Bridged WETH (Optimism)
+prom,Prom
+strax,Stratis
+usdp,Pax Dollar
+bora,BORA
+anyone,ANyONe Protocol
+wsteth,Bridged Wrapped stETH (Gnosis)
+bmx,BitMart
+bull,Tron Bull
+fx,Function X
+acx,Across Protocol
+magic,Magic
+alice,My Neighbor Alice
+ixs,IX Swap
+iost,IOST
+pond,Marlin
+spec,Spectral
+why,WHY
+rss3,RSS3
+omni,Omni Network
+sfund,Seedify.fund
+dar,Mines of Dalarnia
+pumpbtc,pumpBTC
+inst,Instadapp
+movr,Moonriver
+lon,Tokenlon
+nkyc,NKYC Token
+mvl,MVL
+kmno,Kamino
+dag,Constellation
+cvc,Civic
+rare,SuperRare
+ach,Alchemy Pay
+unieth,Universal ETH
+auction,Bounce
+snt,Status
+token,TokenFi
+pha,PHALA
+ace,Fusionist
+dodo,DODO
+rif,RSK Infrastructure Framework
+omi,ECOMI
+cgpt,ChainGPT
+strd,Stride
+lqty,Liquity
+hive,Hive
+usdc.e,Standard Bridged USDC.e (Optimism)
+sure,inSure DeFi
+win,WINkLink
+well,Moonwell
+btse,BTSE Token
+stpt,STP
+dka,dKargo
+ht,Huobi
+rdnt,Radiant Capital
+fire,Matr1x Fire
+spell,Spell
+steem,Steem
+phb,Phoenix
+dent,Dent
+ark,ARK
+naka,Nakamoto Games
+velo,Velodrome Finance
+hook,Hooked Protocol
+boba,Boba Network
+mav,Maverick Protocol
+sys,Syscoin
+$myro,Myro
+mlk,MiL.k Alliance
+dione,Dione
+cxt,Covalent X Token
+raca,Radio Caca
+$wen,Wen
+usdt,Cronos Bridged USDT (Cronos)
+ardr,Ardor
+cudos,Cudos
+tet,Tectum
+knc,Kyber Network Crystal
+zano,Zano
+mcoin,MCOIN
+usd+,Overnight.fi USD+
+xyo,XYO Network
+bzr,Bazaars

@@ -1,0 +1,42 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyChainedComparisonsInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoreConstantInTheMiddle" value="true" />
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N802" />
+          <option value="N801" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="main.min" />
+          <option value="main.max" />
+          <option value="main.len" />
+          <option value="main.sum" />
+          <option value="main.print" />
+          <option value="main.int" />
+          <option value="main.type" />
+          <option value="range.__getitem__" />
+          <option value="tuple.append" />
+          <option value="pdplot" />
+          <option value="yfinance.tickers.Tickers.__getitem__" />
+          <option value="list.to_csv" />
+          <option value="bool.sum" />
+          <option value="dict.summary_detail" />
+          <option value="analyze_prices_change_by_sectors.create_weekly_average_price_change_csv.transpose" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="SpellCheckingInspection" enabled="false" level="TYPO" enabled_by_default="false">
+      <option name="processCode" value="true" />
+      <option name="processLiterals" value="true" />
+      <option name="processComments" value="true" />
+    </inspection_tool>
+  </profile>
+</component>
