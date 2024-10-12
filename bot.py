@@ -31,7 +31,7 @@ def main():
     """Start the bot."""
     # Initialize the Updater with your bot's TOKEN
     updater = Updater(TOKEN, use_context=True)
-
+    # test
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
