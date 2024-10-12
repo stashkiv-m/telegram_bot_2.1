@@ -13,9 +13,10 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# test
 # Token for your bot (ensure to keep this token private in real-world applications)
 TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
-
+# test
 
 def start(update: Update, context: CallbackContext) -> None:
     context.user_data['menu_stack'] = ['start']
