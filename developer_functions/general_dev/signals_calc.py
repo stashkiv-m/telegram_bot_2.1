@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 
+
 # Функція для отримання історичних даних за 205 днів
 def fetch_ohlcv(symbol, asset_type, timeframe='1d'):
     try:
@@ -89,7 +90,6 @@ def process_assets_from_file(file_path, asset_type, output_file=None):
         print("No signals found for the last 5 days.")
 
     return combined_signals if all_signals else None
-
 
 
 # Головна функція для запуску процесу
