@@ -29,6 +29,7 @@ def start(update: Update, context: CallbackContext) -> None:
 
 def main():
     """Start the bot."""
+    # test
     # Initialize the Updater with your bot's TOKEN
     updater = Updater(TOKEN, use_context=True)
 
