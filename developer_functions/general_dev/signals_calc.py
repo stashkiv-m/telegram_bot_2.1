@@ -115,5 +115,3 @@ def main():
     process_assets_from_file(file_path, asset_type, output_file=output_file)
 
 
-if __name__ == "__main__":
-    main()

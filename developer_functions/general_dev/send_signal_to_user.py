@@ -5,6 +5,7 @@ from telegram.ext import CallbackContext
 from state_update_menu import menu_state
 from datetime import datetime, timedelta
 
+
 def process_signals(update: Update, context: CallbackContext) -> None:
     # Отримання поточного стану з функції menu_state
     state = menu_state().rstrip('\n')  # Видаляємо символ нового рядка
