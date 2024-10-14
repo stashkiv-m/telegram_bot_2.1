@@ -6,7 +6,7 @@ import datetime
 
 # Сьогоднішня дата
 today = datetime.date.today()
-one_year_ago = today - datetime.timedelta(days=365)
+one_year_ago = today - datetime.timedelta(days=165)
 
 
 # Функція для отримання фундаментальних даних через yfinance
@@ -139,7 +139,6 @@ def backtest_strategy(df, position_column):
     profit = final_balance - initial_balance  # Прибуток або збиток
     profit_percentage = (profit / initial_balance) * 100  # Прибуток у відсотках
     return profit, profit_percentage, final_balance
-
 
 
 # Функція для розрахунку Take Profit і Stop Loss
@@ -288,7 +287,7 @@ def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
     file_path_crypto = os.path.join(base_dir, '..', 'crypto_dev', 'crypto_list.csv')
-    file_path_stock = os.path.join(base_dir, '..', 'stock_dev', 'stock_list_test.csv')
+    file_path_stock = os.path.join(base_dir, '..', 'stock_dev', 'stock_list.csv')
     file_path_forex = os.path.join(base_dir, '..', 'forex_dev', 'forex_list.csv')
 
     # Вибір, який бектест запускати: криптовалюта, акції або форекс
@@ -303,6 +302,23 @@ def main():
     else:
         print("Невірний тип активу. Виберіть 'crypto', 'stock' або 'forex'.")
 
+def run_all():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
+    file_path_crypto = os.path.join(base_dir, '..', 'crypto_dev', 'crypto_list.csv')
+    file_path_stock = os.path.join(base_dir, '..', 'stock_dev', 'stock_list.csv')
+    file_path_forex = os.path.join(base_dir, '..', 'forex_dev', 'forex_list.csv')
+
+    # Вибір, який бектест запускати: криптовалюта, акції або форекс
+
+    run_backtest_from_file(file_path_crypto, asset_type='crypto')
+
+    run_backtest_from_file(file_path_stock, asset_type='stock')
+
+    run_backtest_from_file(file_path_forex, asset_type='forex')
+
 
 if __name__ == "__main__":
+    run_all()
     main()
+

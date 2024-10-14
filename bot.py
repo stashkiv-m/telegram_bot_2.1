@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackContext, Updater
 
 from buttoms_and_function_call import *
-from developer_functions.general_dev.send_signal_to_user import get_strategy
+from developer_functions.general_dev.send_signal_to_user import signal_list_for_user
 # from developer_functions.general_dev.send_signal_to_user import process_signals
 # from developer_functions.general_dev.send_signal_to_user import process_signals
 from general.universal_functions import symbol_info
@@ -67,7 +67,7 @@ def main():
 
     def stock_signal_func_button_call(update: Update, context: CallbackContext) -> None:
         update_menu_state('stock_signal')
-        get_strategy(update, context)
+        signal_list_for_user(update, context)
 
     def forex_func_button_call(update: Update, context: CallbackContext) -> None:
         forex_keyboard(update, context)
@@ -83,7 +83,7 @@ def main():
 
     def forex_signals_func_button_call(update: Update, context: CallbackContext) -> None:
         update_menu_state('forex_signal')
-        # process_signals(update, context)
+        signal_list_for_user(update, context)
 
     def crypto_func_button_call(update: Update, context: CallbackContext) -> None:
         crypto_keyboard(update, context)
@@ -99,7 +99,7 @@ def main():
 
     def crypto_signals_func_button_call(update: Update, context: CallbackContext) -> None:
         update_menu_state('crypto_signals')
-        # process_signals(update, context)
+        signal_list_for_user(update, context)
 
     schedule_signal_updates()
 

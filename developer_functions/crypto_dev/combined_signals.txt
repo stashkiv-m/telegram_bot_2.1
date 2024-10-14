@@ -1,0 +1,18 @@
+
+=== MACD Signals ===
+| Symb | MACD | TProfit | SLoss | Profit% |
+|----|----|-------|-----|-------|
+eth    | Buy    | 11.65  | -4.87  | 16.50 
+sol    | Buy    | 14.47  | -6.54  | 37.15 
+steth  | Buy    | 13.16  | -4.69  | 21.31 
+doge   | Buy    | 12.79  | -8.09  | -6.85 
+wsteth | Buy    | 11.08  | -4.21  | 19.14 
+weth   | Buy    | 10.85  | -4.30  | 17.23 
+
+=== MA Signals ===
+| Symb | MA | TProfit | SLoss | Profit% |
+|----|--|-------|-----|-------|
+bnb    | Buy    | 12.52  | -4.76  | 28.13 
+sol    | Buy    | 16.01  | -4.30  | 18.25 
+ada    | Buy    |        |        | 6.76  
+trx    | Buy    |        |        | 26.14 

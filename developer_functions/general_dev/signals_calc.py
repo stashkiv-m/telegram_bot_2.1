@@ -137,14 +137,14 @@ def main():
     asset_type = input("Введіть тип активу (crypto/stock/forex): ").strip().lower()
 
     if asset_type == 'crypto':
-        file_path = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_backtest_optimized.csv')
-        output_file = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signal.csv')
+        file_path = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_backtest_optimized_test.csv')
+        output_file = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signal_test.csv')
     elif asset_type == 'stock':
         file_path = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_backtest_optimized_test.csv')
         output_file = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_signal_test.csv')
     elif asset_type == 'forex':
         file_path = os.path.join(BASE_DIR, '..', 'forex_dev', 'forex_backtest_optimized.csv')
-        output_file = os.path.join(BASE_DIR, '..', 'forex_dev', 'forex_signal.csv')
+        output_file = os.path.join(BASE_DIR, '..', 'forex_dev', 'forex_signal_test.csv')
     else:
         print("Невірний тип активу. Виберіть 'crypto', 'stock', або 'forex'.")
         return
