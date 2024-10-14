@@ -1,0 +1,25 @@
+=== MACD Signals ===
+Symb MACD TProfit  SLoss Profit%  Strat
+AAME  BUY    9.36  -7.23  -14.08    Unk
+ AAN  BUY   11.56  -6.48   30.65 DivAcc
+AAOI  BUY   26.47 -11.75  224.33    Unk
+AAON  BUY    8.45  -4.28   63.64     HG
+ AAP  BUY    8.89  -5.44  -10.23    Unk
+AAPL  BUY    4.51  -2.80   15.91     HG
+  AB  BUY    3.28  -2.91   -2.75 DivAcc
+
+=== MA Signals ===
+Symb   MA TProfit SLoss Profit% Strat
+   A  BUY    6.50 -4.67   22.70    HG
+  AA  BUY   22.78 -6.82   93.86   Unk
+AACG  BUY   40.98 -4.86   41.91   Unk
+ AAL  BUY    5.25 -4.24    4.46   Unk
+AAMC  BUY   13.66 -0.47   16.15   Unk
+AAME  BUY   17.46 -5.70   22.67   Unk
+ AAP SELL   27.58 -1.00   30.89   Unk
+
+=== Strategy Descriptions ===
+HG: High Growth: High ROE and ROA with high Debt to Equity.
+Cons: Conservative: Low ROE and ROA with low Debt to Equity.
+DivAcc: Dividend Accumulator: High Dividend Yield, ROE, and ROA.
+Unk: Unknown: No specific strategy classification available.

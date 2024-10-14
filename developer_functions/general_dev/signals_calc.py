@@ -72,6 +72,7 @@ def merge_signals(df):
 
 
 # Функція для обробки списку активів з файлу та збереження сигналів
+# Функція для обробки списку активів з файлу та збереження сигналів
 def process_assets_from_file(file_path, asset_type, output_file=None):
     asset_df = pd.read_csv(file_path)
     all_signals = []
@@ -101,10 +102,19 @@ def process_assets_from_file(file_path, asset_type, output_file=None):
         last_signal = combined_signals_df.dropna(subset=['MA Signal', 'MACD Signal']).tail(1)
 
         if not last_signal.empty:
-            for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
-                        'MACD Profit (%)', 'MACD Take Profit (%)', 'MACD Stop Loss (%)',
-                        'Short MA Window', 'Long MA Window', 'MACD Short Period', 'MACD Long Period', 'MACD Signal Period']:
-                last_signal[col] = row[col]
+            # Додавання фундаментальних метрик лише для акцій
+            if asset_type == 'stock':
+                for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
+                            'MACD Profit (%)', 'MACD Take Profit (%)', 'MACD Stop Loss (%)',
+                            'Market Cap', 'Enterprise Value', 'Trailing P/E', 'Forward P/E',
+                            'P/B Ratio', 'ROE (%)', 'ROA (%)', 'Debt to Equity', 'Current Ratio',
+                            'Dividend Yield (%)', 'Payout Ratio', 'Gross Margin', 'Operating Margin', 'Profit Margin']:
+                    last_signal[col] = row[col]
+            else:
+                # Додавання тільки технічних метрик для форексу та криптовалют
+                for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
+                            'MACD Profit (%)', 'MACD Take Profit (%)', 'MACD Stop Loss (%)']:
+                    last_signal[col] = row[col]
 
             last_signal['Symbol'] = symbol
             all_signals.append(last_signal)
@@ -119,6 +129,7 @@ def process_assets_from_file(file_path, asset_type, output_file=None):
     return combined_signals if all_signals else None
 
 
+
 # Головна функція для запуску процесу
 def main():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -129,8 +140,8 @@ def main():
         file_path = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_backtest_optimized.csv')
         output_file = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signal.csv')
     elif asset_type == 'stock':
-        file_path = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_backtest_optimized.csv')
-        output_file = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_signal.csv')
+        file_path = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_backtest_optimized_test.csv')
+        output_file = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_signal_test.csv')
     elif asset_type == 'forex':
         file_path = os.path.join(BASE_DIR, '..', 'forex_dev', 'forex_backtest_optimized.csv')
         output_file = os.path.join(BASE_DIR, '..', 'forex_dev', 'forex_signal.csv')
