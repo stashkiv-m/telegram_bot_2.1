@@ -9,6 +9,35 @@ today = datetime.date.today()
 one_year_ago = today - datetime.timedelta(days=365)
 
 
+# Функція для отримання фундаментальних даних через yfinance
+def fetch_fundamental_data(symbol):
+    try:
+        stock = yf.Ticker(symbol)
+        info = stock.info
+
+        # Повертаємо необхідні фундаментальні дані
+        return {
+            'Market Cap': info.get('marketCap'),
+            'Enterprise Value': info.get('enterpriseValue'),
+            'Trailing P/E': info.get('trailingPE'),
+            'Forward P/E': info.get('forwardPE'),
+            'P/B Ratio': info.get('priceToBook'),
+            'ROE (%)': info.get('returnOnEquity') * 100 if info.get('returnOnEquity') is not None else None,
+            'ROA (%)': info.get('returnOnAssets') * 100 if info.get('returnOnAssets') is not None else None,
+            'Debt to Equity': info.get('debtToEquity'),
+            'Current Ratio': info.get('currentRatio'),
+            'Dividend Yield (%)': info.get('dividendYield') * 100 if info.get('dividendYield') is not None else None,
+            'Payout Ratio': info.get('payoutRatio'),
+            'Gross Margin': info.get('grossMargins'),
+            'Operating Margin': info.get('operatingMargins'),
+            'Profit Margin': info.get('profitMargins')
+        }
+    except Exception as e:
+        print(f"Error fetching fundamental data for {symbol}: {e}")
+        return None
+
+
+
 # Функція для отримання історичних даних через yfinance
 def fetch_ohlcv(symbol, asset_type):
     try:
@@ -38,11 +67,25 @@ def moving_average_crossover_strategy(df, short_window, long_window):
     df['long_ma'] = df['close'].rolling(window=long_window).mean()
 
     # Створення сигналів
-    df['signal'] = 0
-    df.loc[short_window:, 'signal'] = np.where(df['short_ma'][short_window:] > df['long_ma'][short_window:], 1, 0)
-    df['position'] = df['signal'].diff()
+    df['signal_ma'] = 0
+    df.loc[short_window:, 'signal_ma'] = np.where(df['short_ma'][short_window:] > df['long_ma'][short_window:], 1, 0)
+    df['position_ma'] = df['signal_ma'].diff()
 
     return df
+
+
+# Стратегія MACD
+def macd_strategy(df, short_period=12, long_period=26, signal_period=9):
+    df['macd_line'] = df['close'].ewm(span=short_period, adjust=False).mean() - df['close'].ewm(span=long_period, adjust=False).mean()
+    df['signal_line'] = df['macd_line'].ewm(span=signal_period, adjust=False).mean()
+    df['macd_histogram'] = df['macd_line'] - df['signal_line']
+
+    # Створення сигналів
+    df['signal_macd'] = 0
+    df['signal_macd'] = np.where(df['macd_line'] > df['signal_line'], 1, 0)
+    df['position_macd'] = df['signal_macd'].diff()
+
+    return df, short_period, long_period, signal_period
 
 
 # Функція для бектесту стратегії з підбором найкращих параметрів ковзних середніх
@@ -56,7 +99,7 @@ def optimize_moving_average(df):
     for short_window in range(10, 101, 10):
         for long_window in range(short_window + 10, 201, 10):
             temp_df = moving_average_crossover_strategy(df.copy(), short_window, long_window)
-            profit, profit_percentage, _ = backtest_strategy(temp_df)
+            profit, profit_percentage, _ = backtest_strategy(temp_df, 'position_ma')
 
             if profit_percentage > best_profit:
                 best_profit = profit_percentage
@@ -68,21 +111,27 @@ def optimize_moving_average(df):
 
 
 # Функція для бектестування стратегії
-def backtest_strategy(df):
+# Функція для бектестування стратегії
+def backtest_strategy(df, position_column):
     initial_balance = 10000
     balance = initial_balance
     position = 0  # 1 - довга позиція, 0 - без позиції
 
     for i in range(1, len(df)):
-        if df['position'].iloc[i] == 1:  # Купуємо
+        # Перевірка, чи є ціна закриття ненульовою та не NaN
+        if df['close'].iloc[i] == 0 or pd.isna(df['close'].iloc[i]):
+            # Якщо є погане значення, інтерполюємо або використовуємо інший метод обробки
+            continue  # або df['close'].iloc[i] = інтерпольоване значення, залежно від потреб
+
+        if df[position_column].iloc[i] == 1:  # Купуємо
             position = balance / df['close'].iloc[i]  # Купуємо за весь баланс
             balance = 0
-        elif df['position'].iloc[i] == -1:  # Продаємо
+        elif df[position_column].iloc[i] == -1 and position > 0:  # Продаємо, якщо є відкрита позиція
             balance = position * df['close'].iloc[i]  # Продаємо і отримуємо новий баланс
             position = 0
 
     # Кінцевий баланс: закриваємо позицію за останньою ціною, якщо є відкрита позиція
-    if position != 0:
+    if position != 0 and not pd.isna(df['close'].iloc[-1]) and df['close'].iloc[-1] != 0:
         final_balance = balance + position * df['close'].iloc[-1]
     else:
         final_balance = balance
@@ -92,9 +141,10 @@ def backtest_strategy(df):
     return profit, profit_percentage, final_balance
 
 
+
 # Функція для розрахунку Take Profit і Stop Loss
-def calculate_take_profit_and_stop_loss(df):
-    signals = df[df['position'] != 0].reset_index()
+def calculate_take_profit_and_stop_loss(df, position_column):
+    signals = df[df[position_column] != 0].reset_index()
 
     take_profits = []
     stop_losses = []
@@ -108,14 +158,14 @@ def calculate_take_profit_and_stop_loss(df):
         take_profit = 0
         stop_loss = 0
 
-        if signal['position'] == 1:  # BUY
+        if signal[position_column] == 1:  # BUY
             if not period_df.empty:
                 max_price = period_df['high'].max()
                 take_profit = (max_price - signal['close']) / signal['close'] * 100
                 min_price = period_df['low'].min()
                 stop_loss = (min_price - signal['close']) / signal['close'] * 100
 
-        elif signal['position'] == -1:  # SELL
+        elif signal[position_column] == -1:  # SELL
             if not period_df.empty:
                 min_price = period_df['low'].min()
                 take_profit = (signal['close'] - min_price) / signal['close'] * 100
@@ -132,7 +182,34 @@ def calculate_take_profit_and_stop_loss(df):
 
 
 # Основна функція для бектесту
-def run_backtest_from_file(file_path, asset_type='crypto'):
+
+def optimize_macd(df):
+    best_profit = -np.inf
+    best_short_period = None
+    best_long_period = None
+    best_signal_period = None
+    best_df = None
+
+    # Перебираємо комбінації коротких, довгих і сигналів періодів
+    for short_period in range(8, 14):  # Наприклад, оптимізуємо між 8-13 днями
+        for long_period in range(22, 31):  # Оптимізуємо між 22-30 днями
+            for signal_period in range(7, 12):  # Оптимізуємо між 7-11 днями
+                temp_df, _, _, _ = macd_strategy(df.copy(), short_period, long_period, signal_period)
+                profit_macd, profit_percentage_macd, _ = backtest_strategy(temp_df, 'position_macd')
+
+                if profit_percentage_macd > best_profit:
+                    best_profit = profit_percentage_macd
+                    best_short_period = short_period
+                    best_long_period = long_period
+                    best_signal_period = signal_period
+                    best_df = temp_df
+
+    return best_df, best_short_period, best_long_period, best_signal_period, best_profit
+
+
+# Оновлена основна функція для бектесту
+# Оновлена основна функція для бектесту з фундаментальними показниками
+def run_backtest_from_file(file_path, asset_type='stock'):
     asset_df = pd.read_csv(file_path)
     tickers = asset_df['Ticker'].tolist()
 
@@ -146,29 +223,53 @@ def run_backtest_from_file(file_path, asset_type='crypto'):
             print(f"Skipping {ticker} due to insufficient data.")
             continue
 
-        # Оптимізація стратегії
-        df, short_window, long_window, profit_percentage = optimize_moving_average(df)
+        # Оптимізація MA стратегії
+        df, short_window, long_window, profit_percentage_ma = optimize_moving_average(df)
 
-        # Розрахунок Take Profit і Stop Loss
-        avg_take_profit, avg_stop_loss = calculate_take_profit_and_stop_loss(df)
+        # Оптимізація MACD стратегії
+        df, short_period, long_period, signal_period, profit_percentage_macd = optimize_macd(df)
+
+        # Розрахунок Take Profit і Stop Loss для MA
+        avg_take_profit_ma, avg_stop_loss_ma = calculate_take_profit_and_stop_loss(df, 'position_ma')
+
+        # Розрахунок Take Profit і Stop Loss для MACD
+        avg_take_profit_macd, avg_stop_loss_macd = calculate_take_profit_and_stop_loss(df, 'position_macd')
+
+        # Отримуємо фундаментальні дані для акції
+        if asset_type == 'stock':
+            fundamental_data = fetch_fundamental_data(ticker)
+        else:
+            fundamental_data = {}
 
         # Додаємо результати у форматі рядка для кожного активу
         result = {
             'Symbol': f"{ticker}",
             'Short MA Window': short_window,
             'Long MA Window': long_window,
-            'Profit (%)': profit_percentage,
-            'Take Profit (%)': avg_take_profit,
-            'Stop Loss (%)': avg_stop_loss
+            'MA Profit (%)': profit_percentage_ma,
+            'MA Take Profit (%)': avg_take_profit_ma,
+            'MA Stop Loss (%)': avg_stop_loss_ma,
+            'MACD Short Period': short_period,
+            'MACD Long Period': long_period,
+            'MACD Signal Period': signal_period,
+            'MACD Profit (%)': profit_percentage_macd,
+            'MACD Take Profit (%)': avg_take_profit_macd,
+            'MACD Stop Loss (%)': avg_stop_loss_macd
         }
+
+        # Додаємо фундаментальні дані до результату, якщо вони доступні
+        if fundamental_data:
+            result.update(fundamental_data)
+
         all_results.append(result)
 
         print(
-            f"Results for {ticker}: Profit (%) = {profit_percentage:.2f}, Short MA = {short_window}, Long MA = {long_window}, Take Profit = {avg_take_profit:.2f}%, Stop Loss = {avg_stop_loss:.2f}%")
+            f"Results for {ticker}: MA Profit (%) = {profit_percentage_ma:.2f}, MACD Profit (%) = {profit_percentage_macd:.2f}")
 
-    # Визначаємо, в яку папку зберігати результати
-    folder_path = os.path.join(os.getcwd(), 'developer_functions', f'{asset_type}_dev')
-    file_name = f'{asset_type}_backtest_optimized.csv'
+    # Визначаємо шлях збереження результатів
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    folder_path = os.path.join(project_root, 'developer_functions', f'{asset_type}_dev')
+    file_name = f'{asset_type}_backtest_optimized_test.csv'
 
     # Перевірка наявності папки
     if not os.path.exists(folder_path):
@@ -181,12 +282,13 @@ def run_backtest_from_file(file_path, asset_type='crypto'):
     print(f"\nResults saved to {file_path}")
 
 
+
 # Головна функція для запуску бектесту
 def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
     file_path_crypto = os.path.join(base_dir, '..', 'crypto_dev', 'crypto_list.csv')
-    file_path_stock = os.path.join(base_dir, '..', 'stock_dev', 'stock_list.csv')
+    file_path_stock = os.path.join(base_dir, '..', 'stock_dev', 'stock_list_test.csv')
     file_path_forex = os.path.join(base_dir, '..', 'forex_dev', 'forex_list.csv')
 
     # Вибір, який бектест запускати: криптовалюта, акції або форекс
@@ -200,7 +302,6 @@ def main():
         run_backtest_from_file(file_path_forex, asset_type='forex')
     else:
         print("Невірний тип активу. Виберіть 'crypto', 'stock' або 'forex'.")
-
 
 
 if __name__ == "__main__":

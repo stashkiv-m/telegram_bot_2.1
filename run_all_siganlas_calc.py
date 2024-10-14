@@ -28,9 +28,9 @@ def signals_auto_update():
     send_message_to_all_users("Signals have been updated. Check out new trading ideas!")
 
 
-def schedule_signal_updates(hour: int = 16, minute: int = 0):
+def schedule_signal_updates(hour: int = 23, minute: int = 30):
     # Використовуємо часову зону Eastern Time (US/Eastern)
-    timezone = pytz.timezone('US/Eastern')
+    timezone = pytz.timezone('America/Chicago')
 
     # Створюємо планувальник
     scheduler = BackgroundScheduler(timezone=timezone)

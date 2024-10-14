@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackContext, Updater
 
 from buttoms_and_function_call import *
-from developer_functions.general_dev.send_signal_to_user import process_signals
+# from developer_functions.general_dev.send_signal_to_user import process_signals
 from general.universal_functions import symbol_info
 from general.user_list import handle_user_interaction
 from keyboards import *
@@ -16,7 +16,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 # Token for your bot (ensure to keep this token private in real-world applications)
-TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
+TOKEN = '7721716265:AAEuzhZyZM_pT0FQHsbx-FziENEg-cNT5do'
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -24,7 +24,6 @@ def start(update: Update, context: CallbackContext) -> None:
 
     # Виклик функції з передачею необхідних аргументів
     handle_user_interaction(update, context)
-
 
     # Відправляємо повідомлення користувачу
     context.bot.send_message(chat_id=update.effective_chat.id,
@@ -66,7 +65,7 @@ def main():
 
     def stock_signal_func_button_call(update: Update, context: CallbackContext) -> None:
         update_menu_state('stock_signal')
-        process_signals(update, context)
+        # process_signals(update, context)
 
     def forex_func_button_call(update: Update, context: CallbackContext) -> None:
         forex_keyboard(update, context)
@@ -82,7 +81,7 @@ def main():
 
     def forex_signals_func_button_call(update: Update, context: CallbackContext) -> None:
         update_menu_state('forex_signal')
-        process_signals(update, context)
+        # process_signals(update, context)
 
     def crypto_func_button_call(update: Update, context: CallbackContext) -> None:
         crypto_keyboard(update, context)
@@ -98,9 +97,10 @@ def main():
 
     def crypto_signals_func_button_call(update: Update, context: CallbackContext) -> None:
         update_menu_state('crypto_signals')
-        process_signals(update, context)
+        # process_signals(update, context)
 
     schedule_signal_updates()
+
     # Register command handlers
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(MessageHandler(Filters.regex(r'^About Bot$'), about_bot_func_button_call))
