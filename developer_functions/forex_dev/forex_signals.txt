@@ -1,0 +1,9 @@
+
+=== MACD Signals ===
+| Symb | MACD | TProfit | SLoss | Profit% |
+|----|----|-------|-----|-------|
+EURRUB | Sell   | 3.61   | -2.00  | 5.67  
+GBPCZK | Sell   | 2.45   | -0.49  | 5.82  
+
+=== MA Signals ===
+No data available.

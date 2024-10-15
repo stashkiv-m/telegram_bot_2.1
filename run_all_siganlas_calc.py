@@ -25,10 +25,11 @@ def signals_auto_update():
     process_assets_from_file(file_path_stock, 'stock', output_file=output_file_stock)
     process_assets_from_file(file_path_forex, 'forex', output_file=output_file_forex)
 
-    send_message_to_all_users("Signals have been updated. Check out new trading ideas!")
+    send_message_to_all_users("Signals have been updated. Assets were filtered based on profitability to include only "
+                              "the best trading ideas. Check out new opportunities!")
 
 
-def schedule_signal_updates(hour: int = 23, minute: int = 30):
+def schedule_signal_updates(hour: int = 22, minute: int = 5):
     # Використовуємо часову зону Eastern Time (US/Eastern)
     timezone = pytz.timezone('America/Chicago')
 

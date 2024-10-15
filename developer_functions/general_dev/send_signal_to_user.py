@@ -33,13 +33,13 @@ def signal_list_for_user(update: Update, context: CallbackContext):
 
     # Визначаємо вхідні та вихідні файли на основі стану меню
     if state == 'crypto_signals':
-        file_path = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signal_test.csv')
-        output_file = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_siganls.txt')
+        file_path = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signal.csv')
+        output_file = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signals.txt')
     elif state == 'stock_signal':
-        file_path = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_signal_test.csv')
+        file_path = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_signal.csv')
         output_file = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_signals.txt')
     elif state == 'forex_signal':
-        file_path = os.path.join(BASE_DIR, '..', 'forex_dev', 'forex_signal_test.csv')
+        file_path = os.path.join(BASE_DIR, '..', 'forex_dev', 'forex_signal.csv')
         output_file = os.path.join(BASE_DIR, '..', 'forex_dev', 'forex_signals.txt')
     else:
         context.bot.send_message(chat_id=update.effective_chat.id, text="Невідомий тип активу.")
@@ -79,6 +79,10 @@ def signal_list_for_user(update: Update, context: CallbackContext):
         "Unk": "Unknown: No specific strategy classification available."
     }
 
+    # Визначаємо мінімальні пороги прибутковості
+    forex_min_profit = 5.0  # Поріг для форекс активів
+    other_min_profit = 20.0  # Поріг для криптовалют та акцій
+
     for _, row in df.iterrows():
         # Отримуємо сигнали та дані про прибуток
         macd_signal = row.get('MACD Signal')
@@ -93,6 +97,17 @@ def signal_list_for_user(update: Update, context: CallbackContext):
         # Фільтруємо лише рядки з сигналами BUY або SELL
         if macd_signal not in ['Buy', 'Sell'] and ma_signal not in ['Buy', 'Sell']:
             continue
+
+        # Визначаємо поріг для прибутковості в залежності від типу активу
+        if state == 'forex_signal':
+            min_profit_threshold = forex_min_profit
+        else:
+            min_profit_threshold = other_min_profit
+
+        # Фільтруємо активи за умовою прибутковості для MACD і MA сигналів
+        if (profit_macd is not None and profit_macd < min_profit_threshold) and \
+           (profit_ma is not None and profit_ma < min_profit_threshold):
+            continue  # Пропускаємо активи, що не відповідають порогу прибутковості
 
         strategy = "Unknown"
 
@@ -128,7 +143,7 @@ def signal_list_for_user(update: Update, context: CallbackContext):
         strategy_short = strategy_abbr.get(strategy, "Unk")
 
         # Додаємо рядки для MACD та MA
-        if macd_signal in ['Buy', 'Sell']:
+        if macd_signal in ['Buy', 'Sell'] and (profit_macd is not None and profit_macd >= min_profit_threshold):
             macd_row = {
                 'Symb': row['Symbol'],
                 'MACD': macd_signal,
@@ -140,7 +155,7 @@ def signal_list_for_user(update: Update, context: CallbackContext):
                 macd_row['Strat'] = strategy_short
             macd_rows.append(macd_row)
 
-        if ma_signal in ['Buy', 'Sell']:
+        if ma_signal in ['Buy', 'Sell'] and (profit_ma is not None and profit_ma >= min_profit_threshold):
             ma_row = {
                 'Symb': row['Symbol'],
                 'MA': ma_signal,

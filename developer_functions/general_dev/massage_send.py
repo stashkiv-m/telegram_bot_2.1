@@ -16,7 +16,7 @@ def send_message_to_all_users(message: str):
         return
 
     # Ініціалізація бота з вашим токеном
-    bot = Bot(token='7721716265:AAEuzhZyZM_pT0FQHsbx-FziENEg-cNT5do')
+    bot = Bot(token='7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY')
 
     # Зберігаємо унікальні User ID
     unique_user_ids = set()
