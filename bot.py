@@ -4,13 +4,13 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackContex
 
 from buttoms_and_function_call import *
 from developer_functions.general_dev.send_signal_to_user import signal_list_for_user
-# from developer_functions.general_dev.send_signal_to_user import process_signals
-# from developer_functions.general_dev.send_signal_to_user import process_signals
 from general.universal_functions import symbol_info
 from general.user_list import handle_user_interaction
 from keyboards import *
+from language_state import update_language_state, language_state
 from run_all_siganlas_calc import schedule_signal_updates
 from state_update_menu import update_menu_state
+from telegram.ext import CallbackContext
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -18,22 +18,56 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 # Token for your bot (ensure to keep this token private in real-world applications)
-TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
+TOKEN = '7721716265:AAEuzhZyZM_pT0FQHsbx-FziENEg-cNT5do'
 
 
 def start(update: Update, context: CallbackContext) -> None:
+    # Зберігаємо стан меню
     context.user_data['menu_stack'] = ['start']
+
+    # Отримуємо мову користувача
+    language = language_state().rstrip('\n')
+
+    # Відправляємо привітання та опис проекту залежно від мови
+    if language == 'Ukrainian':
+        greeting = (
+            "https://t.me/stashkiv_mykhailo створив цього бота, щоб надати людям доступ до найкращих ідей для інвестицій та спекуляцій.\n\n"
+            "Цей проект спрямований на підвищення фінансової грамотності населення, щоб люди не потрапляли на шахрайські схеми та інші фінансові пастки.\n"
+            "Усі кошти, зібрані за допомогою цього бота, будуть спрямовані на розробку нових функцій.\n"
+            "Ті, хто підтримає проект, отримають передчасний доступ до нових функцій та можливостей бота.\n\n"
+            "Бот може аналізувати акції, криптовалюти та форекс, надаючи технічний аналіз і рекомендації. В планах — використання AI для більш точного аналізу та нових функцій.\n"
+            "Бот не може гарантувати прибуток або повністю передбачити рух ринку, але може надати корисну інформацію для прийняття рішень."
+        )
+        support_info = (
+            "Якщо хочете підтримати проект, буду вдячний за фінансову підтримку:\n\n"
+            "PayPal: business.stashkiv@gmail.com\n\n"
+            "ETH ERC 20 гаманець: 0x281ce314d2f3762ccb591a987ad9a793bf0be2a7\n\n"
+            "Усі внески будуть використані на розвиток нових можливостей бота та покращення його функціональності."
+        )
+    else:
+        greeting = (
+            "https://t.me/stashkiv_mykhailo created this bot to provide people with access to the best ideas for investments and speculations.\n\n"
+            "This project aims to improve financial literacy, helping people avoid scams and other financial traps.\n"
+            "All funds collected through this bot will be used for developing new features.\n"
+            "Supporters will receive early access to new features and capabilities of the bot.\n\n"
+            "The bot can analyze stocks, cryptocurrencies, and forex, providing technical analysis and recommendations. Future plans include integrating AI for more precise analysis and new functionalities.\n"
+            "The bot cannot guarantee profits or fully predict market movements, but it can provide valuable insights for decision-making."
+        )
+        support_info = (
+            "If you'd like to support the project, I would appreciate any financial contributions:\n\n"
+            "PayPal: business.stashkiv@gmail.com\n\n"
+            "ETH ERC 20 Wallet: 0x281ce314d2f3762ccb591a987ad9a793bf0be2a7\n\n"
+            "All contributions will be used to develop new features and improve the bot's functionality."
+        )
 
     # Виклик функції з передачею необхідних аргументів
     handle_user_interaction(update, context)
 
     # Відправляємо повідомлення користувачу
-    context.bot.send_message(chat_id=update.effective_chat.id,
-                             text='https://t.me/stashkiv_mykhailo created'
-                                  ' this bot to provide people with access to the'
-                                  ' best ideas for investments and speculations.',
-                             reply_markup=create_start_keyboard())
+    context.bot.send_message(chat_id=update.effective_chat.id, text=greeting, reply_markup=create_start_keyboard())
+    context.bot.send_message(chat_id=update.effective_chat.id, text=support_info)
 
+    # Оновлюємо стан меню
     update_menu_state('start')
 
 
@@ -49,9 +83,17 @@ def main():
         about_bot(update, context)
         update_menu_state('about')
 
-    def help_func_button_call(update: Update, context: CallbackContext) -> None:
-        help_button(update, context)
-        update_menu_state('help')
+    def language_func_button_call(update: Update, context: CallbackContext) -> None:
+        language_keyboard(update, context)
+        update_menu_state('language')
+
+    def ukr_language(update: Update, context: CallbackContext) -> None:
+        update_language_state('Ukrainian')
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Мова змінена на українську 🇺🇦")
+
+    def english_language(update: Update, context: CallbackContext) -> None:
+        update_language_state('English')
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Language changed to English. 🇬🇧")
 
     def stock_func_button_call(update: Update, context: CallbackContext) -> None:
         stock_keyboard(update, context)
@@ -106,7 +148,9 @@ def main():
     # Register command handlers
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(MessageHandler(Filters.regex(r'^About Bot$'), about_bot_func_button_call))
-    dp.add_handler(MessageHandler(Filters.regex(r'^Help$'), help_func_button_call))
+    dp.add_handler(MessageHandler(Filters.regex(r'^Language'), language_func_button_call))
+    dp.add_handler(MessageHandler(Filters.regex(r'^Ukrainian'), ukr_language))
+    dp.add_handler(MessageHandler(Filters.regex(r'^English'), english_language))
     dp.add_handler(MessageHandler(Filters.regex(r'^Menu$'), menu))
 
     # Register message handlers for stock menu

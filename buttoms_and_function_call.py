@@ -1,3 +1,4 @@
+from bot import start
 from keyboards import *
 from state_update_menu import update_menu_state
 
@@ -8,13 +9,13 @@ def test_but():
     print('Hello')
 
 
-def start(update, context):
-    context.user_data['menu_stack'] = ['start']
-    context.bot.send_message(chat_id=update.effective_chat.id, text='https://t.me/stashkiv_mykhailo created'
-                                                                    ' this bot to provide people with access to the'
-                                                                    ' best ideas for investments and speculations. ',
-                             reply_markup=create_start_keyboard())
-    update_menu_state('start')
+# def start(update, context):
+#     context.user_data['menu_stack'] = ['start']
+#     context.bot.send_message(chat_id=update.effective_chat.id, text='https://t.me/stashkiv_mykhailo created'
+#                                                                     ' this bot to provide people with access to the'
+#                                                                     ' best ideas for investments and speculations. ',
+#                              reply_markup=create_start_keyboard())
+#     update_menu_state('start')
 
 
 def about_bot(update, context):
@@ -27,18 +28,6 @@ def about_bot(update, context):
                                                                     'https://t.me/stashkiv_mykhailo.',
                              reply_markup=reply_markup)
     update_menu_state('about_bot')
-
-
-def help_button(update, context):
-    context.user_data['menu_stack'] = context.user_data.get('menu_stack', []) + ['help']
-    keyboard = [
-        [KeyboardButton("/start")]
-    ]
-    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
-    context.bot.send_message(chat_id=update.effective_chat.id,
-                             text='Якщо у вас виникли питання або проблеми, зверніться до мене.',
-                             reply_markup=reply_markup)
-    update_menu_state('help')
 
 
 def test_button(update, context):

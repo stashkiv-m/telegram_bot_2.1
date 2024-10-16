@@ -4,7 +4,7 @@ from state_update_menu import update_menu_state
 
 keyboard = [
     [KeyboardButton("Menu")],
-    [KeyboardButton("Help")],
+    [KeyboardButton("Language")],
     [KeyboardButton("About Bot")]
 ]
 
@@ -85,3 +85,18 @@ def forex_keyboard(update, context):
                              reply_markup=reply_markup)
     # Оновлення стану меню
     update_menu_state('forex')
+
+
+def language_keyboard(update, context):
+    context.user_data['menu_stack'] = context.user_data.get('menu_stack', []) + ['settings']
+    # Створюємо клавіатуру
+    keyboard = [
+        [KeyboardButton("Ukrainian")],
+        [KeyboardButton("English")],
+        [KeyboardButton("Back")]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text='Виберіть мову/Choose a language',
+                             reply_markup=reply_markup)
+    update_menu_state('settings')

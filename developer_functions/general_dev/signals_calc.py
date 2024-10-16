@@ -129,7 +129,6 @@ def process_assets_from_file(file_path, asset_type, output_file=None):
     return combined_signals if all_signals else None
 
 
-
 # Головна функція для запуску процесу
 def main():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
