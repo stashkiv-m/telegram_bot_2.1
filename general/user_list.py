@@ -1,42 +1,29 @@
-import csv
-import os
-from datetime import datetime
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, CallbackContext
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 
-def log_user_data(user_id, username, first_name, last_name):
-    # Шлях до файлу
-    file_path = os.path.join(os.getcwd(), 'general', 'general_data_base', 'users_data.csv')
+# Встановлення з'єднання з Google Sheets
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds = ServiceAccountCredentials.from_json_keyfile_name(
+    'C:/Users/Mykhailo/PycharmProjects/telegram_bot_2.1/general/general_data_base/telegram-bot-user-list-04ed64b2edff.json', scope)
 
-    # Перевіряємо, чи існує файл, і створюємо його з заголовками, якщо він не існує
-    file_exists = os.path.isfile(file_path)
+client = gspread.authorize(creds)
 
-    # Отримуємо поточний час
-    interaction_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+# Отримання доступу до таблиці за її ID
+sheet = client.open_by_key('1nZv5QBo_excPo402Ul-a278hyB2-rQbYfqlCcHu-524')  # заміни YOUR_SPREADSHEET_ID на ID таблиці
+worksheet = sheet.get_worksheet(0)  # Отримання першого аркуша таблиці
 
-    # Відкриваємо файл для запису
-    with open(file_path, mode='a', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-
-        # Якщо файл новий, додаємо заголовки
-        if not file_exists:
-            writer.writerow(['User ID', 'Username', 'First Name', 'Last Name', 'Interaction Time'])
-
-        # Записуємо дані користувача
-        writer.writerow([user_id, username, first_name, last_name, interaction_time])
+# Тестове зчитування даних з таблиці
+print(worksheet.get_all_records())
 
 
-def handle_user_interaction(update: Update, context: CallbackContext):
-    user = update.effective_user
-    user_id = user.id
-    username = user.username
-    first_name = user.first_name
-    last_name = user.last_name
+def add_user_activity(user_id, username):
+    # Додає або оновлює запис користувача в таблиці з часом виклику команди
+    from datetime import datetime
 
-    # Логування даних користувача
-    log_user_data(user_id, username, first_name, last_name)
+    # Отримує поточний час у форматі дати та часу
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Відповідь користувачу (опціонально)
-    update.message.reply_text(f"Welcome! {first_name if last_name else ''} Glad to see you here! ")
-
+    # Додає новий рядок до таблиці
+    worksheet.append_row([user_id, username, current_time])
+    print(f"User {username} (ID: {user_id}) activity recorded at {current_time}.")

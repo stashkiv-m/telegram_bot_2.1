@@ -13,17 +13,7 @@ def create_start_keyboard():
     return ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
 
 
-def menu(update, context):
-    context.user_data['menu_stack'] = ['menu']
-    keyboard = [
-        [KeyboardButton("Stock")],
-        [KeyboardButton("Forex")],
-        [KeyboardButton("Crypto")],
-        [KeyboardButton("Back")],
-    ]
-    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
-    context.bot.send_message(chat_id=update.effective_chat.id, text='Меню:', reply_markup=reply_markup)
-    update_menu_state('menu')
+
 
 
 def stock_keyboard(update, context):

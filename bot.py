@@ -5,7 +5,7 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackContex
 from buttoms_and_function_call import *
 from developer_functions.general_dev.send_signal_to_user import signal_list_for_user
 from general.universal_functions import symbol_info
-from general.user_list import handle_user_interaction
+from general.user_list import  add_user_activity
 from keyboards import *
 from language_state import update_language_state, language_state
 from run_all_siganlas_calc import schedule_signal_updates
@@ -18,7 +18,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 # Token for your bot (ensure to keep this token private in real-world applications)
-TOKEN = '7721716265:AAEuzhZyZM_pT0FQHsbx-FziENEg-cNT5do'
+TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -61,7 +61,6 @@ def start(update: Update, context: CallbackContext) -> None:
         )
 
     # Виклик функції з передачею необхідних аргументів
-    handle_user_interaction(update, context)
 
     # Відправляємо повідомлення користувачу
     context.bot.send_message(chat_id=update.effective_chat.id, text=greeting, reply_markup=create_start_keyboard())
@@ -69,6 +68,26 @@ def start(update: Update, context: CallbackContext) -> None:
 
     # Оновлюємо стан меню
     update_menu_state('start')
+
+
+def menu(update, context):
+    context.user_data['menu_stack'] = ['menu']
+    # Отримуємо ID користувача та його ім'я
+    user_id = update.message.from_user.id
+    username = update.message.from_user.username
+
+    # Викликаємо функцію для запису активності користувача
+    add_user_activity(user_id, username)
+
+    keyboard = [
+        [KeyboardButton("Stock")],
+        [KeyboardButton("Forex")],
+        [KeyboardButton("Crypto")],
+        [KeyboardButton("Back")],
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
+    context.bot.send_message(chat_id=update.effective_chat.id, text='Меню:', reply_markup=reply_markup)
+    update_menu_state('menu')
 
 
 def main():
