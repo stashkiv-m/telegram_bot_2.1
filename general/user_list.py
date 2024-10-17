@@ -2,9 +2,8 @@ import os
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-# Визначення універсального шляху до JSON-файлу з обліковими даними
-base_dir = os.path.dirname(os.path.abspath(__file__))
-credentials_path = os.path.join(base_dir, '', 'general_data_base', 'telegram-bot-user-list-dab8481be5b0.json')
+# Вказуємо повний шлях до файлу credentials.json
+credentials_path = 'C:/Users/Mykhailo/OneDrive/Рабочий стол/Telegram Bot Project/ключі/telegram-bot-user-list-cc62d78dd0ff.json'
 
 # Встановлення з'єднання з Google Sheets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
