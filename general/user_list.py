@@ -2,13 +2,12 @@ import os
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-# Визначення універсального шляху до JSON-файлу з обліковими даними
-base_dir = os.path.dirname(os.path.abspath(__file__))
-credentials_path = os.path.join(base_dir, '', 'general_data_base', 'telegram-bot-user-list-79452f202a61.json')
+# Зчитуємо JSON із змінної середовища
+credentials_json = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+credentials_data = json.loads(credentials_json)
 
-# Встановлення з'єднання з Google Sheets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_path, scope)
+creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_data, scope)
 
 client = gspread.authorize(creds)
 
