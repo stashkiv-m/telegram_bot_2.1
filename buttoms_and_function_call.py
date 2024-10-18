@@ -1,4 +1,4 @@
-from bot import start
+from bot import start, menu
 from keyboards import *
 from state_update_menu import update_menu_state
 

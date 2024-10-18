@@ -2,11 +2,14 @@ import os
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from developer_functions.general_dev.massage_send import send_message_to_all_users
+from developer_functions.general_dev.massage_and_img_send import send_message_to_all_users, send_image_to_all_users
 from developer_functions.general_dev.signals_calc import process_assets_from_file
+from language_state import language_state
 
 
 def signals_auto_update():
+
+    language = language_state().rstrip('\n')
 
     # Визначаємо базову директорію проєкту (поточна робоча директорія)
     BASE_DIR = os.getcwd()  # Поточна робоча директорія на сервері
@@ -14,7 +17,7 @@ def signals_auto_update():
     # Формуємо шляхи до файлів відносно базової директорії
     file_path_crypto = os.path.join(BASE_DIR, 'developer_functions', 'crypto_dev', 'crypto_backtest_optimized.csv')
     output_file_crypto = os.path.join(BASE_DIR, 'developer_functions', 'crypto_dev', 'crypto_signal.csv')
-
+    #
     file_path_stock = os.path.join(BASE_DIR, 'developer_functions', 'stock_dev', 'stock_backtest_optimized.csv')
     output_file_stock = os.path.join(BASE_DIR, 'developer_functions', 'stock_dev', 'stock_signal.csv')
     #
@@ -25,11 +28,14 @@ def signals_auto_update():
     process_assets_from_file(file_path_stock, 'stock', output_file=output_file_stock)
     process_assets_from_file(file_path_forex, 'forex', output_file=output_file_forex)
 
-    # send_message_to_all_users("Signals have been updated. Assets were filtered based on profitability to include only "
-    #                           "the best trading ideas. Check out new opportunities!")
+    send_image_to_all_users()
+    if language == "Ukrainian":
+        send_message_to_all_users("Нові сигнали вже доступні! Ознайомтеся з оновленим списком!")
+    elif language == 'English':
+        send_message_to_all_users("New signals are in! View the updated list of signals!")
 
 
-def schedule_signal_updates(hour: int = 22, minute: int = 5):
+def schedule_signal_updates(hour: int = 21, minute: int = 30):
     # Використовуємо часову зону Eastern Time (US/Eastern)
     timezone = pytz.timezone('America/Chicago')
 

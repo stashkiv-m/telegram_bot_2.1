@@ -18,6 +18,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 # Token for your bot (ensure to keep this token private in real-world applications)
+
 TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
 
 
@@ -163,6 +164,7 @@ def main():
         signal_list_for_user(update, context)
 
     schedule_signal_updates()
+
 
     # Register command handlers
     dp.add_handler(CommandHandler("start", start))
