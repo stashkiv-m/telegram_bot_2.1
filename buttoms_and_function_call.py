@@ -36,12 +36,13 @@ def test_button(update, context):
 
 def back_function(update, context):
     menu_stack = context.user_data.get('menu_stack', [])
+    print(menu_stack)
     if len(menu_stack) > 1:
         menu_stack = list(dict.fromkeys(menu_stack))  # Remove duplicates
         menu_stack.pop()  # Remove current menu
         # Send user back to previous menu
         previous_menu = menu_stack[-1]
-        if previous_menu == 'enu':
+        if previous_menu == 'menu':
             menu(update, context)
         elif previous_menu == 'forex':
             test_button(update, context)

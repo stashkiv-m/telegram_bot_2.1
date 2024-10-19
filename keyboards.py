@@ -2,6 +2,8 @@ from telegram import KeyboardButton, ReplyKeyboardMarkup
 from state_update_menu import update_menu_state
 
 
+
+
 keyboard = [
     [KeyboardButton("Menu")],
     [KeyboardButton("Language")],
