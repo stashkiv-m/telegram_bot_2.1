@@ -1,361 +1,117 @@
+import yfinance as yf
+import pandas as pd
+
+def format_number(value):
+    if value is None:
+        return "N/A"
+    elif abs(value) >= 1_000_000_000:
+        return f"${value / 1_000_000_000:.2f}B"
+    elif abs(value) >= 1_000_000:
+        return f"${value / 1_000_000:.2f}M"
+    else:
+        return f"${value:,.2f}"
+
 def get_stock_metrics(stock, ticker, language='English'):
-    try:
-        info = stock.info
-        metrics = {
-            "Company Name": info.get("longName", "No data available"),
-            "Ticker": ticker,
-            "Sector": info.get("sector", "No data available"),
-            "Industry": info.get("industry", "No data available"),
-            "Current Price": info.get("currentPrice", "No data available"),
-            "Market Cap": info.get("marketCap", "No data available"),
-            "Enterprise Value": info.get("enterpriseValue", "No data available"),
-            "Trailing P/E": info.get("trailingPE", "No data available"),
-            "Forward P/E": info.get("forwardPE", "No data available"),
-            "Price to Book": info.get("priceToBook", "No data available"),
-            "Return on Equity (ROE)": info.get("returnOnEquity", "No data available"),
-            "Return on Assets (ROA)": info.get("returnOnAssets", "No data available"),
-            "Debt to Equity": info.get("debtToEquity", "No data available"),
-            "Current Ratio": info.get("currentRatio", "No data available"),
-            "Dividend Yield": "{:.2f}%".format(info.get("dividendYield", 0) * 100) if info.get(
-                "dividendYield") is not None else "No data available",
-            "Payout Ratio": "{:.2f}%".format(info.get("payoutRatio", 0) * 100) if info.get(
-                "payoutRatio") is not None else "No data available",
-            "Gross Margin": "{:.2f}%".format(info.get("grossMargins", 0) * 100) if info.get(
-                "grossMargins") is not None else "No data available",
-            "Operating Margin": "{:.2f}%".format(info.get("operatingMargins", 0) * 100) if info.get(
-                "operatingMargins") is not None else "No data available",
-            "Profit Margin": "{:.2f}%".format(info.get("profitMargins", 0) * 100) if info.get(
-                "profitMargins") is not None else "No data available",
-            "Website": info.get("website", "No website available")
-        }
+    balance_sheet = stock.quarterly_balance_sheet
+    income_statement = stock.quarterly_financials
+    dividends = stock.dividends
+    dividends.index = dividends.index.tz_localize(None)
 
-        if language == 'Ukrainian':
-            output = f"**Огляд компанії: {metrics['Company Name']} ({metrics['Ticker']})**\n"
-            output += f"Сектор: {metrics['Sector']}\n"
-            output += f"Індустрія: {metrics['Industry']}\n\n"
-            output += f"\nОфіційний вебсайт: {metrics['Website']}\n"
-        else:  # English by default
-            output = f"**Company Overview: {metrics['Company Name']} ({metrics['Ticker']})**\n"
-            output += f"Sector: {metrics['Sector']}\n"
-            output += f"Industry: {metrics['Industry']}\n\n"
-            output += f"\nOfficial Website: {metrics['Website']}\n"
+    report_date = pd.to_datetime(balance_sheet.columns[0]).date() if not balance_sheet.empty else "N/A"
+    net_income = income_statement.loc["Net Income"].iloc[0] if "Net Income" in income_statement.index else None
+    total_assets = balance_sheet.loc["Total Assets"].iloc[0] if "Total Assets" in balance_sheet.index else None
+    total_equity = balance_sheet.loc["Stockholders Equity"].iloc[0] if "Stockholders Equity" in balance_sheet.index else None
+    total_debt = (
+        balance_sheet.loc["Long Term Debt"].iloc[0] if "Long Term Debt" in balance_sheet.index else 0
+    ) + (
+        balance_sheet.loc["Current Debt"].iloc[0] if "Current Debt" in balance_sheet.index else 0
+    )
+    revenue = income_statement.loc["Total Revenue"].iloc[0] if "Total Revenue" in income_statement.index else None
+    operating_income = income_statement.loc["Operating Income"].iloc[0] if "Operating Income" in income_statement.index else None
+    current_assets = balance_sheet.loc["Current Assets"].iloc[0] if "Current Assets" in balance_sheet.index else None
+    current_liabilities = balance_sheet.loc["Current Liabilities"].iloc[0] if "Current Liabilities" in balance_sheet.index else None
 
-        for metric, value in metrics.items():
-            if metric in ["Company Name", "Sector", "Industry"]:
-                continue
-            try:
-                if metric == "Current Price":
-                    if language == 'Ukrainian':
-                        output += f"Поточна ціна: ${value:.2f}.\n"
-                    else:
-                        output += f"Current price: ${value:.2f}.\n"
-                elif metric == "Market Cap":
-                    if language == 'Ukrainian':
-                        output += f"Ринкова капіталізація: ${value / 1e9:.2f} млрд.\n"
-                    else:
-                        output += f"Market cap: ${value / 1e9:.2f}B.\n"
-                elif metric == "Enterprise Value":
-                    if language == 'Ukrainian':
-                        output += f"Вартість підприємства: ${value / 1e9:.2f} млрд.\n"
-                    else:
-                        output += f"Enterprise value: ${value / 1e9:.2f}B.\n"
-                elif metric == "Trailing P/E":
-                    if value < 15:
-                        if language == 'Ukrainian':
-                            output += f"Trailing P/E: {value:.2f} (недооцінена).\n"
-                        else:
-                            output += f"Trailing P/E: {value:.2f} (undervalued).\n"
-                    elif value > 25:
-                        if language == 'Ukrainian':
-                            output += f"Trailing P/E: {value:.2f} (переоцінена).\n"
-                        else:
-                            output += f"Trailing P/E: {value:.2f} (overvalued).\n"
-                    else:
-                        if language == 'Ukrainian':
-                            output += f"Trailing P/E: {value:.2f} (справедливо оцінена).\n"
-                        else:
-                            output += f"Trailing P/E: {value:.2f} (fairly valued).\n"
-                elif metric == "Forward P/E":
-                    if value < 15:
-                        if language == 'Ukrainian':
-                            output += f"Forward P/E: {value:.2f} (потенційно недооцінена).\n"
-                        else:
-                            output += f"Forward P/E: {value:.2f} (potentially undervalued).\n"
-                    elif value > 25:
-                        if language == 'Ukrainian':
-                            output += f"Forward P/E: {value:.2f} (потенційно переоцінена).\n"
-                        else:
-                            output += f"Forward P/E: {value:.2f} (potentially overvalued).\n"
-                    else:
-                        if language == 'Ukrainian':
-                            output += f"Forward P/E: {value:.2f} (справедливо оцінена).\n"
-                        else:
-                            output += f"Forward P/E: {value:.2f} (fairly valued).\n"
-                elif metric == "Price to Book":
-                    if value < 1:
-                        if language == 'Ukrainian':
-                            output += f"Ціна до балансової вартості (P/B): {value:.2f} (недооцінена).\n"
-                        else:
-                            output += f"P/B ratio: {value:.2f} (undervalued).\n"
-                    elif value > 3:
-                        if language == 'Ukrainian':
-                            output += f"Ціна до балансової вартості (P/B): {value:.2f} (переоцінена).\n"
-                        else:
-                            output += f"P/B ratio: {value:.2f} (overvalued).\n"
-                    else:
-                        if language == 'Ukrainian':
-                            output += f"Ціна до балансової вартості (P/B): {value:.2f} (справедливо оцінена).\n"
-                        else:
-                            output += f"P/B ratio: {value:.2f} (fairly valued).\n"
-                elif metric == "Return on Equity (ROE)":
-                    value = value * 100
-                    if value < 10:
-                        if language == 'Ukrainian':
-                            output += f"ROE: {value:.2f}% (низький).\n"
-                        else:
-                            output += f"ROE: {value:.2f}% (low).\n"
-                    elif value > 20:
-                        if language == 'Ukrainian':
-                            output += f"ROE: {value:.2f}% (високий).\n"
-                        else:
-                            output += f"ROE: {value:.2f}% (high).\n"
-                    else:
-                        if language == 'Ukrainian':
-                            output += f"ROE: {value:.2f}% (помірний).\n"
-                        else:
-                            output += f"ROE: {value:.2f}% (moderate).\n"
-                elif metric == "Return on Assets (ROA)":
-                    value = value * 100
-                    if value < 5:
-                        if language == 'Ukrainian':
-                            output += f"ROA: {value:.2f}% (низький).\n"
-                        else:
-                            output += f"ROA: {value:.2f}% (low).\n"
-                    elif value > 15:
-                        if language == 'Ukrainian':
-                            output += f"ROA: {value:.2f}% (високий).\n"
-                        else:
-                            output += f"ROA: {value:.2f}% (high).\n"
-                    else:
-                        if language == 'Ukrainian':
-                            output += f"ROA: {value:.2f}% (помірний).\n"
-                        else:
-                            output += f"ROA: {value:.2f}% (moderate).\n"
-                elif metric == "Debt to Equity":
-                    if value < 0.5:
-                        if language == 'Ukrainian':
-                            output += f"Коефіцієнт боргу до власного капіталу (D/E): {value:.2f} (низький ризик).\n"
-                        else:
-                            output += f"D/E ratio: {value:.2f} (low risk).\n"
-                    elif value > 2:
-                        if language == 'Ukrainian':
-                            output += f"Коефіцієнт боргу до власного капіталу (D/E): {value:.2f} (високий ризик).\n"
-                        else:
-                            output += f"D/E ratio: {value:.2f} (high risk).\n"
-                    else:
-                        if language == 'Ukrainian':
-                            output += f"Коефіцієнт боргу до власного капіталу (D/E): {value:.2f} (помірний).\n"
-                        else:
-                            output += f"D/E ratio: {value:.2f} (moderate).\n"
-                elif metric == "Current Ratio":
-                    if value < 1:
-                        if language == 'Ukrainian':
-                            output += f"Коефіцієнт поточної ліквідності: {value:.2f} (можливі проблеми з ліквідністю).\n"
-                        else:
-                            output += f"Current ratio: {value:.2f} (potential liquidity issues).\n"
-                    elif value > 2:
-                        if language == 'Ukrainian':
-                            output += f"Коефіцієнт поточної ліквідності: {value:.2f} (сильна ліквідність).\n"
-                        else:
-                            output += f"Current ratio: {value:.2f} (strong liquidity).\n"
-                    else:
-                        if language == 'Ukrainian':
-                            output += f"Коефіцієнт поточної ліквідності: {value:.2f} (здоровий рівень ліквідності).\n"
-                        else:
-                            output += f"Current ratio: {value:.2f} (healthy liquidity).\n"
-                elif metric == "Dividend Yield":
-                    if value == "No data available":
-                        if language == 'Ukrainian':
-                            output += f"Дані про дивіденди недоступні.\n"
-                        else:
-                            output += f"No dividends.\n"
-                    elif float(value[:-1]) < 2:
-                        if language == 'Ukrainian':
-                            output += f"Дивідендна дохідність: {value} (низька).\n"
-                        else:
-                            output += f"Dividend yield: {value} (low).\n"
-                    elif float(value[:-1]) > 5:
-                        if language == 'Ukrainian':
-                            output += f"Дивідендна дохідність: {value} (висока).\n"
-                        else:
-                            output += f"Dividend yield: {value} (high).\n"
-                    else:
-                        if language == 'Ukrainian':
-                            output += f"Дивідендна дохідність: {value} (помірна).\n"
-                        else:
-                            output += f"Dividend yield: {value} (moderate).\n"
-                elif metric == "Payout Ratio":
-                    if value == "No data available":
-                        if language == 'Ukrainian':
-                            output += f"Дані про коефіцієнт виплат недоступні.\n"
-                        else:
-                            output += f"Payout ratio data not available.\n"
-                    elif float(value[:-1]) < 30:
-                        if language == 'Ukrainian':
-                            output += f"Коефіцієнт виплат: {value} (низький).\n"
-                        else:
-                            output += f"Payout ratio: {value} (low).\n"
-                    elif float(value[:-1]) > 50:
-                        if language == 'Ukrainian':
-                            output += f"Коефіцієнт виплат: {value} (високий).\n"
-                        else:
-                            output += f"Payout ratio: {value} (high).\n"
-                    else:
-                        if language == 'Ukrainian':
-                            output += f"Коефіцієнт виплат: {value} (стабільний).\n"
-                        else:
-                            output += f"Payout ratio: {value} (sustainable).\n"
-                elif metric == "Gross Margin":
-                    if value == "No data available":
-                        if language == 'Ukrainian':
-                            output += f"Дані про валову маржу недоступні.\n"
-                        else:
-                            output += f"Gross margin data not available.\n"
-                    elif float(value[:-1]) < 20:
-                        if language == 'Ukrainian':
-                            output += f"Валова маржа: {value} (низька).\n"
-                        else:
-                            output += f"Gross margin: {value} (low).\n"
-                    elif float(value[:-1]) > 40:
-                        if language == 'Ukrainian':
-                            output += f"Валова маржа: {value} (висока).\n"
-                        else:
-                            output += f"Gross margin: {value} (high).\n"
-                    else:
-                        if language == 'Ukrainian':
-                            output += f"Валова маржа: {value} (середня).\n"
-                        else:
-                            output += f"Gross margin: {value} (average).\n"
-                elif metric == "Operating Margin":
-                    if value == "No data available":
-                        if language == 'Ukrainian':
-                            output += f"Дані про операційну маржу недоступні.\n"
-                        else:
-                            output += f"Operating margin data not available.\n"
-                    elif float(value[:-1]) < 10:
-                        if language == 'Ukrainian':
-                            output += f"Операційна маржа: {value} (низька).\n"
-                        else:
-                            output += f"Operating margin: {value} (low).\n"
-                    elif float(value[:-1]) > 20:
-                        if language == 'Ukrainian':
-                            output += f"Операційна маржа: {value} (висока).\n"
-                        else:
-                            output += f"Operating margin: {value} (high).\n"
-                    else:
-                        if language == 'Ukrainian':
-                            output += f"Операційна маржа: {value} (помірна).\n"
-                        else:
-                            output += f"Operating margin: {value} (moderate).\n"
-                elif metric == "Profit Margin":
-                    if value == "No data available":
-                        if language == 'Ukrainian':
-                            output += f"Дані про чисту маржу недоступні.\n"
-                        else:
-                            output += f"Profit margin data not available.\n"
-                    elif float(value[:-1]) < 5:
-                        if language == 'Ukrainian':
-                            output += f"Чиста маржа: {value} (низька).\n"
-                        else:
-                            output += f"Profit margin: {value} (low).\n"
-                    elif float(value[:-1]) > 15:
-                        if language == 'Ukrainian':
-                            output += f"Чиста маржа: {value} (висока).\n"
-                        else:
-                            output += f"Profit margin: {value} (high).\n"
-                    else:
-                        if language == 'Ukrainian':
-                            output += f"Чиста маржа: {value} (помірна).\n"
-                        else:
-                            output += f"Profit margin: {value} (moderate).\n"
-            except TypeError:
-                output += f"{metric}: {value}\n"
+    pe_ratio = stock.info.get('trailingPE', None)
+    forward_pe = stock.info.get('forwardPE', None)
+    roe = (net_income / total_equity) if total_equity and net_income else None
+    roa = (net_income / total_assets) if total_assets and net_income else None
+    debt_to_equity = (total_debt / total_equity) if total_equity else None
+    current_ratio = (current_assets / current_liabilities) if current_assets and current_liabilities else None
+    gross_margin = (
+        (income_statement.loc["Gross Profit"].iloc[0] / revenue)
+        if revenue and "Gross Profit" in income_statement.index else None
+    )
+    operating_margin = (operating_income / revenue) if revenue and operating_income else None
+    profit_margin = (net_income / revenue) if revenue and net_income else None
 
-        if language == 'Ukrainian':
-            output += "\n**Резюме:**\n"
-            output += "На основі фундаментальних показників, компанія демонструє наступні фінансові показники:\n"
+    # Формуємо висновок на основі мови
+    if language == 'Ukrainian':
+        overall_assessment = (
+            f"На основі аналізу, компанія виглядає {('переоціненою' if pe_ratio and pe_ratio > 25 else 'недооціненою')}, "
+            f"що може свідчити про потенційне зниження ціни, якщо ринок почне коригуватися. "
+            f"При цьому, компанія демонструє {'стабільну' if roe and roe > 0.15 else 'слабшу'} прибутковість, оцінювану через ROE. "
+            f"Баланс компанії виглядає {'сильним' if debt_to_equity and debt_to_equity < 0.5 else 'напруженим'}, враховуючи рівень боргу. "
+            f"Дивідендна дохідність залишається {'низькою' if profit_margin and profit_margin < 2 else 'помірною'}, "
+            f"що може бути привабливим для інвесторів, які шукають стабільний дохід. Загалом, це цікава інвестиційна можливість для довгострокових інвесторів."
+        )
+    else:
+        overall_assessment = (
+            f"Based on the analysis, the company appears {'overvalued' if pe_ratio and pe_ratio > 25 else 'undervalued'}, "
+            f"suggesting potential downside risk if the market corrects. "
+            f"However, the company demonstrates {'stable' if roe and roe > 0.15 else 'weaker'} profitability, as reflected in its ROE. "
+            f"The balance sheet looks {'strong' if debt_to_equity and debt_to_equity < 0.5 else 'strained'}, considering the debt levels. "
+            f"The dividend yield remains {'low' if profit_margin and profit_margin < 2 else 'moderate'}, "
+            f"which could attract income-focused investors. Overall, this could be an intriguing investment opportunity for long-term investors."
+        )
 
-            try:
-                if metrics["Trailing P/E"] != "No data available" and metrics["Forward P/E"] != "No data available":
-                    if metrics["Trailing P/E"] < 15 and metrics["Forward P/E"] < 15:
-                        output += "Оцінка компанії виглядає недооціненою на основі коефіцієнтів P/E, що вказує на потенційний ріст ціни.\n"
-                    elif metrics["Trailing P/E"] > 25 and metrics["Forward P/E"] > 25:
-                        output += "Оцінка компанії виглядає переоціненою на основі коефіцієнтів P/E, що може свідчити про можливість корекції ціни.\n"
-                    else:
-                        output += "Оцінка компанії виглядає справедливою на основі коефіцієнтів P/E, що вказує на стабільність цін.\n"
+    # Формуємо звіт з перевірками мови
+    if language == 'Ukrainian':
+        report = f"**Огляд компанії: {stock.info.get('longName', 'N/A')} ({ticker})**\n"
+        report += f"Сектор: {stock.info.get('sector', 'N/A')}\n"
+        report += f"Індустрія: {stock.info.get('industry', 'N/A')}\n"
+        report += f"Дата звіту: {report_date}\n"
+        report += f"Офіційний вебсайт: {stock.info.get('website', 'Немає даних')}\n"
+        report += f"\n**Фінансові показники:**\n"
+        report += f"Ціна/прибуток (P/E Ratio): {format_number(pe_ratio)}\n"
+        report += f"Форвардний P/E: {format_number(forward_pe)}\n"
+        report += f"ROE: {round(roe * 100, 2) if roe else 'Немає даних'}%\n"
+        report += f"ROA: {round(roa * 100, 2) if roa else 'Немає даних'}%\n"
+        report += f"Debt-to-Equity Ratio: {round(debt_to_equity, 2) if debt_to_equity else 'Немає даних'}\n"
+        report += f"Current Ratio: {round(current_ratio, 2) if current_ratio else 'Немає даних'}\n"
+        report += f"Gross Margin: {round(gross_margin * 100, 2) if gross_margin else 'Немає даних'}%\n"
+        report += f"Operating Margin: {round(operating_margin * 100, 2) if operating_margin else 'Немає даних'}%\n"
+        report += f"Profit Margin: {round(profit_margin * 100, 2) if profit_margin else 'Немає даних'}%\n"
+        report += f"P/B Ratio: {format_number(stock.info.get('priceToBook', None))}\n"
+        report += f"\n**Висновок:**\n{overall_assessment}\n"
+        report += f"\n**Дані для розрахунків:**\n"
+        report += f"Чистий дохід: {format_number(net_income)}, Загальні активи: {format_number(total_assets)}, "
+        report += f"Власний капітал: {format_number(total_equity)}\n"
+        report += f"Загальний борг: {format_number(total_debt)}, Поточні активи: {format_number(current_assets)}, "
+        report += f"Поточні зобов'язання: {format_number(current_liabilities)}\n"
+        report += f"Дохід: {format_number(revenue)}, Операційний дохід: {format_number(operating_income)}"
+    else:
+        report = f"**Company Overview: {stock.info.get('longName', 'N/A')} ({ticker})**\n"
+        report += f"Sector: {stock.info.get('sector', 'N/A')}\n"
+        report += f"Industry: {stock.info.get('industry', 'N/A')}\n"
+        report += f"Report Date: {report_date}\n"
+        report += f"Official Website: {stock.info.get('website', 'No data available')}\n"
+        report += f"\n**Financial Metrics:**\n"
+        report += f"P/E Ratio: {format_number(pe_ratio)}\n"
+        report += f"Forward P/E: {format_number(forward_pe)}\n"
+        report += f"ROE: {round(roe * 100, 2) if roe else 'No data available'}%\n"
+        report += f"ROA: {round(roa * 100, 2) if roa else 'No data available'}%\n"
+        report += f"Debt-to-Equity Ratio: {round(debt_to_equity, 2) if debt_to_equity else 'No data available'}\n"
+        report += f"Current Ratio: {round(current_ratio, 2) if current_ratio else 'No data available'}\n"
+        report += f"Gross Margin: {round(gross_margin * 100, 2) if gross_margin else 'No data available'}%\n"
+        report += f"Operating Margin: {round(operating_margin * 100, 2) if operating_margin else 'No data available'}%\n"
+        report += f"Profit Margin: {round(profit_margin * 100, 2) if profit_margin else 'No data available'}%\n"
+        report += f"P/B Ratio: {format_number(stock.info.get('priceToBook', None))}\n"
+        report += f"\n**Conclusion:**\n{overall_assessment}\n"
+        report += f"\n**Data Used for Calculations:**\n"
+        report += f"Net Income: {format_number(net_income)}, Total Assets: {format_number(total_assets)}, "
+        report += f"Total Equity: {format_number(total_equity)}\n"
+        report += f"Total Debt: {format_number(total_debt)}, Current Assets: {format_number(current_assets)}, "
+        report += f"Current Liabilities: {format_number(current_liabilities)}\n"
+        report += f"Revenue: {format_number(revenue)}, Operating Income: {format_number(operating_income)}"
 
-                if metrics["Return on Equity (ROE)"] != "No data available":
-                    if metrics["Return on Equity (ROE)"] > 0.15:
-                        output += "Компанія демонструє високу прибутковість з високим ROE, що свідчить про ефективне використання капіталу.\n"
-                    else:
-                        output += "Компанія показує нижчу прибутковість на основі ROE, що може свідчити про неефективність використання капіталу.\n"
-
-                if metrics["Debt to Equity"] != "No data available":
-                    if metrics["Debt to Equity"] < 0.5:
-                        output += "Баланс компанії виглядає сильним з низьким рівнем заборгованості, що зменшує фінансовий ризик.\n"
-                    elif metrics["Debt to Equity"] > 2:
-                        output += "Компанія має високий рівень заборгованості, що може становити ризик під час економічного спаду або періоду високих процентних ставок.\n"
-                    else:
-                        output += "Баланс компанії показує помірний рівень заборгованості, що вказує на збалансований підхід до управління боргом.\n"
-            except Exception as e:
-                output += f"Помилка у Резюме: {e}\n"
-
-            output += "\n**Загальна Оцінка:**\n"
-            try:
-                if metrics["Trailing P/E"] < 15 and metrics["Return on Equity (ROE)"] > 0.15 and metrics["Debt to Equity"] < 0.5:
-                    output += "На основі низької оцінки, високої прибутковості та міцного балансу, компанія виглядає привабливим об'єктом для інвестування."
-                else:
-                    output += "З огляду на поточну оцінку, прибутковість та баланс, компанія представляє збалансовану інвестиційну можливість з помірними ризиками."
-            except Exception as e:
-                output += f"Помилка у Загальній Оцінці: {e}\n"
-        else:
-            output += "\n**Summary:**\n"
-            output += "Based on the fundamental metrics, the company shows the following financial health indicators:\n"
-
-            try:
-                if metrics["Trailing P/E"] != "No data available" and metrics["Forward P/E"] != "No data available":
-                    if metrics["Trailing P/E"] < 15 and metrics["Forward P/E"] < 15:
-                        output += "The company's valuation appears to be undervalued based on its P/E ratios, suggesting potential for price appreciation.\n"
-                    elif metrics["Trailing P/E"] > 25 and metrics["Forward P/E"] > 25:
-                        output += "The company's valuation appears to be overvalued based on its P/E ratios, indicating potential risk of price correction.\n"
-                    else:
-                        output += "The company's valuation appears to be fairly valued based on its P/E ratios, suggesting a stable price outlook.\n"
-
-                if metrics["Return on Equity (ROE)"] != "No data available":
-                    if metrics["Return on Equity (ROE)"] > 0.15:
-                        output += "The company demonstrates strong profitability with a high ROE, indicating efficient use of equity capital.\n"
-                    else:
-                        output += "The company shows lower profitability based on its ROE, which could indicate inefficiencies in using equity capital.\n"
-
-                if metrics["Debt to Equity"] != "No data available":
-                    if metrics["Debt to Equity"] < 0.5:
-                        output += "The company's balance sheet appears strong with low leverage, reducing financial risk.\n"
-                    elif metrics["Debt to Equity"] > 2:
-                        output += "The company carries a high level of debt, which may pose a risk during economic downturns or periods of high-interest rates.\n"
-                    else:
-                        output += "The company's balance sheet shows moderate leverage, indicating a balanced approach to debt management.\n"
-            except Exception as e:
-                output += f"Error in Summary: {e}\n"
-
-            output += "\n**Overall Assessment:**\n"
-            try:
-                if metrics["Trailing P/E"] < 15 and metrics["Return on Equity (ROE)"] > 0.15 and metrics["Debt to Equity"] < 0.5:
-                    output += "Based on its low valuation, high profitability, and strong balance sheet, the company appears to be a solid investment opportunity."
-                else:
-                    output += "Considering its current valuation, profitability, and balance sheet, the company presents a balanced investment opportunity with moderate risks."
-            except Exception as e:
-                output += f"Error in Overall Assessment: {e}\n"
-
-        return output
-    except Exception as e:
-        return f"Error retrieving data for {ticker}: {e}"
+    return report
