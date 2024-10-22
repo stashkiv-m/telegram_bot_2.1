@@ -11,10 +11,13 @@ def format_number(value, is_currency=True):
     else:
         return f"{value:,.2f}" if not is_currency else f"${value:,.2f}"
 
-def get_financial_data(balance_sheet, income_statement):
-    """
-    Function to extract financial data from balance sheet and income statement.
-    """
+def get_stock_metrics(stock, ticker, language='English'):
+    balance_sheet = stock.quarterly_balance_sheet
+    income_statement = stock.quarterly_financials
+    dividends = stock.dividends
+    dividends.index = dividends.index.tz_localize(None)
+
+    report_date = pd.to_datetime(balance_sheet.columns[0]).date() if not balance_sheet.empty else "N/A"
     net_income = income_statement.loc["Net Income"].iloc[0] if "Net Income" in income_statement.index else None
     total_assets = balance_sheet.loc["Total Assets"].iloc[0] if "Total Assets" in balance_sheet.index else None
     total_equity = balance_sheet.loc["Stockholders Equity"].iloc[0] if "Stockholders Equity" in balance_sheet.index else None
@@ -28,64 +31,6 @@ def get_financial_data(balance_sheet, income_statement):
     current_assets = balance_sheet.loc["Current Assets"].iloc[0] if "Current Assets" in balance_sheet.index else None
     current_liabilities = balance_sheet.loc["Current Liabilities"].iloc[0] if "Current Liabilities" in balance_sheet.index else None
 
-    # Додаткові спроби знайти дані, якщо вони відсутні у звітах
-    if net_income is None:
-        print("Net Income not found in the default row. Trying alternative rows...")
-    if total_assets is None:
-        print("Total Assets not found in the default row. Trying alternative rows...")
-    if total_equity is None:
-        print("Total Equity not found in the default row. Trying alternative rows...")
-    if total_debt is None:
-        print("Total Debt not found in the default row. Trying alternative rows...")
-    if revenue is None:
-        print("Revenue not found in the default row. Trying alternative rows...")
-    if operating_income is None:
-        print("Operating Income not found in the default row. Trying alternative rows...")
-    if current_assets is None:
-        print("Current Assets not found in the default row. Trying alternative rows...")
-    if current_liabilities is None:
-        print("Current Liabilities not found in the default row. Trying alternative rows...")
-
-    return {
-        "net_income": net_income,
-        "total_assets": total_assets,
-        "total_equity": total_equity,
-        "total_debt": total_debt,
-        "revenue": revenue,
-        "operating_income": operating_income,
-        "current_assets": current_assets,
-        "current_liabilities": current_liabilities
-    }
-
-def get_stock_metrics(stock, ticker, language='English'):
-    # Перший запит до квартальних звітів
-    balance_sheet = stock.quarterly_balance_sheet
-    income_statement = stock.quarterly_financials
-    report_date = pd.to_datetime(balance_sheet.columns[0]).date() if not balance_sheet.empty else "N/A"
-
-    # Отримуємо дані з квартального звіту
-    financial_data = get_financial_data(balance_sheet, income_statement)
-
-    # Перевірка, чи всі дані присутні
-    if any(value is None for value in financial_data.values()):
-        # Якщо дані неповні, використовуємо річні звіти
-        print("Incomplete data found in quarterly reports. Using annual reports instead.")
-        balance_sheet = stock.balance_sheet
-        income_statement = stock.financials
-        report_date = pd.to_datetime(balance_sheet.columns[0]).date() if not balance_sheet.empty else "N/A"
-        financial_data = get_financial_data(balance_sheet, income_statement)
-
-    # Витягуємо дані для розрахунків
-    net_income = financial_data["net_income"]
-    total_assets = financial_data["total_assets"]
-    total_equity = financial_data["total_equity"]
-    total_debt = financial_data["total_debt"]
-    revenue = financial_data["revenue"]
-    operating_income = financial_data["operating_income"]
-    current_assets = financial_data["current_assets"]
-    current_liabilities = financial_data["current_liabilities"]
-
-    # Розрахунок фінансових коефіцієнтів
     pe_ratio = stock.info.get('trailingPE', None)
     forward_pe = stock.info.get('forwardPE', None)
     roe = (net_income / total_equity) if total_equity and net_income else None
