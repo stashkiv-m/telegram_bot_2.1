@@ -1,23 +1,20 @@
 import yfinance as yf
 import pandas as pd
 
-def format_number(value):
+def format_number(value, is_currency=True):
     if value is None:
         return "N/A"
     elif abs(value) >= 1_000_000_000:
-        return f"${value / 1_000_000_000:.2f}B"
+        return f"{value / 1_000_000_000:.2f}B" if not is_currency else f"${value / 1_000_000_000:.2f}B"
     elif abs(value) >= 1_000_000:
-        return f"${value / 1_000_000:.2f}M"
+        return f"{value / 1_000_000:.2f}M" if not is_currency else f"${value / 1_000_000:.2f}M"
     else:
-        return f"${value:,.2f}"
+        return f"{value:,.2f}" if not is_currency else f"${value:,.2f}"
 
-def get_stock_metrics(stock, ticker, language='English'):
-    balance_sheet = stock.quarterly_balance_sheet
-    income_statement = stock.quarterly_financials
-    dividends = stock.dividends
-    dividends.index = dividends.index.tz_localize(None)
-
-    report_date = pd.to_datetime(balance_sheet.columns[0]).date() if not balance_sheet.empty else "N/A"
+def get_financial_data(balance_sheet, income_statement):
+    """
+    Function to extract financial data from balance sheet and income statement.
+    """
     net_income = income_statement.loc["Net Income"].iloc[0] if "Net Income" in income_statement.index else None
     total_assets = balance_sheet.loc["Total Assets"].iloc[0] if "Total Assets" in balance_sheet.index else None
     total_equity = balance_sheet.loc["Stockholders Equity"].iloc[0] if "Stockholders Equity" in balance_sheet.index else None
@@ -31,6 +28,64 @@ def get_stock_metrics(stock, ticker, language='English'):
     current_assets = balance_sheet.loc["Current Assets"].iloc[0] if "Current Assets" in balance_sheet.index else None
     current_liabilities = balance_sheet.loc["Current Liabilities"].iloc[0] if "Current Liabilities" in balance_sheet.index else None
 
+    # Додаткові спроби знайти дані, якщо вони відсутні у звітах
+    if net_income is None:
+        print("Net Income not found in the default row. Trying alternative rows...")
+    if total_assets is None:
+        print("Total Assets not found in the default row. Trying alternative rows...")
+    if total_equity is None:
+        print("Total Equity not found in the default row. Trying alternative rows...")
+    if total_debt is None:
+        print("Total Debt not found in the default row. Trying alternative rows...")
+    if revenue is None:
+        print("Revenue not found in the default row. Trying alternative rows...")
+    if operating_income is None:
+        print("Operating Income not found in the default row. Trying alternative rows...")
+    if current_assets is None:
+        print("Current Assets not found in the default row. Trying alternative rows...")
+    if current_liabilities is None:
+        print("Current Liabilities not found in the default row. Trying alternative rows...")
+
+    return {
+        "net_income": net_income,
+        "total_assets": total_assets,
+        "total_equity": total_equity,
+        "total_debt": total_debt,
+        "revenue": revenue,
+        "operating_income": operating_income,
+        "current_assets": current_assets,
+        "current_liabilities": current_liabilities
+    }
+
+def get_stock_metrics(stock, ticker, language='English'):
+    # Перший запит до квартальних звітів
+    balance_sheet = stock.quarterly_balance_sheet
+    income_statement = stock.quarterly_financials
+    report_date = pd.to_datetime(balance_sheet.columns[0]).date() if not balance_sheet.empty else "N/A"
+
+    # Отримуємо дані з квартального звіту
+    financial_data = get_financial_data(balance_sheet, income_statement)
+
+    # Перевірка, чи всі дані присутні
+    if any(value is None for value in financial_data.values()):
+        # Якщо дані неповні, використовуємо річні звіти
+        print("Incomplete data found in quarterly reports. Using annual reports instead.")
+        balance_sheet = stock.balance_sheet
+        income_statement = stock.financials
+        report_date = pd.to_datetime(balance_sheet.columns[0]).date() if not balance_sheet.empty else "N/A"
+        financial_data = get_financial_data(balance_sheet, income_statement)
+
+    # Витягуємо дані для розрахунків
+    net_income = financial_data["net_income"]
+    total_assets = financial_data["total_assets"]
+    total_equity = financial_data["total_equity"]
+    total_debt = financial_data["total_debt"]
+    revenue = financial_data["revenue"]
+    operating_income = financial_data["operating_income"]
+    current_assets = financial_data["current_assets"]
+    current_liabilities = financial_data["current_liabilities"]
+
+    # Розрахунок фінансових коефіцієнтів
     pe_ratio = stock.info.get('trailingPE', None)
     forward_pe = stock.info.get('forwardPE', None)
     roe = (net_income / total_equity) if total_equity and net_income else None
@@ -43,26 +98,92 @@ def get_stock_metrics(stock, ticker, language='English'):
     )
     operating_margin = (operating_income / revenue) if revenue and operating_income else None
     profit_margin = (net_income / revenue) if revenue and net_income else None
+    dividend_yield = stock.info.get('dividendYield', None)  # Отримання Dividend Yield з інформації акцій
 
-    # Формуємо висновок на основі мови
+    # Оцінка фінансових показників для більш індивідуального аналізу
+    overvaluation = pe_ratio and pe_ratio > 25
+    strong_profitability = roe and roe > 0.15
+    moderate_profitability = roe and 0.10 < roe <= 0.15
+    weak_profitability = roe and roe <= 0.10
+    strong_balance = debt_to_equity and debt_to_equity < 0.5
+    high_debt = debt_to_equity and debt_to_equity > 1.0
+    solid_margin = gross_margin and gross_margin > 40
+    low_liquidity = current_ratio and current_ratio < 1
+
+    # Формуємо висновок на основі показників
     if language == 'Ukrainian':
-        overall_assessment = (
-            f"На основі аналізу, компанія виглядає {('переоціненою' if pe_ratio and pe_ratio > 25 else 'недооціненою')}, "
-            f"що може свідчити про потенційне зниження ціни, якщо ринок почне коригуватися. "
-            f"При цьому, компанія демонструє {'стабільну' if roe and roe > 0.15 else 'слабшу'} прибутковість, оцінювану через ROE. "
-            f"Баланс компанії виглядає {'сильним' if debt_to_equity and debt_to_equity < 0.5 else 'напруженим'}, враховуючи рівень боргу. "
-            f"Дивідендна дохідність залишається {'низькою' if profit_margin and profit_margin < 2 else 'помірною'}, "
-            f"що може бути привабливим для інвесторів, які шукають стабільний дохід. Загалом, це цікава інвестиційна можливість для довгострокових інвесторів."
-        )
+        assessment_parts = []
+
+        # Оцінка переоцінки
+        if overvaluation:
+            assessment_parts.append("Компанія може бути переоціненою, що збільшує ризик корекції ціни у майбутньому.")
+        else:
+            assessment_parts.append("Ціна акцій здається привабливою, що може свідчити про потенційний ріст.")
+
+        # Оцінка прибутковості
+        if strong_profitability:
+            assessment_parts.append("Показник рентабельності власного капіталу (ROE) свідчить про високу прибутковість.")
+        elif moderate_profitability:
+            assessment_parts.append("ROE знаходиться на середньому рівні, що свідчить про стабільну, але не видатну прибутковість.")
+        elif weak_profitability:
+            assessment_parts.append("Низький рівень ROE може бути сигналом слабкої рентабельності.")
+
+        # Оцінка боргового навантаження
+        if strong_balance:
+            assessment_parts.append("Баланс компанії виглядає здоровим із низьким співвідношенням боргу до власного капіталу.")
+        elif high_debt:
+            assessment_parts.append("Компанія має високе боргове навантаження, що може збільшити фінансові ризики у майбутньому.")
+
+        # Оцінка рентабельності
+        if solid_margin:
+            assessment_parts.append("Високий рівень валової маржі свідчить про сильну конкурентну позицію.")
+        else:
+            assessment_parts.append("Рівень валової маржі свідчить про можливі труднощі в управлінні витратами.")
+
+        # Оцінка ліквідності
+        if low_liquidity:
+            assessment_parts.append("Низький коефіцієнт поточної ліквідності може викликати труднощі у покритті короткострокових зобов'язань.")
+        else:
+            assessment_parts.append("Компанія має достатньо ресурсів для покриття своїх поточних зобов'язань.")
+
+        overall_assessment = " ".join(assessment_parts)
+
     else:
-        overall_assessment = (
-            f"Based on the analysis, the company appears {'overvalued' if pe_ratio and pe_ratio > 25 else 'undervalued'}, "
-            f"suggesting potential downside risk if the market corrects. "
-            f"However, the company demonstrates {'stable' if roe and roe > 0.15 else 'weaker'} profitability, as reflected in its ROE. "
-            f"The balance sheet looks {'strong' if debt_to_equity and debt_to_equity < 0.5 else 'strained'}, considering the debt levels. "
-            f"The dividend yield remains {'low' if profit_margin and profit_margin < 2 else 'moderate'}, "
-            f"which could attract income-focused investors. Overall, this could be an intriguing investment opportunity for long-term investors."
-        )
+        assessment_parts = []
+
+        # Overvaluation assessment
+        if overvaluation:
+            assessment_parts.append("The company appears overvalued, increasing the risk of a future price correction.")
+        else:
+            assessment_parts.append("The stock price seems attractive, indicating potential growth opportunities.")
+
+        # Profitability assessment
+        if strong_profitability:
+            assessment_parts.append("The ROE indicates strong profitability, a positive signal for investors.")
+        elif moderate_profitability:
+            assessment_parts.append("The ROE is at a moderate level, indicating stable but not exceptional profitability.")
+        elif weak_profitability:
+            assessment_parts.append("A low ROE might indicate weaker profitability compared to industry standards.")
+
+        # Debt load assessment
+        if strong_balance:
+            assessment_parts.append("The company's balance sheet is healthy, with a low debt-to-equity ratio.")
+        elif high_debt:
+            assessment_parts.append("The company has a high debt burden, which could pose financial risks in the long term.")
+
+        # Margin assessment
+        if solid_margin:
+            assessment_parts.append("A high gross margin indicates a strong competitive position in the market.")
+        else:
+            assessment_parts.append("The gross margin suggests potential challenges in managing costs efficiently.")
+
+        # Liquidity assessment
+        if low_liquidity:
+            assessment_parts.append("Low current ratio may indicate challenges in covering short-term liabilities.")
+        else:
+            assessment_parts.append("The company appears well-positioned to meet its short-term obligations.")
+
+        overall_assessment = " ".join(assessment_parts)
 
     # Формуємо звіт з перевірками мови
     if language == 'Ukrainian':
@@ -72,8 +193,8 @@ def get_stock_metrics(stock, ticker, language='English'):
         report += f"Дата звіту: {report_date}\n"
         report += f"Офіційний вебсайт: {stock.info.get('website', 'Немає даних')}\n"
         report += f"\n**Фінансові показники:**\n"
-        report += f"Ціна/прибуток (P/E Ratio): {format_number(pe_ratio)}\n"
-        report += f"Форвардний P/E: {format_number(forward_pe)}\n"
+        report += f"Ціна/прибуток (P/E Ratio): {format_number(pe_ratio, is_currency=False)}\n"
+        report += f"Форвардний P/E: {format_number(forward_pe, is_currency=False)}\n"
         report += f"ROE: {round(roe * 100, 2) if roe else 'Немає даних'}%\n"
         report += f"ROA: {round(roa * 100, 2) if roa else 'Немає даних'}%\n"
         report += f"Debt-to-Equity Ratio: {round(debt_to_equity, 2) if debt_to_equity else 'Немає даних'}\n"
@@ -81,7 +202,8 @@ def get_stock_metrics(stock, ticker, language='English'):
         report += f"Gross Margin: {round(gross_margin * 100, 2) if gross_margin else 'Немає даних'}%\n"
         report += f"Operating Margin: {round(operating_margin * 100, 2) if operating_margin else 'Немає даних'}%\n"
         report += f"Profit Margin: {round(profit_margin * 100, 2) if profit_margin else 'Немає даних'}%\n"
-        report += f"P/B Ratio: {format_number(stock.info.get('priceToBook', None))}\n"
+        report += f"Dividend Yield: {round(dividend_yield * 100, 2) if dividend_yield else 'Немає даних'}%\n"
+        report += f"P/B Ratio: {format_number(stock.info.get('priceToBook', None), is_currency=False)}\n"
         report += f"\n**Висновок:**\n{overall_assessment}\n"
         report += f"\n**Дані для розрахунків:**\n"
         report += f"Чистий дохід: {format_number(net_income)}, Загальні активи: {format_number(total_assets)}, "
@@ -96,8 +218,8 @@ def get_stock_metrics(stock, ticker, language='English'):
         report += f"Report Date: {report_date}\n"
         report += f"Official Website: {stock.info.get('website', 'No data available')}\n"
         report += f"\n**Financial Metrics:**\n"
-        report += f"P/E Ratio: {format_number(pe_ratio)}\n"
-        report += f"Forward P/E: {format_number(forward_pe)}\n"
+        report += f"P/E Ratio: {format_number(pe_ratio, is_currency=False)}\n"
+        report += f"Forward P/E: {format_number(forward_pe, is_currency=False)}\n"
         report += f"ROE: {round(roe * 100, 2) if roe else 'No data available'}%\n"
         report += f"ROA: {round(roa * 100, 2) if roa else 'No data available'}%\n"
         report += f"Debt-to-Equity Ratio: {round(debt_to_equity, 2) if debt_to_equity else 'No data available'}\n"
@@ -105,7 +227,8 @@ def get_stock_metrics(stock, ticker, language='English'):
         report += f"Gross Margin: {round(gross_margin * 100, 2) if gross_margin else 'No data available'}%\n"
         report += f"Operating Margin: {round(operating_margin * 100, 2) if operating_margin else 'No data available'}%\n"
         report += f"Profit Margin: {round(profit_margin * 100, 2) if profit_margin else 'No data available'}%\n"
-        report += f"P/B Ratio: {format_number(stock.info.get('priceToBook', None))}\n"
+        report += f"Dividend Yield: {round(dividend_yield * 100, 2) if dividend_yield else 'No data available'}%\n"
+        report += f"P/B Ratio: {format_number(stock.info.get('priceToBook', None), is_currency=False)}\n"
         report += f"\n**Conclusion:**\n{overall_assessment}\n"
         report += f"\n**Data Used for Calculations:**\n"
         report += f"Net Income: {format_number(net_income)}, Total Assets: {format_number(total_assets)}, "
