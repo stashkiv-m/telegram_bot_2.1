@@ -35,7 +35,7 @@ def signals_auto_update():
         send_message_to_all_users("New signals are in! View the updated list of signals!")
 
 
-def schedule_signal_updates(hour: int = 21, minute: int = 50):
+def schedule_signal_updates(hour: int = 22, minute: int = 25):
     # Використовуємо часову зону Eastern Time (US/Eastern)
     timezone = pytz.timezone('America/Chicago')
 
