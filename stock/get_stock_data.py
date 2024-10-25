@@ -11,173 +11,102 @@ def format_number(value, is_currency=True):
     else:
         return f"{value:,.2f}" if not is_currency else f"${value:,.2f}"
 
+
 def get_stock_metrics(stock, ticker, language='English'):
     # Get balance sheet and income statement data
     balance_sheet = stock.quarterly_balance_sheet
     income_statement = stock.quarterly_financials
+    cashflow = stock.quarterly_cashflow
     dividends = stock.dividends
     dividends.index = dividends.index.tz_localize(None)
 
     report_date = pd.to_datetime(balance_sheet.columns[0]).date() if not balance_sheet.empty else "N/A"
     net_income = income_statement.loc["Net Income"].iloc[0] if "Net Income" in income_statement.index else None
     total_assets = balance_sheet.loc["Total Assets"].iloc[0] if "Total Assets" in balance_sheet.index else None
-    total_equity = balance_sheet.loc["Stockholders Equity"].iloc[0] if "Stockholders Equity" in balance_sheet.index else None
+    total_equity = balance_sheet.loc["Stockholders Equity"].iloc[
+        0] if "Stockholders Equity" in balance_sheet.index else None
     total_debt = (
-        balance_sheet.loc["Long Term Debt"].iloc[0] if "Long Term Debt" in balance_sheet.index else 0
-    ) + (
-        balance_sheet.loc["Current Debt"].iloc[0] if "Current Debt" in balance_sheet.index else 0
-    )
+                     balance_sheet.loc["Long Term Debt"].iloc[0] if "Long Term Debt" in balance_sheet.index else 0
+                 ) + (
+                     balance_sheet.loc["Current Debt"].iloc[0] if "Current Debt" in balance_sheet.index else 0
+                 )
     revenue = income_statement.loc["Total Revenue"].iloc[0] if "Total Revenue" in income_statement.index else None
-    operating_income = income_statement.loc["Operating Income"].iloc[0] if "Operating Income" in income_statement.index else None
+    gross_profit = income_statement.loc["Gross Profit"].iloc[0] if "Gross Profit" in income_statement.index else None
+    operating_income = income_statement.loc["Operating Income"].iloc[
+        0] if "Operating Income" in income_statement.index else None
     current_assets = balance_sheet.loc["Current Assets"].iloc[0] if "Current Assets" in balance_sheet.index else None
-    current_liabilities = balance_sheet.loc["Current Liabilities"].iloc[0] if "Current Liabilities" in balance_sheet.index else None
+    current_liabilities = balance_sheet.loc["Current Liabilities"].iloc[
+        0] if "Current Liabilities" in balance_sheet.index else None
+    cash_from_operations = cashflow.loc["Total Cash From Operating Activities"].iloc[
+        0] if "Total Cash From Operating Activities" in cashflow.index else None
 
     # Calculate and format key metrics
     pe_ratio = round(stock.info.get('trailingPE', 0), 2) if stock.info.get('trailingPE') else None
+    price_to_sales = round(stock.info.get('priceToSalesTrailing12Months', 0), 2) if stock.info.get(
+        'priceToSalesTrailing12Months') else None
+    price_to_cash_flow = round(stock.info.get('priceToCashFlow', 0), 2) if stock.info.get('priceToCashFlow') else None
+    price_to_book = round(stock.info.get('priceToBook', 0), 2) if stock.info.get('priceToBook') else None
     forward_pe = round(stock.info.get('forwardPE', 0), 2) if stock.info.get('forwardPE') else None
     roe = round((net_income / total_equity) * 100, 2) if total_equity and net_income else None
     roa = round((net_income / total_assets) * 100, 2) if total_assets and net_income else None
     debt_to_equity = round(total_debt / total_equity, 2) if total_equity else None
     current_ratio = round(current_assets / current_liabilities, 2) if current_assets and current_liabilities else None
-    gross_margin = round((income_statement.loc["Gross Profit"].iloc[0] / revenue) * 100, 2) if revenue and "Gross Profit" in income_statement.index else None
+    quick_ratio = round((current_assets - balance_sheet.loc["Inventory"].iloc[0]) / current_liabilities,
+                        2) if "Inventory" in balance_sheet.index and current_liabilities else None
+    gross_margin = round((gross_profit / revenue) * 100, 2) if revenue and gross_profit else None
     operating_margin = round((operating_income / revenue) * 100, 2) if revenue and operating_income else None
     profit_margin = round((net_income / revenue) * 100, 2) if revenue and net_income else None
     dividend_yield = round(stock.info.get('dividendYield', 0) * 100, 2) if stock.info.get('dividendYield') else None
-    price_to_book = round(stock.info.get('priceToBook', 0), 2) if stock.info.get('priceToBook') else None
+    asset_turnover = round(revenue / total_assets, 2) if revenue and total_assets else None
+    inventory_turnover = round(revenue / balance_sheet.loc["Inventory"].iloc[0],
+                               2) if "Inventory" in balance_sheet.index and revenue else None
+    receivable_turnover = round(revenue / balance_sheet.loc["Net Receivables"].iloc[0],
+                                2) if "Net Receivables" in balance_sheet.index and revenue else None
 
-    # Financial analysis assessments
-    overvaluation = pe_ratio and pe_ratio > 25
-    strong_profitability = roe and roe > 15
-    moderate_profitability = roe and 10 < roe <= 15
-    weak_profitability = roe and roe <= 10
-    strong_balance = debt_to_equity and debt_to_equity < 0.5
-    high_debt = debt_to_equity and debt_to_equity > 1.0
-    solid_margin = gross_margin and gross_margin > 40
-    low_liquidity = current_ratio and current_ratio < 1
+    # Short assessments for each metric
+    short_assessments = {
+        "P/E Ratio": f"{format_number(pe_ratio, False)} (Overvalued)" if pe_ratio and pe_ratio > 25 else f"{format_number(pe_ratio, False)} (Undervalued)" if pe_ratio else "N/A",
+        "Price to Sales": f"{format_number(price_to_sales, False)} (High)" if price_to_sales and price_to_sales > 2 else f"{format_number(price_to_sales, False)} (Low)" if price_to_sales else "N/A",
+        "Price to Cash Flow": f"{format_number(price_to_cash_flow, False)} (High)" if price_to_cash_flow and price_to_cash_flow > 15 else f"{format_number(price_to_cash_flow, False)} (Low)" if price_to_cash_flow else "N/A",
+        "Price to Book": f"{format_number(price_to_book, False)} (High)" if price_to_book and price_to_book > 1 else f"{format_number(price_to_book, False)} (Low)" if price_to_book else "N/A",
+        "Forward P/E": f"{format_number(forward_pe, False)} (Overvalued)" if forward_pe and forward_pe > 20 else f"{format_number(forward_pe, False)} (Undervalued)" if forward_pe else "N/A",
+        "ROE": f"{roe}% (High)" if roe and roe > 15 else f"{roe}% (Moderate)" if roe and 10 <= roe <= 15 else f"{roe}% (Low)" if roe else "N/A",
+        "ROA": f"{roa}% (High)" if roa and roa > 10 else f"{roa}% (Low)" if roa else "N/A",
+        "Debt-to-Equity": f"{debt_to_equity} (High Risk)" if debt_to_equity and debt_to_equity > 1.0 else f"{debt_to_equity} (Low Risk)" if debt_to_equity else "N/A",
+        "Current Ratio": f"{current_ratio} (Liquid)" if current_ratio and current_ratio >= 1 else f"{current_ratio} (Illiquid)" if current_ratio else "N/A",
+        "Quick Ratio": f"{quick_ratio} (Strong)" if quick_ratio and quick_ratio >= 1 else f"{quick_ratio} (Weak)" if quick_ratio else "N/A",
+        "Gross Margin": f"{gross_margin}% (Strong)" if gross_margin and gross_margin > 40 else f"{gross_margin}% (Average)" if gross_margin else "N/A",
+        "Operating Margin": f"{operating_margin}% (Strong)" if operating_margin and operating_margin > 20 else f"{operating_margin}% (Average)" if operating_margin else "N/A",
+        "Profit Margin": f"{profit_margin}% (High)" if profit_margin and profit_margin > 10 else f"{profit_margin}% (Low)" if profit_margin else "N/A",
+        "Dividend Yield": f"{dividend_yield}% (High)" if dividend_yield and dividend_yield > 3 else f"{dividend_yield}% (Low)" if dividend_yield else "N/A",
+        "Asset Turnover": f"{asset_turnover} (Efficient)" if asset_turnover and asset_turnover > 1 else f"{asset_turnover} (Inefficient)" if asset_turnover else "N/A",
+        "Inventory Turnover": f"{inventory_turnover} (High)" if inventory_turnover and inventory_turnover > 5 else f"{inventory_turnover} (Low)" if inventory_turnover else "N/A",
+        "Receivable Turnover": f"{receivable_turnover} (High)" if receivable_turnover and receivable_turnover > 5 else f"{receivable_turnover} (Low)" if receivable_turnover else "N/A"
+    }
 
-    # Generate assessment
-    assessment_parts = []
+    # Dynamic conclusion based on all indicators
+    conclusion = get_dynamic_conclusion(
+        short_assessments,
+        net_income,
+        total_debt,
+        roe,
+        gross_margin,
+        dividend_yield,
+        language
+    )
 
-    if language == 'Ukrainian':
-        # Оцінка переоцінки
-        if overvaluation:
-            assessment_parts.append(
-                f"Компанія може бути переоціненою (P/E = {pe_ratio}), що збільшує ризик корекції ціни у майбутньому.")
-        elif pe_ratio is not None:
-            assessment_parts.append(
-                f"Ціна акцій (P/E = {pe_ratio}) здається привабливою, що може свідчити про потенційний ріст.")
-
-        # Оцінка прибутковості
-        if strong_profitability:
-            assessment_parts.append(
-                f"Показник рентабельності власного капіталу (ROE = {roe}%) свідчить про високу прибутковість.")
-        elif moderate_profitability:
-            assessment_parts.append(
-                f"ROE (={roe}%) знаходиться на середньому рівні, що свідчить про стабільну, але не видатну прибутковість.")
-        elif weak_profitability:
-            assessment_parts.append(f"Низький рівень ROE (={roe}%) може бути сигналом слабкої рентабельності.")
-
-        # Оцінка боргового навантаження
-        if strong_balance:
-            assessment_parts.append(
-                f"Баланс компанії виглядає здоровим із низьким співвідношенням боргу до власного капіталу (Debt/Equity = {debt_to_equity}).")
-        elif high_debt:
-            assessment_parts.append(
-                f"Компанія має високе боргове навантаження (Debt/Equity = {debt_to_equity}), що може збільшити фінансові ризики у майбутньому.")
-
-        # Оцінка рентабельності
-        if solid_margin:
-            assessment_parts.append(
-                f"Високий рівень валової маржі (Gross Margin = {gross_margin}%) свідчить про сильну конкурентну позицію.")
-        elif gross_margin is not None:
-            assessment_parts.append(
-                f"Рівень валової маржі (Gross Margin = {gross_margin}%) свідчить про можливі труднощі в управлінні витратами.")
-
-        # Оцінка ліквідності
-        if low_liquidity:
-            assessment_parts.append(
-                f"Низький коефіцієнт поточної ліквідності (Current Ratio = {current_ratio}) може викликати труднощі у покритті короткострокових зобов'язань.")
-        elif current_ratio is not None:
-            assessment_parts.append(
-                f"Компанія має достатньо ресурсів для покриття своїх поточних зобов'язань (Current Ratio = {current_ratio}).")
-    else:
-        # Overvaluation assessment
-        if overvaluation:
-            assessment_parts.append(
-                f"The company appears overvalued (P/E = {pe_ratio}), increasing the risk of a future price correction.")
-        elif pe_ratio is not None:
-            assessment_parts.append(
-                f"The stock price (P/E = {pe_ratio}) seems attractive, indicating potential growth opportunities.")
-
-        # Profitability assessment
-        if strong_profitability:
-            assessment_parts.append(
-                f"The ROE (={roe}%) indicates strong profitability, a positive signal for investors.")
-        elif moderate_profitability:
-            assessment_parts.append(
-                f"The ROE (={roe}%) is at a moderate level, indicating stable but not exceptional profitability.")
-        elif weak_profitability:
-            assessment_parts.append(
-                f"A low ROE (={roe}%) might indicate weaker profitability compared to industry standards.")
-
-        # Debt load assessment
-        if strong_balance:
-            assessment_parts.append(
-                f"The company's balance sheet is healthy, with a low debt-to-equity ratio (Debt/Equity = {debt_to_equity}).")
-        elif high_debt:
-            assessment_parts.append(
-                f"The company has a high debt burden (Debt/Equity = {debt_to_equity}), which could pose financial risks in the long term.")
-
-        # Margin assessment
-        if solid_margin:
-            assessment_parts.append(
-                f"A high gross margin (Gross Margin = {gross_margin}%) indicates a strong competitive position in the market.")
-        elif gross_margin is not None:
-            assessment_parts.append(
-                f"The gross margin (Gross Margin = {gross_margin}%) suggests potential challenges in managing costs efficiently.")
-
-        # Liquidity assessment
-        if low_liquidity:
-            assessment_parts.append(
-                f"Low current ratio (Current Ratio = {current_ratio}) may indicate challenges in covering short-term liabilities.")
-        elif current_ratio is not None:
-            assessment_parts.append(
-                f"The company appears well-positioned to meet its short-term obligations (Current Ratio = {current_ratio}).")
-
-    overall_assessment = " ".join(assessment_parts)
-
-    # Generate report based on the selected language
+    # Generate report
     report = f"**Company Overview: {stock.info.get('longName', 'N/A')} ({ticker})**\n"
     report += f"Sector: {stock.info.get('sector', 'N/A')}\n"
     report += f"Industry: {stock.info.get('industry', 'N/A')}\n"
     report += f"Report Date: {report_date}\n"
     report += f"Official Website: {stock.info.get('website', 'No data available')}\n"
     report += f"\n**Financial Metrics:**\n"
-    if pe_ratio is not None:
-        report += f"P/E Ratio: {format_number(pe_ratio, is_currency=False)}\n"
-    if forward_pe is not None:
-        report += f"Forward P/E: {format_number(forward_pe, is_currency=False)}\n"
-    if roe is not None:
-        report += f"ROE: {roe}%\n"
-    if roa is not None:
-        report += f"ROA: {roa}%\n"
-    if debt_to_equity is not None:
-        report += f"Debt-to-Equity Ratio: {debt_to_equity}\n"
-    if current_ratio is not None:
-        report += f"Current Ratio: {current_ratio}\n"
-    if gross_margin is not None:
-        report += f"Gross Margin: {gross_margin}%\n"
-    if operating_margin is not None:
-        report += f"Operating Margin: {operating_margin}%\n"
-    if profit_margin is not None:
-        report += f"Profit Margin: {profit_margin}%\n"
-    if dividend_yield is not None:
-        report += f"Dividend Yield: {dividend_yield}%\n"
-    if price_to_book is not None:
-        report += f"P/B Ratio: {format_number(price_to_book, is_currency=False)}\n"
+    for key, value in short_assessments.items():
+        if value != "N/A":
+            report += f"{key}: {value}\n"
 
-    report += f"\n**Conclusion:**\n{overall_assessment}\n"
-    report += f"\n**Data Used for Calculations:**\n"
+    report += f"\n**Conclusion:**\n{conclusion}\n"
     report += f"Net Income: {format_number(net_income)}, Total Assets: {format_number(total_assets)}, "
     report += f"Total Equity: {format_number(total_equity)}\n"
     report += f"Total Debt: {format_number(total_debt)}, Current Assets: {format_number(current_assets)}, "
@@ -185,3 +114,70 @@ def get_stock_metrics(stock, ticker, language='English'):
     report += f"Revenue: {format_number(revenue)}, Operating Income: {format_number(operating_income)}"
 
     return report
+
+
+def get_dynamic_conclusion(
+    short_assessments, net_income, total_debt, roe, gross_margin, dividend_yield, language='English'
+):
+    high_profitability = "High" in short_assessments['ROE']
+    moderate_profitability = "Moderate" in short_assessments['ROE']
+    high_debt = "High Risk" in short_assessments['Debt-to-Equity']
+    low_debt = "Low Risk" in short_assessments['Debt-to-Equity']
+    strong_liquidity = "Liquid" in short_assessments['Current Ratio'] and "Strong" in short_assessments['Quick Ratio']
+    attractive_dividends = "High" in short_assessments['Dividend Yield']
+    low_valuation = "Undervalued" in short_assessments['P/E Ratio'] and "Low" in short_assessments['Price to Book']
+
+    if language == 'Ukrainian':
+        if high_profitability and strong_liquidity and low_debt:
+            return (
+                f"Компанія демонструє високий рівень прибутковості з рентабельністю власного капіталу {roe}% та валовою маржою {gross_margin}%. "
+                f"Завдяки низькому рівню боргу {format_number(total_debt)}, що {short_assessments['Debt-to-Equity']} відносно капіталу, фінансові ризики є мінімальними. "
+                f"Сильна ліквідність забезпечує стабільність та здатність швидко покривати короткострокові зобов'язання, що створює умови для стійкого зростання. "
+                f"{'Приваблива дивідендна дохідність додає додаткові переваги для інвесторів.' if attractive_dividends else 'Дивідендна дохідність є помірною.'}"
+            )
+        elif high_debt:
+            return (
+                f"Компанія має значний борговий тягар у розмірі {format_number(total_debt)}, що {short_assessments['Debt-to-Equity']}. "
+                f"Це може створювати фінансові ризики в довгостроковій перспективі. "
+                f"Прибутковість залишається {short_assessments['ROE']} з чистим доходом {format_number(net_income)}. "
+                f"{'Однак, високі маржі свідчать про здатність зберігати прибутковість навіть за умов високого боргу.' if gross_margin > 40 else 'Маржі знаходяться на середньому рівні, що вимагає уваги до управління витратами.'}"
+            )
+        elif attractive_dividends and low_valuation:
+            return (
+                f"Акції компанії вважаються недооціненими з P/E {short_assessments['P/E Ratio']} та високою дивідендною дохідністю {dividend_yield}%. "
+                f"Це може бути привабливою можливістю для інвесторів, які шукають стабільний дохід. "
+                f"Низький рівень боргу {short_assessments['Debt-to-Equity']} свідчить про мінімальні фінансові ризики."
+            )
+        else:
+            return (
+                f"Фінансові показники компанії є збалансованими, із середньою прибутковістю та ліквідністю. "
+                f"Загальний дохід {format_number(net_income)} свідчить про {short_assessments['ROE']} рівень ефективності. "
+                f"{'Низьке боргове навантаження сприяє фінансовій стабільності.' if low_debt else 'Проте, наявність боргу може бути важливим фактором для оцінки інвесторами.'}"
+            )
+    else:
+        if high_profitability and strong_liquidity and low_debt:
+            return (
+                f"The company demonstrates high profitability with a return on equity of {roe}% and a gross margin of {gross_margin}%. "
+                f"With a low debt level of {format_number(total_debt)}, considered {short_assessments['Debt-to-Equity']} relative to equity, financial risks are minimized. "
+                f"Strong liquidity ensures stability and the ability to cover short-term obligations quickly, creating conditions for sustainable growth. "
+                f"{'The attractive dividend yield adds further appeal for investors.' if attractive_dividends else 'Dividend yield remains moderate.'}"
+            )
+        elif high_debt:
+            return (
+                f"The company has a significant debt burden of {format_number(total_debt)}, which is considered {short_assessments['Debt-to-Equity']}. "
+                f"This may pose financial risks over the long term. "
+                f"Profitability remains {short_assessments['ROE']} with a net income of {format_number(net_income)}. "
+                f"{'However, strong margins indicate the ability to maintain profitability despite high debt levels.' if gross_margin > 40 else 'The margins are average, requiring attention to cost management.'}"
+            )
+        elif attractive_dividends and low_valuation:
+            return (
+                f"The stock is considered undervalued with a P/E of {short_assessments['P/E Ratio']} and a high dividend yield of {dividend_yield}%. "
+                f"This could present an attractive opportunity for income-focused investors. "
+                f"Low debt {short_assessments['Debt-to-Equity']} suggests minimal financial risks."
+            )
+        else:
+            return (
+                f"The company's financial metrics are balanced, with moderate profitability and liquidity. "
+                f"A net income of {format_number(net_income)} indicates {short_assessments['ROE']} efficiency. "
+                f"{'Low debt levels contribute to financial stability.' if low_debt else 'However, the debt presence may be a key consideration for investors.'}"
+            )
