@@ -62,27 +62,20 @@ def generate_text_analysis(ticker, top_line_start, top_line_end, bottom_line_sta
                            latest_close, language='Ukrainian', state=''):
     """
     Генерує текстовий опис технічного аналізу на основі розрахованих ліній тренду, ключових рівнів та 200-денної EMA.
-
-    Параметри:
-    - ticker: тикер активу.
-    - top_line_start, top_line_end: координати верхньої трендової лінії.
-    - bottom_line_start, bottom_line_end: координати нижньої трендової лінії.
-    - key_levels: список ключових рівнів.
-    - ma_200: значення 200-денної ковзної середньої (EMA).
-    - latest_close: остання ціна закриття.
-    - language: мова аналізу ('Ukrainian' або 'English').
-    - state: стан меню, який впливає на аналіз ('stock_company_info' чи інші).
-
-    Повертає:
-    - Текстовий опис технічного аналізу українською або англійською мовою.
+    Враховує напрямок руху ціни, близькість до ключових рівнів та можливі сценарії пробою або відбою від рівнів.
     """
 
-    # Визначення напрямку тренду на основі EMA 200
+    # Визначення напрямку тренду на основі EMA 200 та відстані від неї
     distance_to_ma = abs(latest_close - ma_200)
+    trend_strength_threshold = 0.02 * latest_close  # Наприклад, 2% відстань для сильного тренду
     neutral_threshold = 0.01 * latest_close  # Поріг для нейтрального тренду (1%)
 
     if distance_to_ma < neutral_threshold:
         trend_direction = "neutral" if language == 'English' else "нейтральний"
+    elif latest_close > ma_200 and distance_to_ma > trend_strength_threshold:
+        trend_direction = "strong upward" if language == 'English' else "сильний висхідний"
+    elif latest_close < ma_200 and distance_to_ma > trend_strength_threshold:
+        trend_direction = "strong downward" if language == 'English' else "сильний низхідний"
     elif latest_close > ma_200:
         trend_direction = "upward" if language == 'English' else "висхідний"
     else:
@@ -90,115 +83,93 @@ def generate_text_analysis(ticker, top_line_start, top_line_end, bottom_line_sta
 
     support_resistance_analysis = []
 
-    # Додаємо аналіз трендових ліній лише для 'stock_company_info'
-    if state == 'stock_company_info':
-        if top_line_start and top_line_end:
-            support_resistance_analysis.append(
-                f"The {ticker} shows a {trend_direction} trend with an upper trendline starting at "
-                f"{top_line_start[1]:.2f} and ending at {top_line_end[1]:.2f}."
-                if language == 'English' else
-                f"Актив {ticker} демонструє {trend_direction} тренд із верхньою трендовою лінією, що починається на рівні "
-                f"{top_line_start[1]:.2f} та закінчується на {top_line_end[1]:.2f}."
-            )
-        if bottom_line_start and bottom_line_end:
-            support_resistance_analysis.append(
-                f"The lower trendline starts at {bottom_line_start[1]:.2f} and ends at {bottom_line_end[1]:.2f}, "
-                f"indicating a potential support zone."
-                if language == 'English' else
-                f"Нижня трендова лінія починається на рівні {bottom_line_start[1]:.2f} та закінчується на {bottom_line_end[1]:.2f}, "
-                f"що може свідчити про потенційну зону підтримки."
-            )
-    else:
+    # Аналіз трендових ліній для 'stock_company_info'
+    if state == 'stock_company_info' and top_line_start and top_line_end:
         support_resistance_analysis.append(
-            f"The {ticker} shows a {trend_direction} trend."
+            f"The {ticker} shows a {trend_direction} trend with an upper trendline starting at "
+            f"{top_line_start[1]:.2f} and ending at {top_line_end[1]:.2f}."
             if language == 'English' else
-            f"Актив {ticker} демонструє {trend_direction} тренд."
+            f"Актив {ticker} демонструє {trend_direction} тренд із верхньою трендовою лінією, що починається на рівні "
+            f"{top_line_start[1]:.2f} та закінчується на {top_line_end[1]:.2f}."
         )
 
-    # Аналіз ключових рівнів з урахуванням близькості до ціни
-    levels_description = ", ".join(f"{level:.2f}" for level in key_levels)
+    # Визначення найближчого рівня та відстані до нього
     closest_level = min(key_levels, key=lambda x: abs(x - latest_close))
     distance_to_level = abs(latest_close - closest_level)
-    level_proximity_threshold = 0.01 * latest_close
+    level_proximity_threshold = 0.02 * latest_close  # Поріг близькості для рівнів (2%)
 
+    # Логіка для різних сценаріїв
     if distance_to_level < level_proximity_threshold:
-        support_resistance_analysis.append(
-            f"The price of {ticker} is currently near the key level {closest_level:.2f}. "
-            "Traders should be cautious as various scenarios are possible: the price may consolidate before a breakout, indicating market uncertainty, "
-            "or it may bounce off this level."
-            if language == 'English' else
-            f"Ціна активу {ticker} наразі перебуває поблизу ключового рівня {closest_level:.2f}. "
-            "Трейдерам варто бути обережними, оскільки можливі різні сценарії: ціна може консолідуватися перед пробоєм, що свідчить про невпевненість ринку, "
-            "або ж відскочити від цього рівня."
-        )
+        if trend_direction in ["upward", "strong upward"]:
+            support_resistance_analysis.append(
+                f"The price of {ticker} is close to the key level {closest_level:.2f} in an upward trend. "
+                "If the price consolidates at this level, a breakout is possible. However, if the trend weakens, a pullback could occur."
+                if language == 'English' else
+                f"Ціна активу {ticker} знаходиться біля ключового рівня {closest_level:.2f} при висхідному тренді. "
+                "Якщо ціна консолідується на цьому рівні, можливий пробій. Проте, якщо тренд ослабне, можливий відкат."
+            )
+        elif trend_direction in ["downward", "strong downward"]:
+            support_resistance_analysis.append(
+                f"The price is near the key level {closest_level:.2f} in a downward trend. "
+                "A consolidation at this level could lead to further decline, but a bounce might indicate a temporary support."
+                if language == 'English' else
+                f"Ціна перебуває біля ключового рівня {closest_level:.2f} при низхідному тренді. "
+                "Консолідація на цьому рівні може призвести до подальшого падіння, але відскок може вказати на тимчасову підтримку."
+            )
+        else:
+            support_resistance_analysis.append(
+                f"The price of {ticker} is currently near the key level {closest_level:.2f}, suggesting indecisiveness. "
+                "Traders should monitor for potential breakouts or rebounds."
+                if language == 'English' else
+                f"Ціна активу {ticker} наразі перебуває біля ключового рівня {closest_level:.2f}, що свідчить про невизначеність. "
+                "Трейдерам варто спостерігати за можливими пробоями або відскоками."
+            )
     elif latest_close > closest_level:
         support_resistance_analysis.append(
-            f"The price has just broken above the key level {closest_level:.2f}, which may indicate a potential move toward the next resistance level. "
-            "Support at this level could present a buying opportunity."
+            f"The price has just broken above the key level {closest_level:.2f}, which may suggest further upward movement."
             if language == 'English' else
-            f"Ціна щойно пробила ключовий рівень {closest_level:.2f}, що може свідчити про можливий подальший рух до наступного рівня опору. "
-            "Підтримка на цьому рівні може стати хорошою можливістю для покупців."
+            f"Ціна щойно пробила ключовий рівень {closest_level:.2f}, що може вказувати на подальший висхідний рух."
         )
     else:
         support_resistance_analysis.append(
-            f"The price is approaching the key level {closest_level:.2f}. If the price breaks through easily, further movement toward the next support zone is possible. "
-            "However, if a pause or rebound occurs, it may indicate a temporary halt in the decline."
+            f"The price is approaching the support level at {closest_level:.2f}. If this level holds, it could offer a buying opportunity. "
+            "A failure to hold may signal further decline."
             if language == 'English' else
-            f"Ціна наближається до ключового рівня {closest_level:.2f}. Якщо ціна легко проб'є цей рівень, то можливий подальший рух до наступної зони підтримки. "
-            "Якщо ж відбудеться зупинка або відскок, це може свідчити про тимчасову паузу в падінні."
+            f"Ціна наближається до рівня підтримки на рівні {closest_level:.2f}. Якщо рівень витримає, це може бути гарною можливістю для покупки. "
+            "Невдача утримати рівень може сигналізувати про подальше падіння."
         )
 
     # Загальний аналіз ситуації на ринку
     analysis = "\n".join(support_resistance_analysis)
     analysis += (
-        f"\nCurrently, the price is trading at {latest_close:.2f}, suggesting that traders should closely monitor these key levels."
-        "\nIt is recommended to observe the asset's behavior around these levels for potential breakout or reversal signals."
+        f"\nCurrently, the price is trading at {latest_close:.2f}. Observe how the price interacts with these levels for potential breakout or reversal signals."
         if language == 'English' else
-        f"\nНаразі ціна торгується на рівні {latest_close:.2f}, що вказує на необхідність уважного спостереження за цими ключовими рівнями."
-        "\nРекомендується стежити за поведінкою активу навколо цих рівнів для потенційних сигналів про пробій або розворот."
+        f"\nНаразі ціна торгується на рівні {latest_close:.2f}. Слідкуйте за взаємодією ціни з цими рівнями для можливих сигналів пробою або розвороту."
     )
 
     # Додаткові рекомендації на основі тренду
-    if trend_direction == ("upward" if language == 'English' else "висхідний"):
-        if distance_to_level < level_proximity_threshold:
-            analysis += (
-                "\nConsidering the upward trend and proximity to the level, consolidation before a breakout is possible. "
-                "However, if the level is broken, this could signal further growth."
-                if language == 'English' else
-                "\nВраховуючи висхідний тренд та близькість до рівня, можлива консолідація перед пробоєм. "
-                "Однак, якщо рівень буде пробитий, це може стати сигналом для подальшого зростання."
-            )
-        else:
-            analysis += (
-                "\nThe upward trend suggests potential further growth, especially if the price breaks through resistance."
-                if language == 'English' else
-                "\nВисхідний тренд вказує на можливість подальшого зростання, особливо якщо ціна пробиває опір."
-            )
-    elif trend_direction == ("downward" if language == 'English' else "низхідний"):
-        if distance_to_level < level_proximity_threshold:
-            analysis += (
-                "\nWith a downward trend and proximity to the level, a bounce from support or consolidation is possible. "
-                "If the level does not hold, further decline to the next support is likely."
-                if language == 'English' else
-                "\nПри низхідному тренді та близькості до рівня, можливий відскок від підтримки або консолідація. "
-                "Якщо рівень не витримає, можливий подальший спад до наступної підтримки."
-            )
-        else:
-            analysis += (
-                "\nThe downward trend indicates market weakness, and caution is advised with purchases until clear reversal signals appear."
-                if language == 'English' else
-                "\nНизхідний тренд вказує на слабкість ринку, і варто бути обережними з покупками до появи чітких сигналів на розворот."
-            )
-    else:
+    if trend_direction == "strong upward" or trend_direction == "upward":
         analysis += (
-            "\nThe neutral trend suggests market uncertainty, which may indicate a potential change in price direction. "
-            "It is crucial to closely watch for breakouts to understand the future movement."
+            "\nThe upward trend suggests potential further growth, especially if resistance levels are broken."
             if language == 'English' else
-            "\nНейтральний тренд вказує на невизначеність на ринку, що може свідчити про потенційну зміну напрямку ціни. "
-            "Варто уважно стежити за пробоями рівнів для розуміння подальшого напрямку."
+            "\nВисхідний тренд вказує на можливість подальшого зростання, особливо якщо рівні опору будуть пробиті."
+        )
+    elif trend_direction == "strong downward" or trend_direction == "downward":
+        analysis += (
+            "\nThe downward trend indicates market weakness; exercise caution with purchases."
+            if language == 'English' else
+            "\nНизхідний тренд вказує на слабкість ринку; будьте обережні з покупками."
+        )
+    elif trend_direction == "neutral":
+        analysis += (
+            "\nThe neutral trend suggests uncertainty, which may precede a change in price direction."
+            if language == 'English' else
+            "\nНейтральний тренд вказує на невизначеність, що може передувати зміні напрямку ціни."
         )
 
     return analysis
+
+
 
 def analyze_ticker(ticker, data, language='Ukrainian', state=''):
     """

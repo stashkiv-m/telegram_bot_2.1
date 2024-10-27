@@ -9,33 +9,80 @@ today = datetime.date.today()
 one_year_ago = today - datetime.timedelta(days=165)
 
 
-# Функція для отримання фундаментальних даних через yfinance
-def fetch_fundamental_data(symbol):
+def fetch_fundamental_data(symbol, report_type='Quarterly'):
     try:
         stock = yf.Ticker(symbol)
         info = stock.info
 
-        # Повертаємо необхідні фундаментальні дані
-        return {
-            'Market Cap': info.get('marketCap'),
-            'Enterprise Value': info.get('enterpriseValue'),
-            'Trailing P/E': info.get('trailingPE'),
-            'Forward P/E': info.get('forwardPE'),
-            'P/B Ratio': info.get('priceToBook'),
-            'ROE (%)': info.get('returnOnEquity') * 100 if info.get('returnOnEquity') is not None else None,
-            'ROA (%)': info.get('returnOnAssets') * 100 if info.get('returnOnAssets') is not None else None,
-            'Debt to Equity': info.get('debtToEquity'),
-            'Current Ratio': info.get('currentRatio'),
-            'Dividend Yield (%)': info.get('dividendYield') * 100 if info.get('dividendYield') is not None else None,
-            'Payout Ratio': info.get('payoutRatio'),
-            'Gross Margin': info.get('grossMargins'),
-            'Operating Margin': info.get('operatingMargins'),
-            'Profit Margin': info.get('profitMargins')
+        # Вибір даних на основі типу звіту
+        balance_sheet = stock.quarterly_balance_sheet if report_type == 'Quarterly' else stock.balance_sheet
+        financials = stock.quarterly_financials if report_type == 'Quarterly' else stock.financials
+        cashflow = stock.quarterly_cashflow if report_type == 'Quarterly' else stock.cashflow
+
+        # Збір основних даних з інформації про акцію
+        market_cap = info.get('marketCap')
+        shares_outstanding = info.get('sharesOutstanding')
+        cash = balance_sheet.loc['Cash'].iloc[0] if 'Cash' in balance_sheet.index else 0
+        net_income = financials.loc['Net Income'].iloc[0] if 'Net Income' in financials.index else None
+        total_equity = balance_sheet.loc['Stockholders Equity'].iloc[0] if 'Stockholders Equity' in balance_sheet.index else None
+        total_assets = balance_sheet.loc['Total Assets'].iloc[0] if 'Total Assets' in balance_sheet.index else None
+        long_term_debt = balance_sheet.loc['Long Term Debt'].iloc[0] if 'Long Term Debt' in balance_sheet.index else 0
+        current_debt = balance_sheet.loc['Current Debt'].iloc[0] if 'Current Debt' in balance_sheet.index else 0
+        total_debt = long_term_debt + current_debt
+        current_assets = balance_sheet.loc['Current Assets'].iloc[0] if 'Current Assets' in balance_sheet.index else None
+        current_liabilities = balance_sheet.loc['Current Liabilities'].iloc[0] if 'Current Liabilities' in balance_sheet.index else None
+        revenue = financials.loc['Total Revenue'].iloc[0] if 'Total Revenue' in financials.index else None
+        operating_income = financials.loc['Operating Income'].iloc[0] if 'Operating Income' in financials.index else None
+        gross_profit = financials.loc['Gross Profit'].iloc[0] if 'Gross Profit' in financials.index else None
+        ebitda = financials.loc['EBITDA'].iloc[0] if 'EBITDA' in financials.index else None
+        cash_from_operations = cashflow.loc['Total Cash From Operating Activities'].iloc[0] if 'Total Cash From Operating Activities' in cashflow.index else None
+        inventory = balance_sheet.loc['Inventory'].iloc[0] if 'Inventory' in balance_sheet.index else None
+
+        # Розрахунок показників
+        pe_ratio = market_cap / net_income if market_cap and net_income else None
+        ps_ratio = market_cap / revenue if market_cap and revenue else None
+        price_to_cash_flow = market_cap / cash_from_operations if market_cap and cash_from_operations else None
+        pb_ratio = market_cap / total_equity if market_cap and total_equity else None
+        roe = (net_income / total_equity) * 100 if net_income and total_equity else None
+        roa = (net_income / total_assets) * 100 if net_income and total_assets else None
+        gross_margin = (gross_profit / revenue) * 100 if gross_profit and revenue else None
+        operating_margin = (operating_income / revenue) * 100 if operating_income and revenue else None
+        ebit_margin = (operating_income / revenue) * 100 if operating_income and revenue else None
+        ebitda_margin = (ebitda / revenue) * 100 if ebitda and revenue else None
+        net_margin = (net_income / revenue) * 100 if net_income and revenue else None
+        current_ratio = current_assets / current_liabilities if current_assets and current_liabilities else None
+        quick_ratio = (current_assets - inventory) / current_liabilities if inventory and current_liabilities else None
+        debt_to_assets = total_debt / total_assets if total_debt and total_assets else None
+        debt_to_equity = total_debt / total_equity if total_debt and total_equity else None
+        long_term_debt_to_assets = long_term_debt / total_assets if long_term_debt and total_assets else None
+        book_value_per_share = total_equity / shares_outstanding if total_equity and shares_outstanding else None
+
+        # Створення структури даних
+        data = {
+            'Market Cap': market_cap,
+            'PE Ratio': pe_ratio,
+            'PS Ratio': ps_ratio,
+            'P/B Ratio': pb_ratio,
+            'ROE (%)': roe,
+            'ROA (%)': roa,
+            'Gross Margin (%)': gross_margin,
+            'Operating Margin (%)': operating_margin,
+            'EBIT Margin (%)': ebit_margin,
+            'EBITDA Margin (%)': ebitda_margin,
+            'Net Margin (%)': net_margin,
+            'Current Ratio': current_ratio,
+            'Quick Ratio': quick_ratio,
+            'Debt to Assets': debt_to_assets,
+            'Debt to Equity': debt_to_equity,
+            'Long Term Debt to Assets': long_term_debt_to_assets,
+            'Book Value Per Share': book_value_per_share,
+            'Report Type': report_type
         }
+
+        return data
     except Exception as e:
         print(f"Error fetching fundamental data for {symbol}: {e}")
         return None
-
 
 
 # Функція для отримання історичних даних через yfinance
@@ -268,7 +315,7 @@ def run_backtest_from_file(file_path, asset_type='stock'):
     # Визначаємо шлях збереження результатів
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
     folder_path = os.path.join(project_root, 'developer_functions', f'{asset_type}_dev')
-    file_name = f'{asset_type}_backtest_optimized_test.csv'
+    file_name = f'{asset_type}_backtest_optimized.csv'
 
     # Перевірка наявності папки
     if not os.path.exists(folder_path):
@@ -319,6 +366,6 @@ def run_all():
 
 
 if __name__ == "__main__":
-    run_all()
+    # run_all()
     main()
 

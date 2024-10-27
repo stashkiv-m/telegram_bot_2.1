@@ -70,9 +70,21 @@ def merge_signals(df):
     df['MACD Signal'] = df['MACD Signal'].fillna('Neutral')
     return df
 
+# Функція для обробки списку активів з файлу та збереження сигналів
 
-# Функція для обробки списку активів з файлу та збереження сигналів
-# Функція для обробки списку активів з файлу та збереження сигналів
+def get_price_dependent_metrics(symbol):
+    stock = yf.Ticker(symbol)
+    info = stock.info
+    current_price = info.get('regularMarketPrice')
+
+    metrics = {
+        'Trailing P/E': info.get('trailingPE'),
+        'Forward P/E': info.get('forwardPE'),
+        'P/B Ratio': info.get('priceToBook'),
+        'Dividend Yield (%)': info.get('dividendYield') * 100 if info.get('dividendYield') else None,
+    }
+    return metrics
+
 def process_assets_from_file(file_path, asset_type, output_file=None):
     asset_df = pd.read_csv(file_path)
     all_signals = []
@@ -102,13 +114,18 @@ def process_assets_from_file(file_path, asset_type, output_file=None):
         last_signal = combined_signals_df.dropna(subset=['MA Signal', 'MACD Signal']).tail(1)
 
         if not last_signal.empty:
-            # Додавання фундаментальних метрик лише для акцій
+            # Додавання фундаментальних метрик тільки для акцій
             if asset_type == 'stock':
+                price_dependent_metrics = get_price_dependent_metrics(symbol)
+                for col, value in price_dependent_metrics.items():
+                    last_signal[col] = value
+
                 for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
                             'MACD Profit (%)', 'MACD Take Profit (%)', 'MACD Stop Loss (%)',
-                            'Market Cap', 'Enterprise Value', 'Trailing P/E', 'Forward P/E',
-                            'P/B Ratio', 'ROE (%)', 'ROA (%)', 'Debt to Equity', 'Current Ratio',
-                            'Dividend Yield (%)', 'Payout Ratio', 'Gross Margin', 'Operating Margin', 'Profit Margin']:
+                            'Market Cap', 'PE Ratio', 'PS Ratio', 'P/B Ratio', 'ROE (%)', 'ROA (%)',
+                            'Gross Margin (%)', 'Operating Margin (%)', 'EBIT Margin (%)',
+                            'EBITDA Margin (%)', 'Net Margin (%)', 'Current Ratio', 'Quick Ratio',
+                            'Debt to Assets', 'Debt to Equity', 'Long Term Debt to Assets', 'Book Value Per Share']:
                     last_signal[col] = row[col]
             else:
                 # Додавання тільки технічних метрик для форексу та криптовалют

@@ -82,8 +82,8 @@ def menu(update, context):
 
     keyboard = [
         [KeyboardButton("Stock")],
-        [KeyboardButton("Forex")],
-        [KeyboardButton("Crypto")],
+        # [KeyboardButton("Forex")],
+        # [KeyboardButton("Crypto")],
         [KeyboardButton("Back")],
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)

@@ -1,6 +1,7 @@
 import yfinance as yf
 import pandas as pd
 
+
 def format_number(value, is_currency=True):
     if value is None:
         return "N/A"
@@ -127,57 +128,118 @@ def get_dynamic_conclusion(
     attractive_dividends = "High" in short_assessments['Dividend Yield']
     low_valuation = "Undervalued" in short_assessments['P/E Ratio'] and "Low" in short_assessments['Price to Book']
 
+    # Текст висновку залежить від мови
     if language == 'Ukrainian':
-        if high_profitability and strong_liquidity and low_debt:
-            return (
-                f"Компанія демонструє високий рівень прибутковості з рентабельністю власного капіталу {roe}% та валовою маржою {gross_margin}%. "
-                f"Завдяки низькому рівню боргу {format_number(total_debt)}, що {short_assessments['Debt-to-Equity']} відносно капіталу, фінансові ризики є мінімальними. "
-                f"Сильна ліквідність забезпечує стабільність та здатність швидко покривати короткострокові зобов'язання, що створює умови для стійкого зростання. "
-                f"{'Приваблива дивідендна дохідність додає додаткові переваги для інвесторів.' if attractive_dividends else 'Дивідендна дохідність є помірною.'}"
+        conclusion = []
+
+        # ROE and profitability assessment
+        if high_profitability:
+            conclusion.append(
+                f"Компанія демонструє високий рівень прибутковості, з рентабельністю власного капіталу (ROE) на рівні {roe}%, "
+                f"що вказує на ефективне використання капіталу для генерації прибутку."
             )
-        elif high_debt:
-            return (
-                f"Компанія має значний борговий тягар у розмірі {format_number(total_debt)}, що {short_assessments['Debt-to-Equity']}. "
-                f"Це може створювати фінансові ризики в довгостроковій перспективі. "
-                f"Прибутковість залишається {short_assessments['ROE']} з чистим доходом {format_number(net_income)}. "
-                f"{'Однак, високі маржі свідчать про здатність зберігати прибутковість навіть за умов високого боргу.' if gross_margin > 40 else 'Маржі знаходяться на середньому рівні, що вимагає уваги до управління витратами.'}"
-            )
-        elif attractive_dividends and low_valuation:
-            return (
-                f"Акції компанії вважаються недооціненими з P/E {short_assessments['P/E Ratio']} та високою дивідендною дохідністю {dividend_yield}%. "
-                f"Це може бути привабливою можливістю для інвесторів, які шукають стабільний дохід. "
-                f"Низький рівень боргу {short_assessments['Debt-to-Equity']} свідчить про мінімальні фінансові ризики."
+        elif moderate_profitability:
+            conclusion.append(
+                f"Рентабельність власного капіталу (ROE) складає {roe}%, що свідчить про помірний рівень прибутковості. "
+                f"Це може вказувати на стабільне, хоча й не дуже динамічне зростання."
             )
         else:
-            return (
-                f"Фінансові показники компанії є збалансованими, із середньою прибутковістю та ліквідністю. "
-                f"Загальний дохід {format_number(net_income)} свідчить про {short_assessments['ROE']} рівень ефективності. "
-                f"{'Низьке боргове навантаження сприяє фінансовій стабільності.' if low_debt else 'Проте, наявність боргу може бути важливим фактором для оцінки інвесторами.'}"
+            conclusion.append(
+                f"Рентабельність власного капіталу (ROE) складає {roe}%, що є низьким показником, можливо, вказуючи на обмежену прибутковість компанії."
             )
-    else:
-        if high_profitability and strong_liquidity and low_debt:
-            return (
-                f"The company demonstrates high profitability with a return on equity of {roe}% and a gross margin of {gross_margin}%. "
-                f"With a low debt level of {format_number(total_debt)}, considered {short_assessments['Debt-to-Equity']} relative to equity, financial risks are minimized. "
-                f"Strong liquidity ensures stability and the ability to cover short-term obligations quickly, creating conditions for sustainable growth. "
-                f"{'The attractive dividend yield adds further appeal for investors.' if attractive_dividends else 'Dividend yield remains moderate.'}"
+
+        # Debt assessment
+        if high_debt:
+            conclusion.append(
+                f"Компанія має високий рівень заборгованості у розмірі {format_number(total_debt)}, що підвищує фінансові ризики "
+                f"та може вплинути на здатність компанії підтримувати стійкість у складних умовах."
             )
-        elif high_debt:
-            return (
-                f"The company has a significant debt burden of {format_number(total_debt)}, which is considered {short_assessments['Debt-to-Equity']}. "
-                f"This may pose financial risks over the long term. "
-                f"Profitability remains {short_assessments['ROE']} with a net income of {format_number(net_income)}. "
-                f"{'However, strong margins indicate the ability to maintain profitability despite high debt levels.' if gross_margin > 40 else 'The margins are average, requiring attention to cost management.'}"
+        elif low_debt:
+            conclusion.append(
+                f"Заборгованість компанії є низькою ({short_assessments['Debt-to-Equity']}), що знижує фінансові ризики та забезпечує фінансову стабільність."
             )
-        elif attractive_dividends and low_valuation:
-            return (
-                f"The stock is considered undervalued with a P/E of {short_assessments['P/E Ratio']} and a high dividend yield of {dividend_yield}%. "
-                f"This could present an attractive opportunity for income-focused investors. "
-                f"Low debt {short_assessments['Debt-to-Equity']} suggests minimal financial risks."
+
+        # Liquidity assessment
+        if strong_liquidity:
+            conclusion.append(
+                "Сильна ліквідність вказує на здатність компанії швидко покривати свої короткострокові зобов'язання, що сприяє стабільності."
+            )
+
+        # Gross Margin assessment
+        conclusion.append(
+            f"Валовий прибуток компанії на рівні {gross_margin}%, що свідчить про {('високу' if gross_margin > 40 else 'середню') if gross_margin else 'низьку'} ефективність контролю над витратами."
+        )
+
+        # Dividend yield assessment
+        if attractive_dividends:
+            conclusion.append(
+                f"Висока дивідендна дохідність ({dividend_yield}%) робить компанію привабливою для інвесторів, які шукають стабільний дохід."
             )
         else:
-            return (
-                f"The company's financial metrics are balanced, with moderate profitability and liquidity. "
-                f"A net income of {format_number(net_income)} indicates {short_assessments['ROE']} efficiency. "
-                f"{'Low debt levels contribute to financial stability.' if low_debt else 'However, the debt presence may be a key consideration for investors.'}"
+            conclusion.append(
+                f"Дивідендна дохідність компанії є {('помірною' if dividend_yield else 'відсутньою')}, що може не задовольняти інвесторів, які шукають дохід від дивідендів."
             )
+
+        # Valuation
+        if low_valuation:
+            conclusion.append(
+                "Акції компанії оцінюються як недооцінені, що може представляти привабливу інвестиційну можливість."
+            )
+
+        return " ".join(conclusion)
+
+    else:  # English as default
+        conclusion = []
+
+        # ROE and profitability assessment
+        if high_profitability:
+            conclusion.append(
+                f"The company demonstrates high profitability, with a return on equity (ROE) of {roe}%, indicating efficient capital usage for profit generation."
+            )
+        elif moderate_profitability:
+            conclusion.append(
+                f"The return on equity (ROE) of {roe}% suggests a moderate level of profitability, indicating stable, though not rapid, growth."
+            )
+        else:
+            conclusion.append(
+                f"The return on equity (ROE) of {roe}% is low, potentially pointing to limited profitability."
+            )
+
+        # Debt assessment
+        if high_debt:
+            conclusion.append(
+                f"The company carries a high debt level of {format_number(total_debt)}, increasing financial risks and possibly affecting resilience in challenging conditions."
+            )
+        elif low_debt:
+            conclusion.append(
+                f"The company's debt is low ({short_assessments['Debt-to-Equity']}), reducing financial risks and supporting stability."
+            )
+
+        # Liquidity assessment
+        if strong_liquidity:
+            conclusion.append(
+                "Strong liquidity indicates the company's ability to quickly cover its short-term obligations, supporting financial stability."
+            )
+
+        # Gross Margin assessment
+        conclusion.append(
+            f"The gross margin of {gross_margin}% reflects {('high' if gross_margin > 40 else 'average') if gross_margin else 'low'} cost control efficiency."
+        )
+
+        # Dividend yield assessment
+        if attractive_dividends:
+            conclusion.append(
+                f"A high dividend yield ({dividend_yield}%) makes the company attractive for income-focused investors."
+            )
+        else:
+            conclusion.append(
+                f"The company's dividend yield is {('moderate' if dividend_yield else 'absent')}, which may not appeal to income-seeking investors."
+            )
+
+        # Valuation
+        if low_valuation:
+            conclusion.append(
+                "The stock is considered undervalued, potentially presenting an attractive investment opportunity."
+            )
+
+        return " ".join(conclusion)
