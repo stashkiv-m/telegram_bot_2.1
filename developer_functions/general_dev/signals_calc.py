@@ -5,6 +5,19 @@ import numpy as np
 from datetime import datetime, timedelta
 
 
+def get_price_dependent_metrics(symbol):
+    stock = yf.Ticker(symbol)
+    info = stock.info
+    current_price = info.get('regularMarketPrice')
+
+    metrics = {
+        'Trailing P/E': info.get('trailingPE'),
+        'Forward P/E': info.get('forwardPE'),
+        'P/B Ratio': info.get('priceToBook'),
+        'Dividend Yield (%)': info.get('dividendYield') * 100 if info.get('dividendYield') else None,
+    }
+    return metrics
+
 # Функція для отримання історичних даних за 205 днів
 def fetch_ohlcv(symbol, asset_type, timeframe='1d'):
     try:
@@ -49,16 +62,19 @@ def calculate_ma_signals(df, short_window, long_window):
 
 # Функція для розрахунку MACD сигналів
 def calculate_macd_signals(df, short_period, long_period, signal_period):
-    df['macd'] = df['close'].ewm(span=short_period, adjust=False).mean() - df['close'].ewm(span=long_period, adjust=False).mean()
+    df['macd'] = df['close'].ewm(span=short_period, adjust=False).mean() - df['close'].ewm(span=long_period,
+                                                                                           adjust=False).mean()
     df['macd_signal_line'] = df['macd'].ewm(span=signal_period, adjust=False).mean()
 
     df['MACD Signal'] = np.nan
     df['MACD Signal'] = df['MACD Signal'].astype('object')  # Set dtype to object to store string values
 
     for i in range(1, len(df)):
-        if df['macd'].iloc[i - 1] < df['macd_signal_line'].iloc[i - 1] and df['macd'].iloc[i] > df['macd_signal_line'].iloc[i]:
+        if df['macd'].iloc[i - 1] < df['macd_signal_line'].iloc[i - 1] and df['macd'].iloc[i] > \
+                df['macd_signal_line'].iloc[i]:
             df.loc[i, 'MACD Signal'] = 'Buy'
-        elif df['macd'].iloc[i - 1] > df['macd_signal_line'].iloc[i - 1] and df['macd'].iloc[i] < df['macd_signal_line'].iloc[i]:
+        elif df['macd'].iloc[i - 1] > df['macd_signal_line'].iloc[i - 1] and df['macd'].iloc[i] < \
+                df['macd_signal_line'].iloc[i]:
             df.loc[i, 'MACD Signal'] = 'Sell'
 
     return df
@@ -70,21 +86,32 @@ def merge_signals(df):
     df['MACD Signal'] = df['MACD Signal'].fillna('Neutral')
     return df
 
-# Функція для обробки списку активів з файлу та збереження сигналів
 
-def get_price_dependent_metrics(symbol):
+# Функція для отримання сектору, галузі та цін закриття за останні 5 торгових днів
+# Функція для отримання сектору, галузі та цін закриття за останні 7 торгових днів
+def add_sector_industry_and_last_7_closes(df, symbol):
     stock = yf.Ticker(symbol)
     info = stock.info
-    current_price = info.get('regularMarketPrice')
 
-    metrics = {
-        'Trailing P/E': info.get('trailingPE'),
-        'Forward P/E': info.get('forwardPE'),
-        'P/B Ratio': info.get('priceToBook'),
-        'Dividend Yield (%)': info.get('dividendYield') * 100 if info.get('dividendYield') else None,
-    }
-    return metrics
+    # Додавання сектору та галузі
+    df['Sector'] = info.get('sector', 'N/A')
+    df['Industry'] = info.get('industry', 'N/A')
 
+    # Отримання цін закриття за останні 7 торгових днів (без вихідних)
+    hist_data = stock.history(period="1mo")  # Отримання даних за останній місяць
+    last_7_trading_days = hist_data['Close'].tail(7)  # Останні 7 торгових днів
+
+    for i in range(1, 8):
+        column_name = f'close_day_{i}'
+        if len(last_7_trading_days) >= i:
+            df[column_name] = last_7_trading_days.iloc[-i]
+        else:
+            df[column_name] = 'N/A'
+
+    return df
+
+
+# Функція для обробки списку активів з файлу та збереження сигналів
 def process_assets_from_file(file_path, asset_type, output_file=None):
     asset_df = pd.read_csv(file_path)
     all_signals = []
@@ -120,6 +147,9 @@ def process_assets_from_file(file_path, asset_type, output_file=None):
                 for col, value in price_dependent_metrics.items():
                     last_signal[col] = value
 
+                # Додавання сектору, галузі та цін закриття за останні 5 днів
+                last_signal = add_sector_industry_and_last_7_closes(last_signal, symbol)
+
                 for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
                             'MACD Profit (%)', 'MACD Take Profit (%)', 'MACD Stop Loss (%)',
                             'Market Cap', 'PE Ratio', 'PS Ratio', 'P/B Ratio', 'ROE (%)', 'ROA (%)',
@@ -153,11 +183,11 @@ def main():
     asset_type = input("Введіть тип активу (crypto/stock/forex): ").strip().lower()
 
     if asset_type == 'crypto':
-        file_path = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_backtest_optimized_test.csv')
+        file_path = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_backtest_optimized.csv')
         output_file = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signal_test.csv')
     elif asset_type == 'stock':
-        file_path = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_backtest_optimized_test.csv')
-        output_file = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_signal_test.csv')
+        file_path = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_backtest_optimized.csv')
+        output_file = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_signal.csv')
     elif asset_type == 'forex':
         file_path = os.path.join(BASE_DIR, '..', 'forex_dev', 'forex_backtest_optimized.csv')
         output_file = os.path.join(BASE_DIR, '..', 'forex_dev', 'forex_signal_test.csv')
@@ -171,3 +201,4 @@ def main():
 # Виклик головної функції
 if __name__ == "__main__":
     main()
+

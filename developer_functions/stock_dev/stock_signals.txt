@@ -2,118 +2,101 @@
 === MACD Signals ===
 
 --- MixFund ---
-| Symb | MACD | TProfit | SLoss | Profit% | Strat |
-|----|----|-------|-----|-------|-----|
-BWEN   | Sell   | 33.21  | -3.96  | 69.25  | MixFun
-NAPA   | Sell   | 7.62   | -2.84  | 66.13  | MixFun
-EVRI   | Sell   | 17.43  | -5.26  | 57.11  | MixFun
-HL     | Sell   | 16.87  | -4.68  | 50.10  | MixFun
-HIMX   | Sell   | 17.04  | -7.06  | 45.14  | MixFun
-DBD    | Buy    | 13.30  | -2.90  | 34.68  | MixFun
-UHS    | Sell   | 6.92   | -2.85  | 29.23  | MixFun
-VERX   | Sell   | 7.14   | -4.24  | 27.84  | MixFun
-CVNA   | Buy    | 9.61   | -8.21  | 26.65  | MixFun
-ENVA   | Sell   | 9.33   | -4.02  | 23.64  | MixFun
-AKR    | Sell   | 5.75   | -3.27  | 21.03  | MixFun
+| Symb | MACD | TProfit | SLoss | Profit% | Industry |
+|----|----|-------|-----|-------|--------|
+NAPA   | Sell   | 17.26  | -3.69  | 65.22  | Bevera
+BWEN   | Sell   | 33.51  | -6.60  | 38.79  | Specia
+CVNA   | Buy    | 11.38  | -8.24  | 33.32  | Auto &
+VMD    | Sell   | 7.77   | -3.46  | 31.78  | Medica
+HL     | Sell   | 13.50  | -5.34  | 27.77  | Other 
+DEI    | Sell   | 6.32   | -3.27  | 20.03  | REIT -
+
+--- ModInc ---
+| Symb | MACD | TProfit | SLoss | Profit% | Industry |
+|----|----|-------|-----|-------|--------|
+AKR    | Sell   | 6.53   | -3.07  | 25.37  | REIT -
 
 --- NegRet ---
-| Symb | MACD | TProfit | SLoss | Profit% | Strat |
-|----|----|-------|-----|-------|-----|
-VRNA   | Sell   | 19.92  | -9.79  | 97.48  | NegRet
-BMTX   | Buy    | 23.70  | -12.37 | 93.41  | NegRet
-PPTA   | Sell   | 15.85  | -6.89  | 65.10  | NegRet
-AVXL   | Sell   | 20.12  | -6.28  | 61.72  | NegRet
-TRUP   | Sell   | 14.45  | -8.71  | 59.94  | NegRet
-IHT    | Sell   | 16.92  | -7.90  | 56.85  | NegRet
-CLPR   | Sell   | 13.12  | -7.44  | 54.55  | NegRet
-WHLRD  | Sell   | 6.69   | -4.20  | 45.37  | NegRet
-COCP   | Sell   | 29.72  | -7.21  | 44.58  | NegRet
-INVO   | Sell   | 14.84  | -9.83  | 41.28  | NegRet
-CENX   | Buy    | 18.23  | -5.23  | 34.42  | NegRet
-HRTX   | Buy    | 24.47  | -4.51  | 34.23  | NegRet
-EOSEW  | Buy    | 38.17  | -20.03 | 29.65  | NegRet
-DAKT   | Sell   | 11.94  | -7.03  | 26.92  | NegRet
-PLNT   | Buy    | 5.63   | -2.36  | 24.98  | NegRet
-HCA    | Sell   | 4.88   | -2.02  | 24.00  | NegRet
-GFL    | Sell   | 5.88   | -3.54  | 23.26  | NegRet
-ALDX   | Sell   | 15.57  | -12.58 | 20.78  | NegRet
-XGN    | Sell   | 20.81  | -5.12  | 113.81 | NegRet
+| Symb | MACD | TProfit | SLoss | Profit% | Industry |
+|----|----|-------|-----|-------|--------|
+VRNA   | Sell   | 16.76  | -8.24  | 87.08  | Biotec
+EBS    | Sell   | 42.36  | -12.20 | 84.13  | Drug M
+PPTA   | Sell   | 16.25  | -6.74  | 58.09  | Other 
+IHT    | Sell   | 15.13  | -7.95  | 52.56  | REIT—H
+CLPR   | Sell   | 15.97  | -6.64  | 51.02  | REIT -
+AVAH   | Sell   | 20.04  | -11.22 | 46.93  | Medica
+AVXL   | Sell   | 19.43  | -6.05  | 44.25  | Biotec
+GP     | Buy    | 29.65  | -9.92  | 39.98  | Farm &
+GLDG   | Sell   | 12.58  | -2.97  | 35.28  | Gold  
+HUSA   | Buy    | 22.63  | -5.74  | 33.47  | Oil & 
+ALTO   | Sell   | 14.26  | -4.42  | 24.96  | Specia
+GLBZ   | Buy    | 9.16   | -4.76  | 23.86  | Banks—
+DASH   | Sell   | 5.95   | -3.12  | 22.69  | Intern
+KRNY   | Sell   | 10.06  | -3.01  | 22.23  | Banks—
+WHG    | Sell   | 7.35   | -3.27  | 21.36  | Asset 
+BCOV   | Buy    | 10.52  | -4.51  | 20.89  | Softwa
 
 --- Unk ---
-| Symb | MACD | TProfit | SLoss | Profit% | Strat |
-|----|----|-------|-----|-------|-----|
-BSVN   | Sell   | 7.59   | -2.97  | 37.83  | Unk   
-HIFS   | Sell   | 7.60   | -2.70  | 37.71  | Unk   
-CJJD   | Buy    | 31.53  | -5.43  | 34.79  | Unk   
-GLDG   | Sell   | 13.67  | -3.51  | 34.48  | Unk   
-BANR   | Sell   | 6.83   | -2.62  | 34.45  | Unk   
-BHLB   | Sell   | 9.16   | -1.71  | 33.36  | Unk   
-DAL    | Sell   | 10.73  | -1.00  | 32.43  | Unk   
-PNFP   | Sell   | 9.36   | -2.32  | 32.32  | Unk   
-UVSP   | Buy    | 7.81   | -2.89  | 31.32  | Unk   
-FBK    | Sell   | 9.38   | -2.45  | 31.25  | Unk   
-AUBN   | Buy    | 11.45  | -2.04  | 30.67  | Unk   
-GBCI   | Buy    | 9.15   | -2.63  | 30.30  | Unk   
-DJCO   | Sell   | 9.06   | -2.13  | 30.23  | Unk   
-MTB    | Sell   | 6.83   | -1.55  | 30.18  | Unk   
-PKBK   | Sell   | 5.95   | -1.84  | 27.25  | Unk   
-VBTX   | Sell   | 9.64   | -2.74  | 27.19  | Unk   
-FFBC   | Sell   | 8.78   | -1.91  | 26.86  | Unk   
-DY     | Sell   | 8.51   | -3.32  | 26.41  | Unk   
-VABK   | Sell   | 8.34   | -4.17  | 26.17  | Unk   
-GLBZ   | Buy    | 13.19  | -3.87  | 26.09  | Unk   
-WSBC   | Sell   | 8.47   | -2.32  | 25.41  | Unk   
-FMBH   | Sell   | 7.49   | -2.02  | 25.24  | Unk   
-FSBC   | Sell   | 6.42   | -2.23  | 25.24  | Unk   
-TRMK   | Sell   | 5.77   | -1.85  | 24.71  | Unk   
-WSFS   | Sell   | 9.17   | -2.89  | 24.54  | Unk   
-CATY   | Sell   | 6.58   | -2.02  | 23.01  | Unk   
-BCML   | Sell   | 7.16   | -3.00  | 22.84  | Unk   
-CLBK   | Sell   | 8.67   | -2.26  | 22.83  | Unk   
-CVBF   | Sell   | 8.00   | -2.09  | 22.55  | Unk   
-WTFC   | Sell   | 7.31   | -2.01  | 22.14  | Unk   
-CNS    | Sell   | 6.19   | -3.36  | 21.91  | Unk   
-FRAF   | Buy    | 7.87   | -1.95  | 20.08  | Unk   
-WLFC   | Sell   | 15.14  | -5.95  | 151.69 | Unk   
+| Symb | MACD | TProfit | SLoss | Profit% | Industry |
+|----|----|-------|-----|-------|--------|
+KINS   | Sell   | 16.91  | -7.46  | 65.40  | Insura
+BSVN   | Sell   | 9.72   | -2.48  | 42.73  | Banks 
+HIFS   | Sell   | 11.91  | -2.65  | 42.47  | Banks—
+BSRR   | Sell   | 12.78  | -3.37  | 35.59  | Banks 
+DAL    | Sell   | 17.51  | -1.40  | 32.80  | Airlin
+PNFP   | Sell   | 9.02   | -2.40  | 31.09  | Banks—
+VBTX   | Sell   | 9.46   | -2.20  | 30.59  | Banks—
+TRMK   | Sell   | 8.47   | -1.77  | 30.29  | Banks—
+MTB    | Sell   | 7.39   | -1.98  | 30.15  | Banks—
+BANR   | Sell   | 7.13   | -2.75  | 29.30  | Banks 
+FBK    | Sell   | 9.09   | -2.70  | 29.30  | Banks 
+BCML   | Sell   | 6.71   | -2.91  | 24.98  | Banks 
+UVSP   | Buy    | 7.86   | -3.66  | 24.39  | Banks—
+GBCI   | Buy    | 6.92   | -2.89  | 23.07  | Banks—
+DJCO   | Sell   | 6.71   | -2.32  | 22.65  | Softwa
+WTFC   | Sell   | 7.52   | -1.80  | 22.29  | Banks—
+PFC    | Sell   | 8.17   | -3.05  | 21.92  | Banks—
 
 === MA Signals ===
 
 --- DivLd ---
-| Symb | MA | TProfit | SLoss | Profit% | Strat |
-|----|--|-------|-----|-------|-----|
-ZIM    | Buy    | 12.65  | -4.95  | 33.76  | DivLd 
+| Symb | MA | TProfit | SLoss | Profit% | Industry |
+|----|--|-------|-----|-------|--------|
+ZIM    | Buy    | 16.64  | -4.52  | 50.49  | Marine
 
 --- MixFund ---
-| Symb | MA | TProfit | SLoss | Profit% | Strat |
-|----|--|-------|-----|-------|-----|
-ACIW   | Sell   | 10.24  | -1.91  | 43.83  | MixFun
-POLA   | Buy    | 20.89  | -5.86  | 39.54  | MixFun
-AEHR   | Buy    | 45.97  | -2.78  | 33.84  | MixFun
-ANGI   | Sell   | 22.28  | -5.45  | 27.23  | MixFun
-ERJ    | Sell   | 2.97   | -6.27  | 25.41  | MixFun
+| Symb | MA | TProfit | SLoss | Profit% | Industry |
+|----|--|-------|-----|-------|--------|
+AP     | Sell   | 36.76  | -2.21  | 47.06  | Metal 
+ACIW   | Sell   | 11.63  | -2.47  | 29.18  | Softwa
+ANGI   | Sell   | 13.20  | -3.92  | 23.65  | Intern
 
 --- NegRet ---
-| Symb | MA | TProfit | SLoss | Profit% | Strat |
-|----|--|-------|-----|-------|-----|
-BALY   | Sell   | 16.65  | -0.50  | 49.90  | NegRet
-AEVA   | Buy    | 21.70  | -2.80  | 38.00  | NegRet
-NBR    | Sell   | 19.23  | -4.87  | 35.02  | NegRet
-YTRA   | Sell   |        |        | 30.23  | NegRet
-BHC    | Buy    | 16.72  | -1.76  | 29.28  | NegRet
-BGSF   | Sell   | 15.24  | -3.51  | 25.54  | NegRet
-IOVA   | Buy    | 25.03  | -7.32  | 22.09  | NegRet
-HLIT   | Sell   | 7.39   | -3.42  | 20.64  | NegRet
-INFN   | Sell   | 5.51   | -4.80  | 20.24  | NegRet
-EMKR   | Sell   | 19.24  | -8.45  | 150.98 | NegRet
-COE    | Buy    | 53.70  | -7.90  | 103.65 | NegRet
+| Symb | MA | TProfit | SLoss | Profit% | Industry |
+|----|--|-------|-----|-------|--------|
+BALY   | Sell   | 13.76  | -0.48  | 48.71  | Resort
+FHTX   | Sell   | 47.81  | -1.91  | 47.33  | Biotec
+KOD    | Sell   | 22.18  | -2.26  | 40.60  | Biotec
+NBR    | Sell   | 26.90  | -3.88  | 37.03  | Oil & 
+BHC    | Buy    | 12.10  | -2.95  | 29.28  | Drug M
+HLIT   | Sell   | 10.42  | -2.30  | 26.37  | Commun
+HUSA   | Sell   | 20.39  | -9.12  | 25.33  | Oil & 
+INFN   | Sell   | 6.79   | -3.98  | 22.90  | Commun
+IOVA   | Buy    | 20.62  | -8.19  | 22.09  | Biotec
+EMKR   | Sell   | 36.94  | -7.92  | 130.42 | Electr
+COE    | Buy    | 44.31  | -9.07  | 100.26 | Educat
 
 --- Unk ---
-| Symb | MA | TProfit | SLoss | Profit% | Strat |
-|----|--|-------|-----|-------|-----|
-BQ     | Sell   | 26.14  | -16.39 | 49.63  | Unk   
-COKE   | Sell   | 11.00  | -1.69  | 33.24  | Unk   
-CPRX   | Buy    | 4.05   | -2.49  | 28.63  | Unk   
-CBNK   | Sell   | 15.43  | -0.45  | 22.38  | Unk   
+| Symb | MA | TProfit | SLoss | Profit% | Industry |
+|----|--|-------|-----|-------|--------|
+EQ     | Sell   | 33.58  | -3.58  | 56.74  | Biotec
+EVBN   | Buy    | 16.88  | -1.35  | 42.70  | Banks—
+BQ     | Sell   | 51.53  | -14.28 | 35.84  | Specia
+CPRX   | Buy    | 12.12  | -2.04  | 32.24  | Biotec
+ANET   | Buy    | 12.80  | -0.84  | 29.61  | Comput
+COKE   | Sell   | 7.12   | -2.38  | 24.89  | Bevera
+FBK    | Buy    | 7.38   | -2.97  | 21.52  | Banks 
+UAMY   | Sell   | 43.86  | -7.95  | 110.66 | Other 
 
 
 === Strategy Descriptions ===

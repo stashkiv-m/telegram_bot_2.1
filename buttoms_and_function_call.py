@@ -9,15 +9,6 @@ def test_but():
     print('Hello')
 
 
-# def start(update, context):
-#     context.user_data['menu_stack'] = ['start']
-#     context.bot.send_message(chat_id=update.effective_chat.id, text='https://t.me/stashkiv_mykhailo created'
-#                                                                     ' this bot to provide people with access to the'
-#                                                                     ' best ideas for investments and speculations. ',
-#                              reply_markup=create_start_keyboard())
-#     update_menu_state('start')
-
-
 def about_bot(update, context):
     context.user_data['menu_stack'] = context.user_data.get('menu_stack', []) + ['about_bot']
     keyboard = [

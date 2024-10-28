@@ -24,7 +24,7 @@ def stock_keyboard(update, context):
 
     # Створюємо клавіатуру
     keyboard = [
-        # [KeyboardButton("Stocks Market Overview")],
+        [KeyboardButton("Stocks Market Overview")],
         [KeyboardButton("Company information")],
         [KeyboardButton("Stock Signals")],
         [KeyboardButton("Back")]

@@ -12,6 +12,8 @@ from run_all_siganlas_calc import schedule_signal_updates
 from state_update_menu import update_menu_state
 from telegram.ext import CallbackContext
 
+from stock.market_overwiev import send_market_overview
+
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -120,8 +122,8 @@ def main():
         update_menu_state('stock_menu')
 
     def stock_mrkt_overview_func_button_call(update: Update, context: CallbackContext) -> None:
-        test_button(update, context)
         update_menu_state('mrkt_overview')
+        send_market_overview(update, context)
 
     def stock_company_info_func_button_call(update: Update, context: CallbackContext) -> None:
         symbol_info(update, context)

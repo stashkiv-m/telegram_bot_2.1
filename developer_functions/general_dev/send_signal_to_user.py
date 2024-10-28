@@ -133,9 +133,15 @@ def create_user_table_by_strategy(df, title):
     for strategy, group in grouped:
         table_str += f"\n--- {strategy} ---\n"
         group = group.sort_values(by='Profit%', ascending=False)
-        headers = " | ".join(df.columns)
-        separator = "|".join(['-' * len(col) for col in df.columns])
+
+        # Видаляємо колонку 'Strat' і залишаємо 'Industry'
+        group = group.drop(columns=['Strat'])
+
+        # Форматування таблиці для виводу
+        headers = " | ".join(group.columns)
+        separator = "|".join(['-' * len(col) for col in group.columns])
         rows = "\n".join(" | ".join(str(val).ljust(6)[:6] for val in row) for row in group.values)
+
         table_str += f"| {headers} |\n|{separator}|\n{rows}\n"
     return table_str
 
@@ -147,6 +153,7 @@ def filter_and_classify_signals(df, state, forex_min_profit=5.0, other_min_profi
     for _, row in df.iterrows():
         macd_signal = row.get('MACD Signal')
         ma_signal = row.get('MA Signal')
+        industry = row.get('Industry')  # Збережемо значення Industry для кожного рядка
         take_profit_macd = safe_float_conversion(row.get('MACD Take Profit (%)'))
         stop_loss_macd = safe_float_conversion(row.get('MACD Stop Loss (%)'))
         profit_macd = safe_float_conversion(row.get('MACD Profit (%)'))
@@ -171,7 +178,8 @@ def filter_and_classify_signals(df, state, forex_min_profit=5.0, other_min_profi
                 'TProfit': f"{take_profit_macd:.2f}"[:6] if take_profit_macd is not None else '',
                 'SLoss': f"{stop_loss_macd:.2f}"[:6] if stop_loss_macd is not None else '',
                 'Profit%': f"{profit_macd:.2f}"[:6] if profit_macd is not None else '',
-                'Strat': strategy_short if state == 'stock_signal' else ''
+                'Strat': strategy_short,  # Додаємо колонку стратегії для групування
+                'Industry': industry
             }
             macd_rows.append(macd_row)
 
@@ -181,7 +189,8 @@ def filter_and_classify_signals(df, state, forex_min_profit=5.0, other_min_profi
                 'TProfit': f"{take_profit_ma:.2f}"[:6] if take_profit_ma is not None else '',
                 'SLoss': f"{stop_loss_ma:.2f}"[:6] if stop_loss_ma is not None else '',
                 'Profit%': f"{profit_ma:.2f}"[:6] if profit_ma is not None else '',
-                'Strat': strategy_short if state == 'stock_signal' else ''
+                'Strat': strategy_short,  # Додаємо колонку стратегії для групування
+                'Industry': industry
             }
             ma_rows.append(ma_row)
 
@@ -196,7 +205,7 @@ def signal_list_for_user(update: Update, context: CallbackContext):
         file_path = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signal.csv')
         output_file = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signals.txt')
     elif state == 'stock_signal':
-        file_path = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_signal_test.csv')
+        file_path = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_signal.csv')
         output_file = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_signals.txt')
     elif state == 'forex_signal':
         file_path = os.path.join(BASE_DIR, '..', 'forex_dev', 'forex_signal.csv')
