@@ -5,6 +5,14 @@ from telegram.ext import CallbackContext
 from state_update_menu import menu_state
 
 
+def abbreviate_industry(industry_name, max_word_length=3, abbrev_dict=None):
+    words = industry_name.split()
+    abbreviated = ''.join([word[:max_word_length].capitalize() for word in words])
+    if abbrev_dict is not None:
+        abbrev_dict[abbreviated] = industry_name
+    return abbreviated
+
+
 def safe_float_conversion(value):
     try:
         return float(value) if value else None
@@ -23,12 +31,7 @@ def clean_percentage(value):
         return None
 
 
-
 def determine_strategy(row=None):
-    """Determines the strategy for a stock based on fundamental metrics and returns both the strategy code and description.
-       If row is None, returns strategy abbreviations and descriptions only."""
-
-    # Оновлений набір стратегій з додатковою стратегією для негативного ROE або ROA
     strategy_abbr = {
         "High Growth Undervalued": "HG_Und",
         "High Quality": "HQ",
@@ -64,7 +67,6 @@ def determine_strategy(row=None):
     if row is None:
         return strategy_abbr, strategy_descriptions
 
-    # Метрики для фільтрації стратегій
     roe = safe_float_conversion(row.get('ROE (%)'))
     roa = safe_float_conversion(row.get('ROA (%)'))
     debt_to_equity = safe_float_conversion(row.get('Debt to Equity'))
@@ -78,7 +80,6 @@ def determine_strategy(row=None):
     dividend_yield = clean_percentage(row.get('Dividend Yield (%)'))
     asset_turnover = safe_float_conversion(row.get('Asset Turnover'))
 
-    # Визначення стратегій з додатковою умовою для негативного ROE або ROA
     if roe is not None and roe < 0 or roa is not None and roa < 0:
         strategy = "Negative Returns"
     elif roe is not None and roa is not None and debt_to_equity is not None and gross_margin is not None and \
@@ -114,71 +115,84 @@ def determine_strategy(row=None):
     else:
         strategy = "Unknown"
 
-    # Повернення результатів
     strategy_short = strategy_abbr[strategy]
     strategy_description = strategy_descriptions[strategy_short]
     return strategy_short, strategy_description
 
 
-# Перевірка функції для нових умов (без конкретних даних)
-
-def create_user_table_by_strategy(df, title):
+def create_user_table_by_strategy(df, title, abbrev_dict):
     """Generates a formatted table grouped by strategy for the given DataFrame."""
     table_str = f"\n=== {title} ===\n"
     if df.empty:
         return table_str + "No data available.\n"
 
-    # Group by 'Strat' and sort each group by 'Profit%' in descending order
     grouped = df.groupby('Strat')
     for strategy, group in grouped:
         table_str += f"\n--- {strategy} ---\n"
         group = group.sort_values(by='Profit%', ascending=False)
-
-        # Видаляємо колонку 'Strat' і залишаємо 'Industry'
         group = group.drop(columns=['Strat'])
 
-        # Форматування таблиці для виводу
         headers = " | ".join(group.columns)
         separator = "|".join(['-' * len(col) for col in group.columns])
         rows = "\n".join(" | ".join(str(val).ljust(6)[:6] for val in row) for row in group.values)
-
         table_str += f"| {headers} |\n|{separator}|\n{rows}\n"
+
     return table_str
 
 
+def add_industry_abbreviations(abbrev_dict):
+    abbrev_table = "\n\n=== Industry Abbreviations ===\n"
+    abbrev_table += "| Abbreviation | Full Industry Name |\n"
+    abbrev_table += "|--------------|---------------------|\n"
+    for abbrev, full_name in sorted(abbrev_dict.items()):  # Додаємо сортування за алфавітом
+        abbrev_table += f"| {abbrev:<12} | {full_name} |\n"
+    return abbrev_table
+
+
+
+def add_strategy_descriptions(strategy_descriptions):
+    strategy_table = "\n\n=== Strategy Descriptions ===\n"
+    for code, description in strategy_descriptions.items():
+        strategy_table += f"{code}: {description}\n"
+    return strategy_table
+
+
 def filter_and_classify_signals(df, state, forex_min_profit=5.0, other_min_profit=20.0):
-    """Filters and classifies signals based on the state and profit thresholds."""
     macd_rows, ma_rows = [], []
+    abbrev_dict = {}
 
     for _, row in df.iterrows():
         macd_signal = row.get('MACD Signal')
         ma_signal = row.get('MA Signal')
-        industry = row.get('Industry')  # Збережемо значення Industry для кожного рядка
-        take_profit_macd = safe_float_conversion(row.get('MACD Take Profit (%)'))
-        stop_loss_macd = safe_float_conversion(row.get('MACD Stop Loss (%)'))
-        profit_macd = safe_float_conversion(row.get('MACD Profit (%)'))
-        take_profit_ma = safe_float_conversion(row.get('MA Take Profit (%)'))
-        stop_loss_ma = safe_float_conversion(row.get('MA Stop Loss (%)'))
-        profit_ma = safe_float_conversion(row.get('MA Profit (%)'))
 
+        # Check for valid signals (Buy or Sell)
         if macd_signal not in ['Buy', 'Sell'] and ma_signal not in ['Buy', 'Sell']:
             continue
 
         min_profit_threshold = forex_min_profit if state == 'forex_signal' else other_min_profit
+        profit_macd = safe_float_conversion(row.get('MACD Profit (%)'))
+        profit_ma = safe_float_conversion(row.get('MA Profit (%)'))
 
+        # Skip rows if profits are below the threshold
         if (profit_macd is not None and profit_macd < min_profit_threshold) and \
                 (profit_ma is not None and profit_ma < min_profit_threshold):
             continue
 
+        industry = row.get('Industry')
+        # Abbreviate industry only for rows with signals
+        if pd.notna(industry):
+            industry = abbreviate_industry(industry, abbrev_dict=abbrev_dict)
+
+        # Determine the strategy for stocks
         strategy_short, _ = determine_strategy(row) if state == 'stock_signal' else ("Unk", "")
 
         if macd_signal in ['Buy', 'Sell'] and (profit_macd is not None and profit_macd >= min_profit_threshold):
             macd_row = {
                 'Symb': row['Symbol'], 'MACD': macd_signal,
-                'TProfit': f"{take_profit_macd:.2f}"[:6] if take_profit_macd is not None else '',
-                'SLoss': f"{stop_loss_macd:.2f}"[:6] if stop_loss_macd is not None else '',
-                'Profit%': f"{profit_macd:.2f}"[:6] if profit_macd is not None else '',
-                'Strat': strategy_short,  # Додаємо колонку стратегії для групування
+                'TProfit': f"{profit_macd:.2f}"[:6] if profit_macd is not None else '',
+                'SLoss': f"{safe_float_conversion(row.get('MACD Stop Loss (%)')):.2f}"[:6],
+                'Profit%': f"{profit_macd:.2f}"[:6],
+                'Strat': strategy_short,
                 'Industry': industry
             }
             macd_rows.append(macd_row)
@@ -186,15 +200,15 @@ def filter_and_classify_signals(df, state, forex_min_profit=5.0, other_min_profi
         if ma_signal in ['Buy', 'Sell'] and (profit_ma is not None and profit_ma >= min_profit_threshold):
             ma_row = {
                 'Symb': row['Symbol'], 'MA': ma_signal,
-                'TProfit': f"{take_profit_ma:.2f}"[:6] if take_profit_ma is not None else '',
-                'SLoss': f"{stop_loss_ma:.2f}"[:6] if stop_loss_ma is not None else '',
-                'Profit%': f"{profit_ma:.2f}"[:6] if profit_ma is not None else '',
-                'Strat': strategy_short,  # Додаємо колонку стратегії для групування
+                'TProfit': f"{profit_ma:.2f}"[:6] if profit_ma is not None else '',
+                'SLoss': f"{safe_float_conversion(row.get('MA Stop Loss (%)')):.2f}"[:6],
+                'Profit%': f"{profit_ma:.2f}"[:6],
+                'Strat': strategy_short,
                 'Industry': industry
             }
             ma_rows.append(ma_row)
 
-    return pd.DataFrame(macd_rows), pd.DataFrame(ma_rows)
+    return pd.DataFrame(macd_rows), pd.DataFrame(ma_rows), abbrev_dict
 
 
 def signal_list_for_user(update: Update, context: CallbackContext):
@@ -215,17 +229,14 @@ def signal_list_for_user(update: Update, context: CallbackContext):
         return
 
     df = pd.read_csv(file_path)
-    macd_df, ma_df = filter_and_classify_signals(df, state)
+    macd_df, ma_df, abbrev_dict = filter_and_classify_signals(df, state)
+    _, strategy_descriptions = determine_strategy(None)
 
     with open(output_file, 'w', encoding='utf-8') as file:
-        file.write(create_user_table_by_strategy(macd_df, "MACD Signals"))
-        file.write(create_user_table_by_strategy(ma_df, "MA Signals"))
-
-        if state == 'stock_signal':
-            _, strategy_descriptions = determine_strategy(None)
-            file.write("\n\n=== Strategy Descriptions ===\n")
-            for code, description in strategy_descriptions.items():
-                file.write(f"{code}: {description}\n")
+        file.write(create_user_table_by_strategy(macd_df, "MACD Signals", abbrev_dict))
+        file.write(create_user_table_by_strategy(ma_df, "MA Signals", abbrev_dict))
+        file.write(add_industry_abbreviations(abbrev_dict))
+        file.write(add_strategy_descriptions(strategy_descriptions))
 
     with open(output_file, 'rb') as document:
         context.bot.send_document(chat_id=update.effective_chat.id, document=document)

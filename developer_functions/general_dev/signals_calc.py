@@ -184,7 +184,7 @@ def main():
 
     if asset_type == 'crypto':
         file_path = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_backtest_optimized.csv')
-        output_file = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signal_test.csv')
+        output_file = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signal.csv')
     elif asset_type == 'stock':
         file_path = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_backtest_optimized.csv')
         output_file = os.path.join(BASE_DIR, '..', 'stock_dev', 'stock_signal.csv')

@@ -168,6 +168,7 @@ def main():
     schedule_signal_updates()
 
 
+
     # Register command handlers
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(MessageHandler(Filters.regex(r'^About Bot$'), about_bot_func_button_call))
