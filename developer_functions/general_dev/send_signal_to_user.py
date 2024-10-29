@@ -190,7 +190,7 @@ def filter_and_classify_signals(df, state, forex_min_profit=5.0, other_min_profi
             macd_row = {
                 'Symb': row['Symbol'], 'MACD': macd_signal,
                 'TProfit': f"{profit_macd:.2f}"[:6] if profit_macd is not None else '',
-                'SLoss': f"{safe_float_conversion(row.get('MACD Stop Loss (%)')):.2f}"[:6],
+                'SLoss': f"{safe_float_conversion(row.get('MA Stop Loss (%)')):.2f}"[:6] if safe_float_conversion(row.get('MA Stop Loss (%)')) is not None else '',
                 'Profit%': f"{profit_macd:.2f}"[:6],
                 'Strat': strategy_short,
                 'Industry': industry
@@ -201,7 +201,7 @@ def filter_and_classify_signals(df, state, forex_min_profit=5.0, other_min_profi
             ma_row = {
                 'Symb': row['Symbol'], 'MA': ma_signal,
                 'TProfit': f"{profit_ma:.2f}"[:6] if profit_ma is not None else '',
-                'SLoss': f"{safe_float_conversion(row.get('MA Stop Loss (%)')):.2f}"[:6],
+                'SLoss': f"{safe_float_conversion(row.get('MA Stop Loss (%)')):.2f}"[:6] if safe_float_conversion(row.get('MA Stop Loss (%)')) is not None else '',
                 'Profit%': f"{profit_ma:.2f}"[:6],
                 'Strat': strategy_short,
                 'Industry': industry

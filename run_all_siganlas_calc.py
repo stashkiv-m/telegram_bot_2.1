@@ -35,7 +35,7 @@ def signals_auto_update():
         send_message_to_all_users("New signals are in! View the updated list of signals!")
 
 
-def schedule_signal_updates(hour: int = 22, minute: int = 5):
+def schedule_signal_updates(hour: int = 22, minute: int = 35):
     # Використовуємо часову зону Eastern Time (US/Eastern)
     timezone = pytz.timezone('America/Chicago')
 
@@ -48,6 +48,5 @@ def schedule_signal_updates(hour: int = 22, minute: int = 5):
     # Запускаємо планувальник
     scheduler.start()
     print(f"Планувальник запущено. Сигнали будуть оновлюватися щодня о {hour:02d}:{minute:02d}.")
-
 
 

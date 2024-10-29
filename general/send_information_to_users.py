@@ -1,5 +1,9 @@
 import investpy
 import pandas as pd
+import pytz
+from apscheduler.schedulers.background import BackgroundScheduler
+
+from run_all_siganlas_calc import signals_auto_update
 
 
 # Функція для отримання важливих економічних подій
@@ -53,3 +57,16 @@ else:
     print("Подій не знайдено або виникла помилка.")
 
 
+def schedule_signal_updates(hour: int = 22, minute: int = 5):
+    # Використовуємо часову зону Eastern Time (US/Eastern)
+    timezone = pytz.timezone('America/Chicago')
+
+    # Створюємо планувальник
+    scheduler = BackgroundScheduler(timezone=timezone)
+
+    # Додаємо завдання для запуску функції signals_auto_update в конкретний час
+    scheduler.add_job(get_important_economic_events, 'cron', hour=hour, minute=minute)
+
+    # Запускаємо планувальник
+    scheduler.start()
+    print(f"Планувальник запущено. Сигнали будуть оновлюватися щодня о {hour:02d}:{minute:02d}.")
