@@ -166,7 +166,7 @@ def main():
         update_menu_state('crypto_signals')
         signal_list_for_user(update, context)
 
-    schedule_func_call(all_signals_calc_run, 22, 51)
+    schedule_func_call(all_signals_calc_run, 22, 52)
     schedule_func_call(send_important_economic_events, 7, 30)
 
 
