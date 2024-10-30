@@ -1,72 +1,73 @@
+import os
+from datetime import datetime, timedelta
 import investpy
-import pandas as pd
-import pytz
-from apscheduler.schedulers.background import BackgroundScheduler
+from developer_functions.general_dev.massage_and_img_send import send_file_to_all_users, send_message_to_all_users
 
-from run_all_siganlas_calc import signals_auto_update
+# Базова директорія для збереження файлів
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-# Функція для отримання важливих економічних подій
-def get_important_economic_events(country='United States', from_date=None, to_date=None):
-    """
-    Отримує економічний календар для вказаної країни та періоду,
-    фільтруючи події за високою важливістю.
-
-    Параметри:
-        country (str): Країна для фільтрації подій.
-        from_date (str): Початкова дата у форматі 'дд/мм/рррр'.
-        to_date (str): Кінцева дата у форматі 'дд/мм/рррр'.
-
-    Повертає:
-        pd.DataFrame: Таблиця з важливими подіями.
-    """
+def send_important_economic_events(country='United States'):
     try:
-        # Отримуємо економічний календар за вказаний період і країну
+        today = datetime.today()
+        future_date = (today + timedelta(days=3)).strftime('%d/%m/%Y')
+        today_str = today.strftime('%d/%m/%Y')
+
         calendar = investpy.news.economic_calendar(
             countries=[country],
-            from_date=from_date,
-            to_date=to_date
+            from_date=today_str,
+            to_date=future_date
         )
 
-        # Фільтруємо події за високою важливістю
+        # Видаляємо колонку 'actual' для оптимізації
         important_events = calendar[calendar['importance'] == 'high']
+        important_events = important_events[['date', 'time', 'event', 'forecast', 'previous']]
 
-        # Перевірка, чи є результати
-        if important_events.empty:
+        def format_date(date_str):
+            # Форматуємо дату у форматі 'день/місяць'
+            event_date = datetime.strptime(date_str, '%d/%m/%Y')
+            return event_date.strftime('%d/%m')
+
+        important_events['date'] = important_events['date'].apply(format_date)
+
+        if not important_events.empty:
+            # Замість таблиці, виводимо інформацію простим текстом
+            event_lines = []
+            for _, row in important_events.iterrows():
+                event_text = row['event'][:20]  # Обрізаємо текст події до 20 символів
+                forecast_text = f"Fcst: {row['forecast']}" if row['forecast'] else "Fcst: N/A"
+                previous_text = f"Prev: {row['previous']}" if row['previous'] else "Prev: N/A"
+
+                # Форматуємо кожен рядок без розділення колонок
+                line = f"{row['date']} {row['time']} - {event_text} {forecast_text} {previous_text}"
+                event_lines.append(line)
+
+            # Додаємо заголовок для інформативності
+            formatted_text = f"Economic Events for {today_str}\n\n" + "\n".join(event_lines)
+
+            # Додаємо інформацію про часовий пояс
+            formatted_text += "\n\n* All times are in Eastern Standard Time (EST)"
+
+            # Формуємо шлях до файлу з поточною датою
+            formatted_massage = (
+                f"Important Economic Events for {today_str}\n\n"
+                "Please check the details below to stay informed about key economic events.\n\n"
+            )
+            send_message_to_all_users(formatted_massage)
+            file_name = f"Important economic_events_{today.strftime('%Y-%m-%d')}.txt"
+            file_path = os.path.join(BASE_DIR, 'developer_functions', 'stock_dev', file_name)
+            print("Скоригований file_path:", file_path)  # Перевірка шляху
+
+            # Записуємо текст у файл
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(formatted_text)
+
+            send_file_to_all_users(file_path)
+            print("Файл успішно відправлено користувачам.")
+        else:
             print("Немає важливих подій для вказаного періоду.")
-            return None
-
-        # Налаштування відображення всіх колонок і рядків для кращого вигляду
-        pd.set_option('display.max_columns', None)
-        pd.set_option('display.width', None)
-
-        return important_events
 
     except Exception as e:
         print(f"Error: {e}")
-        return None
 
 
-# Використання функції для отримання важливих подій
-important_events = get_important_economic_events(from_date='27/10/2024', to_date='03/11/2024')
-
-# Перевірка і вивід результатів
-if important_events is not None:
-    print(important_events)
-else:
-    print("Подій не знайдено або виникла помилка.")
-
-
-def schedule_signal_updates(hour: int = 22, minute: int = 5):
-    # Використовуємо часову зону Eastern Time (US/Eastern)
-    timezone = pytz.timezone('America/Chicago')
-
-    # Створюємо планувальник
-    scheduler = BackgroundScheduler(timezone=timezone)
-
-    # Додаємо завдання для запуску функції signals_auto_update в конкретний час
-    scheduler.add_job(get_important_economic_events, 'cron', hour=hour, minute=minute)
-
-    # Запускаємо планувальник
-    scheduler.start()
-    print(f"Планувальник запущено. Сигнали будуть оновлюватися щодня о {hour:02d}:{minute:02d}.")

@@ -7,7 +7,7 @@ from developer_functions.general_dev.signals_calc import process_assets_from_fil
 from language_state import language_state
 
 
-def signals_auto_update():
+def all_signals_calc_run():
 
     language = language_state().rstrip('\n')
 
@@ -35,7 +35,7 @@ def signals_auto_update():
         send_message_to_all_users("New signals are in! View the updated list of signals!")
 
 
-def schedule_signal_updates(hour: int = 22, minute: int = 35):
+def schedule_func_call(func, hour: int = 22, minute: int = 35):
     # Використовуємо часову зону Eastern Time (US/Eastern)
     timezone = pytz.timezone('America/Chicago')
 
@@ -43,10 +43,10 @@ def schedule_signal_updates(hour: int = 22, minute: int = 35):
     scheduler = BackgroundScheduler(timezone=timezone)
 
     # Додаємо завдання для запуску функції signals_auto_update в конкретний час
-    scheduler.add_job(signals_auto_update, 'cron', hour=hour, minute=minute)
+    scheduler.add_job(func, 'cron', hour=hour, minute=minute)
 
     # Запускаємо планувальник
     scheduler.start()
-    print(f"Планувальник запущено. Сигнали будуть оновлюватися щодня о {hour:02d}:{minute:02d}.")
+    print(f"Планувальник запущено. Оновлення о: {hour:02d}:{minute:02d}.")
 
 

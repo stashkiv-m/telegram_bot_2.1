@@ -6,9 +6,8 @@ from telegram import Bot
 import os
 import json
 
-from language_state import language_state
 
-Telegram_token = '7721716265:AAEuzhZyZM_pT0FQHsbx-FziENEg-cNT5do'
+Telegram_token = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
 
 
 def send_message_to_all_users(message: str):
@@ -110,3 +109,51 @@ def send_image_to_all_users():
             except Exception as e:
                 print(f"Не вдалося надіслати зображення користувачу {user_id}. Помилка: {e}")
 
+
+def send_file_to_all_users(file_path: str):
+    """
+    Надсилає файл усім користувачам зі списку в Google Sheets.
+    """
+    # 1. Для сервера:
+    credentials_json = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+    credentials_data = json.loads(credentials_json)
+
+
+    # Вкажіть шлях до JSON-файлу з обліковими даними
+    # local_credentials_path = 'C:/Users/Mykhailo/PycharmProjects/telegram_bot_2.1/general/general_data_base/telegram-bot-user-list-79452f202a61.json'
+    # with open(local_credentials_path, 'r') as file:
+    #     credentials_data = json.load(file)
+
+    # Налаштування Google Sheets API
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_data, scope)
+    client = gspread.authorize(creds)
+
+    # Отримання доступу до таблиці за її ID
+    sheet = client.open_by_key('1nZv5QBo_excPo402Ul-a278hyB2-rQbYfqlCcHu-524')
+    worksheet = sheet.get_worksheet(0)  # Отримання першого аркуша таблиці
+
+    # Ініціалізація бота з вашим токеном
+    bot = Bot(token='7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY')  # Замість 'YOUR_BOT_TOKEN' вкажіть ваш токен
+
+    # Зберігаємо унікальні User ID
+    unique_user_ids = set()
+
+    # Читаємо дані користувачів з Google Таблиці
+    users_data = worksheet.get_all_records()
+    for row in users_data:
+        user_id = row.get('ID')
+        if user_id and user_id not in unique_user_ids:
+            # Додаємо user_id до множини унікальних ID
+            unique_user_ids.add(user_id)
+
+            # Відправляємо файл користувачу
+            try:
+                with open(file_path, 'rb') as file:
+                    bot.send_document(chat_id=user_id, document=file)
+                print(f"Файл надіслано користувачу {user_id}")
+            except Exception as e:
+                print(f"Не вдалося надіслати файл користувачу {user_id}. Помилка: {e}")
+
+# Викликайте функцію так:
+# send_file_to_all_users(file_path)

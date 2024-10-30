@@ -4,11 +4,12 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackContex
 
 from buttoms_and_function_call import *
 from developer_functions.general_dev.send_signal_to_user import signal_list_for_user
+from general.send_information_to_users import send_important_economic_events
 from general.universal_functions import symbol_info
 from general.user_list import  add_user_activity
 from keyboards import *
 from language_state import update_language_state, language_state
-from run_all_siganlas_calc import schedule_signal_updates
+from run_all_siganlas_calc import schedule_func_call, all_signals_calc_run
 from state_update_menu import update_menu_state
 from telegram.ext import CallbackContext
 
@@ -165,8 +166,8 @@ def main():
         update_menu_state('crypto_signals')
         signal_list_for_user(update, context)
 
-    schedule_signal_updates()
-
+    schedule_func_call(all_signals_calc_run, 21, 45)
+    schedule_func_call(send_important_economic_events, 7, 30)
 
 
     # Register command handlers

@@ -1,0 +1,17 @@
+29/10 09:00 - CB Consumer Confiden Fcst: 99.5 Prev: 99.2
+29/10 09:00 - JOLTS Job Openings   Fcst: 7.980M Prev: 7.861M
+30/10 07:15 - ADP Nonfarm Employme Fcst: 101K Prev: 143K
+30/10 07:30 - GDP (QoQ)  (Q3) Fcst: 3.0% Prev: 3.0%
+30/10 09:30 - Crude Oil Inventorie Fcst: N/A Prev: 5.474M
+31/10 07:30 - Core PCE Price Index Fcst: 0.3% Prev: 0.1%
+31/10 07:30 - Core PCE Price Index Fcst: N/A Prev: 2.7%
+31/10 07:30 - Initial Jobless Clai Fcst: 231K Prev: 227K
+31/10 08:45 - Chicago PMI  (Oct) Fcst: 47.1 Prev: 46.6
+01/11 07:30 - Average Hourly Earni Fcst: 0.3% Prev: 0.4%
+01/11 07:30 - Nonfarm Payrolls  (O Fcst: 111K Prev: 254K
+01/11 07:30 - Unemployment Rate  ( Fcst: 4.1% Prev: 4.1%
+01/11 08:45 - S&P Global US Manufa Fcst: 47.9 Prev: 47.8
+01/11 09:00 - ISM Manufacturing PM Fcst: 47.5 Prev: 47.2
+01/11 09:00 - ISM Manufacturing Pr Fcst: 48.9 Prev: 48.3
+
+* All times are in Eastern Standard Time (EST)
