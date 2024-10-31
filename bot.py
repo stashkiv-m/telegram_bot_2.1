@@ -4,7 +4,7 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackContex
 
 from buttoms_and_function_call import *
 from developer_functions.general_dev.send_signal_to_user import signal_list_for_user
-from general.send_information_to_users import send_important_economic_events
+from general.daily_information import get_important_economic_events
 from general.universal_functions import symbol_info
 from general.user_list import  add_user_activity
 from keyboards import *
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Token for your bot (ensure to keep this token private in real-world applications)
 
-TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
+TOKEN = '7721716265:AAEuzhZyZM_pT0FQHsbx-FziENEg-cNT5do'
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -167,8 +167,7 @@ def main():
         signal_list_for_user(update, context)
 
     schedule_func_call(all_signals_calc_run, 22, 54)
-    schedule_func_call(send_important_economic_events, 7, 30)
-
+    schedule_func_call(get_important_economic_events, 7, 30)
 
     # Register command handlers
     dp.add_handler(CommandHandler("start", start))

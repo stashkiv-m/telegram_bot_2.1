@@ -7,7 +7,8 @@ from developer_functions.general_dev.massage_and_img_send import send_file_to_al
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def send_important_economic_events(country='United States'):
+def get_important_economic_events(country='United States'):
+    print('send_important_economic_events запущено' )
     try:
         today = datetime.today()
         future_date = (today + timedelta(days=3)).strftime('%d/%m/%Y')
@@ -54,7 +55,7 @@ def send_important_economic_events(country='United States'):
                 "Please check the details below to stay informed about key economic events.\n\n"
             )
             send_message_to_all_users(formatted_massage)
-            file_name = f"Important economic_events_{today.strftime('%Y-%m-%d')}.txt"
+            file_name = f"Important economic_events_{today.strftime('%Y%m%d')}.txt"
             file_path = os.path.join(BASE_DIR, 'developer_functions', 'stock_dev', file_name)
             print("Скоригований file_path:", file_path)  # Перевірка шляху
 
@@ -69,5 +70,3 @@ def send_important_economic_events(country='United States'):
 
     except Exception as e:
         print(f"Error: {e}")
-
-

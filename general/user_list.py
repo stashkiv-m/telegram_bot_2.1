@@ -3,15 +3,16 @@ import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-# Використовуйте лише один з варіантів:
-# 1. Для сервера:
-credentials_json = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
-credentials_data = json.loads(credentials_json)
-
-# 2. Для локального запуску:
-# local_credentials_path = 'C:/Users/Mykhailo/PycharmProjects/telegram_bot_2.1/general/general_data_base/telegram-bot-user-list-79452f202a61.json'
-# with open(local_credentials_path, 'r') as file:
-#     credentials_data = json.load(file)
+# Перевірка режиму запуску (сервер або локально)
+if os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON'):
+    # Використовується на сервері
+    credentials_json = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+    credentials_data = json.loads(credentials_json)
+else:
+    # Локальний запуск
+    local_credentials_path = 'C:/Users/Mykhailo/PycharmProjects/telegram_bot_2.1/general/general_data_base/telegram-bot-user-list-79452f202a61.json'
+    with open(local_credentials_path, 'r') as file:
+        credentials_data = json.load(file)
 
 # Налаштування Google Sheets API
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]

@@ -1,25 +1,28 @@
-import random
-
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from telegram import Bot
 import os
 import json
+import random
 
+# Ініціалізація глобальних змінних
+bot = None
+worksheet = None
 
-Telegram_token = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
+def initialize_bot_and_sheet():
 
+    global bot, worksheet
 
-def send_message_to_all_users(message: str):
-    # Використовуйте лише один з варіантів:
-    # 1. Для сервера:
-    credentials_json = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
-    credentials_data = json.loads(credentials_json)
-
-    # 2. Для локального запуску:
-    # local_credentials_path = 'C:/Users/Mykhailo/PycharmProjects/telegram_bot_2.1/general/general_data_base/telegram-bot-user-list-79452f202a61.json'
-    # with open(local_credentials_path, 'r') as file:
-    #     credentials_data = json.load(file)
+    # Налаштування для роботи на сервері або локально
+    if os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON'):
+        # Варіант для сервера
+        credentials_json = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+        credentials_data = json.loads(credentials_json)
+    else:
+        # Варіант для локального запуску
+        local_credentials_path = 'C:/Users/Mykhailo/PycharmProjects/telegram_bot_2.1/general/general_data_base/telegram-bot-user-list-79452f202a61.json'
+        with open(local_credentials_path, 'r') as file:
+            credentials_data = json.load(file)
 
     # Налаштування Google Sheets API
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -30,68 +33,37 @@ def send_message_to_all_users(message: str):
     sheet = client.open_by_key('1nZv5QBo_excPo402Ul-a278hyB2-rQbYfqlCcHu-524')
     worksheet = sheet.get_worksheet(0)  # Отримання першого аркуша таблиці
 
-    # Ініціалізація бота з вашим токеном
-    bot = Bot(token='7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY')  # замініть на ваш токен
+    # Ініціалізація бота з токеном
+    bot_token = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
+    bot = Bot(token=bot_token)
 
-    # Зберігаємо унікальні User ID
+# Викликаємо функцію ініціалізації на початку
+initialize_bot_and_sheet()
+
+def send_message_to_all_users(message: str):
     unique_user_ids = set()
-
-    # Читаємо дані користувачів з Google Таблиці
     users_data = worksheet.get_all_records()
     for row in users_data:
         user_id = row.get('ID')
         if user_id and user_id not in unique_user_ids:
-            # Додаємо user_id до множини унікальних ID
             unique_user_ids.add(user_id)
-
-            # Відправляємо повідомлення користувачу
             try:
                 bot.send_message(chat_id=user_id, text=message)
                 print(f"Повідомлення надіслано користувачу {user_id}")
             except Exception as e:
                 print(f"Не вдалося надіслати повідомлення користувачу {user_id}. Помилка: {e}")
 
-
 def send_image_to_all_users():
-
-    # Використовуйте лише один з варіантів:
-    # 1. Для сервера:
-    credentials_json = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
-    credentials_data = json.loads(credentials_json)
-
-    # 2. Для локального запуску:
-    # local_credentials_path = 'C:/Users/Mykhailo/PycharmProjects/telegram_bot_2.1/general/general_data_base/telegram-bot-user-list-79452f202a61.json'
-    # with open(local_credentials_path, 'r') as file:
-    #     credentials_data = json.load(file)
-
-    # Налаштування Google Sheets API
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_data, scope)
-    client = gspread.authorize(creds)
-
-    # Отримання доступу до таблиці за її ID
-    sheet = client.open_by_key('1nZv5QBo_excPo402Ul-a278hyB2-rQbYfqlCcHu-524')
-    worksheet = sheet.get_worksheet(0)  # Отримання першого аркуша таблиці
-
-    # Ініціалізація бота з вашим токеном
-    bot = Bot(token='7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY')  # замініть на ваш токен
-
-    # Зберігаємо унікальні User ID
     unique_user_ids = set()
-
-    # Читаємо дані користувачів з Google Таблиці
     users_data = worksheet.get_all_records()
     for row in users_data:
         user_id = row.get('ID')
         if user_id and user_id not in unique_user_ids:
-            # Додаємо user_id до множини унікальних ID
             unique_user_ids.add(user_id)
 
             # Вибираємо рандомне зображення з папки
             base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
             img_folder = os.path.join(base_dir, 'img', 'exchange_img')
-            print(f"Папка зображень: {img_folder}")  # Додано для відлагодження
-
             try:
                 images = [f for f in os.listdir(img_folder) if os.path.isfile(os.path.join(img_folder, f))]
                 if images:
@@ -109,51 +81,16 @@ def send_image_to_all_users():
             except Exception as e:
                 print(f"Не вдалося надіслати зображення користувачу {user_id}. Помилка: {e}")
 
-
 def send_file_to_all_users(file_path: str):
-    """
-    Надсилає файл усім користувачам зі списку в Google Sheets.
-    """
-    # 1. Для сервера:
-    credentials_json = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
-    credentials_data = json.loads(credentials_json)
-
-
-    # Вкажіть шлях до JSON-файлу з обліковими даними
-    # local_credentials_path = 'C:/Users/Mykhailo/PycharmProjects/telegram_bot_2.1/general/general_data_base/telegram-bot-user-list-79452f202a61.json'
-    # with open(local_credentials_path, 'r') as file:
-    #     credentials_data = json.load(file)
-
-    # Налаштування Google Sheets API
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_data, scope)
-    client = gspread.authorize(creds)
-
-    # Отримання доступу до таблиці за її ID
-    sheet = client.open_by_key('1nZv5QBo_excPo402Ul-a278hyB2-rQbYfqlCcHu-524')
-    worksheet = sheet.get_worksheet(0)  # Отримання першого аркуша таблиці
-
-    # Ініціалізація бота з вашим токеном
-    bot = Bot(token='7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY')  # Замість 'YOUR_BOT_TOKEN' вкажіть ваш токен
-
-    # Зберігаємо унікальні User ID
     unique_user_ids = set()
-
-    # Читаємо дані користувачів з Google Таблиці
     users_data = worksheet.get_all_records()
     for row in users_data:
         user_id = row.get('ID')
         if user_id and user_id not in unique_user_ids:
-            # Додаємо user_id до множини унікальних ID
             unique_user_ids.add(user_id)
-
-            # Відправляємо файл користувачу
             try:
                 with open(file_path, 'rb') as file:
                     bot.send_document(chat_id=user_id, document=file)
                 print(f"Файл надіслано користувачу {user_id}")
             except Exception as e:
                 print(f"Не вдалося надіслати файл користувачу {user_id}. Помилка: {e}")
-
-# Викликайте функцію так:
-# send_file_to_all_users(file_path)
