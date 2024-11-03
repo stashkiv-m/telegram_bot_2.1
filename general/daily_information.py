@@ -54,32 +54,45 @@ def get_market_indicators_price_changes():
         return f"Error fetching market indicators: {e}"
 
 
+import investpy
+from datetime import datetime, timedelta
+
+
 def get_economic_events(country='United States', days_ahead=5):
     """Fetches high-importance economic events for a specified country and period."""
     try:
+        # Форматування дат
         today = datetime.today()
         from_date = today.strftime('%d/%m/%Y')
         to_date = (today + timedelta(days=days_ahead)).strftime('%d/%m/%Y')
 
         print(f"Fetching economic events from {from_date} to {to_date} for {country}.")
 
+        # Отримання економічного календаря
         calendar = investpy.news.economic_calendar(
             countries=[country],
             from_date=from_date,
             to_date=to_date
         )
 
-        if calendar.empty:
+        # Перевірка, чи є дані
+        if calendar is None or calendar.empty:
             print(f"No economic events found from {from_date} to {to_date}.")
             return "No important events for the specified period."
 
+        # Відбір подій з високою важливістю
         important_events = calendar[calendar['importance'] == 'high'][['date', 'time', 'event', 'forecast', 'previous']]
-        important_events['date'] = important_events['date'].apply(lambda d: datetime.strptime(d, '%d/%m/%Y').strftime('%d/%m'))
 
+        # Переформатування дат
+        important_events['date'] = important_events['date'].apply(
+            lambda d: datetime.strptime(d, '%d/%m/%Y').strftime('%d/%m'))
+
+        # Перевірка, чи є події з високою важливістю
         if important_events.empty:
             print("No high-importance events found.")
             return "No high-importance events for the specified period."
 
+        # Створення тексту для повідомлення
         lines = [
             f"Economic Events ({from_date} - {to_date})",
             "Date      | Time     | Event                           | Forecast   | Previous",
@@ -88,8 +101,8 @@ def get_economic_events(country='United States', days_ahead=5):
 
         for _, row in important_events.iterrows():
             event = (row['event'][:30] + '...') if len(row['event']) > 30 else row['event']
-            forecast = row['forecast'] or "N/A"
-            previous = row['previous'] or "N/A"
+            forecast = row['forecast'] if row['forecast'] else "N/A"
+            previous = row['previous'] if row['previous'] else "N/A"
             lines.append(f"{row['date']:<9} | {row['time']:<8} | {event:<30} | {forecast:<10} | {previous:<10}")
 
         lines.append("\n* All times are in Eastern Standard Time (EST)")
@@ -101,6 +114,7 @@ def get_economic_events(country='United States', days_ahead=5):
     except Exception as e:
         print(f"Unexpected error: {e}")
         return f"Error fetching events: {e}"
+
 
 def clear_folder(folder_path):
     """Removes all files from a specified folder."""
@@ -240,3 +254,4 @@ def send_day_end_info():
 
 
 send_daily_events()
+send_day_end_info()
