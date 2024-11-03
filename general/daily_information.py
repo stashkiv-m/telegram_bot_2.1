@@ -107,9 +107,7 @@ def clear_folder(folder_path):
         except Exception as e:
             print(f"Error deleting {file_path}: {e}")
 
-import os
-from PIL import ImageFont, ImageDraw, Image
-from datetime import datetime
+
 
 def clear_folder(folder_path):
     """Clears all files in the given folder."""
@@ -255,4 +253,4 @@ def send_day_end_info():
         send_image_to_all_users(result_path)
 
 # send_day_end_info()
-# send_daily_events()
+send_daily_events()
