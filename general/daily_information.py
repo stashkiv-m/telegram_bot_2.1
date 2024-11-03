@@ -56,40 +56,32 @@ def get_market_indicators_price_changes():
 
 
 def get_economic_events(country='United States', days_ahead=4):
-    """Fetches high-importance economic events for a specified country and period."""
     try:
-        # Форматування дат
         today = datetime.today()
         from_date = today.strftime('%d/%m/%Y')
         to_date = (today + timedelta(days=days_ahead)).strftime('%d/%m/%Y')
-
         print(f"Fetching economic events from {from_date} to {to_date} for {country}.")
 
-        # Отримання економічного календаря
         calendar = investpy.news.economic_calendar(
             countries=[country],
             from_date=from_date,
             to_date=to_date
         )
+        print(calendar.head())  # Додайте це для перевірки структури даних
+        # print(f"Calendar data fetched: {calendar}")
 
-        # Перевірка, чи є дані
         if calendar is None or calendar.empty:
             print(f"No economic events found from {from_date} to {to_date}.")
             return "No important events for the specified period."
 
-        # Відбір подій з високою важливістю
         important_events = calendar[calendar['importance'] == 'high'][['date', 'time', 'event', 'forecast', 'previous']]
-
-        # Переформатування дат
         important_events['date'] = important_events['date'].apply(
             lambda d: datetime.strptime(d, '%d/%m/%Y').strftime('%d/%m'))
 
-        # Перевірка, чи є події з високою важливістю
         if important_events.empty:
             print("No high-importance events found.")
             return "No high-importance events for the specified period."
 
-        # Створення тексту для повідомлення
         lines = [
             f"Economic Events ({from_date} - {to_date})",
             "Date      | Time     | Event                           | Forecast   | Previous",
