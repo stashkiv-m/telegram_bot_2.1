@@ -253,4 +253,4 @@ def send_day_end_info():
         send_image_to_all_users(result_path)
 
 # send_day_end_info()
-send_daily_events()
+# send_daily_events()
