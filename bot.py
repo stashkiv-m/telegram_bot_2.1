@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 # Token for your bot (ensure to keep this token private in real-world applications)
 
-TOKEN = '7721716265:AAEuzhZyZM_pT0FQHsbx-FziENEg-cNT5do'
+TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
 
 
 def start(update: Update, context: CallbackContext) -> None:

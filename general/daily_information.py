@@ -4,7 +4,8 @@ from datetime import timedelta, datetime
 import investpy
 import yfinance as yf
 from developer_functions.general_dev.massage_and_img_send import send_message_to_all_users, send_image_to_all_users
-
+import time
+import requests
 
 def get_market_indicators_price_changes():
     """Fetches price and percentage changes for major market indicators including stocks, forex, metals, and commodities."""
@@ -251,7 +252,7 @@ def test_get_economic_events_output(country='United States', days_ahead=4):
         print(f"Unexpected error: {e}")
 
 
-import time
+
 
 
 def get_calendar_with_retry(country='United States', days_ahead=4, retries=3):
@@ -260,6 +261,10 @@ def get_calendar_with_retry(country='United States', days_ahead=4, retries=3):
     today = datetime.today()
     from_date = today.strftime('%d/%m/%Y')
     to_date = (today + timedelta(days=days_ahead)).strftime('%d/%m/%Y')
+
+    response = requests.get('https://www.investing.com/economic-calendar/')
+    print(f"Status code: {response.status_code}")
+    print(f"Response content: {response.text[:500]}")  # Вивести перші 500 символів відповіді
 
     for attempt in range(retries):
         try:
