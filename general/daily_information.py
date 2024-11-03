@@ -54,10 +54,6 @@ def get_market_indicators_price_changes():
         return f"Error fetching market indicators: {e}"
 
 
-import investpy
-from datetime import datetime, timedelta
-
-
 def get_economic_events(country='United States', days_ahead=3):
     """Fetches high-importance economic events for a specified country and period."""
     try:
@@ -126,6 +122,7 @@ def clear_folder(folder_path):
                 print(f"Deleted file: {file_path}")
         except Exception as e:
             print(f"Error deleting {file_path}: {e}")
+
 
 def clear_folder(folder_path):
     """Removes all files from a specified folder."""
