@@ -58,7 +58,7 @@ def get_market_indicators_price_changes():
         return f"Error fetching market indicators: {e}"
 
 # Використання функції для отримання даних
-print(get_market_indicators_price_changes())
+# print(get_market_indicators_price_changes())
 
 
 def get_economic_events(country='United States', days_ahead=5):
@@ -107,28 +107,48 @@ def clear_folder(folder_path):
         except Exception as e:
             print(f"Error deleting {file_path}: {e}")
 
+import os
+from PIL import ImageFont, ImageDraw, Image
+from datetime import datetime
+
+def clear_folder(folder_path):
+    """Clears all files in the given folder."""
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(f"Failed to delete {file_path}. Reason: {e}")
+
 def overlay_text_on_image(table_text, image_path, output_folder, initial_font_size=25, padding=10):
     """Overlays formatted table text on an image, aligning columns dynamically and adjusting for image size."""
     os.makedirs(output_folder, exist_ok=True)
     clear_folder(output_folder)
 
     try:
+        # Відображаємо шлях до файлу шрифту для перевірки
+        font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fonts', 'arial.ttf')
+        print(f"Path to font: {font_path}")
+
+        # Перевіряємо, чи завантажується шрифт
+        try:
+            font = ImageFont.truetype(font_path, initial_font_size)
+            print("Font loaded successfully.")
+        except IOError as e:
+            print(f"Font not found at {font_path}. Using default font. Error: {e}")
+            font = ImageFont.load_default()
+
         with Image.open(image_path) as img:
+            print("Image opened successfully.")
             draw = ImageDraw.Draw(img)
             img_width, img_height = img.size
 
-            # Load font and dynamically adjust size if necessary
-            try:
-                font = ImageFont.truetype("arial.ttf", initial_font_size)
-            except IOError:
-                print("Font 'arial.ttf' not found, using default font.")
-                font = ImageFont.load_default()
-
-            # Split text into lines and columns for processing
+            # Розбиваємо текст на рядки та колонки для обробки
             lines = table_text.split('\n')
             columns = [line.split('|') for line in lines if '|' in line]
 
-            # Calculate max column widths
+            # Розрахунок максимальної ширини колонок
             num_columns = len(columns[0])
             col_widths = [0] * num_columns
 
@@ -137,25 +157,29 @@ def overlay_text_on_image(table_text, image_path, output_folder, initial_font_si
                     draw.textbbox((0, 0), col[col_idx].strip(), font=font)[2] for col in columns
                 )
 
-            # Adjust column widths and font size to fit the image width
+            # Регулюємо розмір шрифту, якщо ширина тексту перевищує ширину зображення
             while sum(col_widths) + padding * (num_columns - 1) > img_width:
                 initial_font_size -= 1
-                font = ImageFont.truetype("arial.ttf", initial_font_size) if initial_font_size > 10 else ImageFont.load_default()
+                if initial_font_size <= 10:  # Мінімальний розмір шрифту
+                    font = ImageFont.load_default()
+                    print("Reached minimum font size. Using default font.")
+                    break
+                font = ImageFont.truetype(font_path, initial_font_size)
                 col_widths = [max(
                     draw.textbbox((0, 0), col[col_idx].strip(), font=font)[2] for col in columns
                 ) for col_idx in range(num_columns)]
 
-            # Calculate starting x position and center the table on the image
+            # Обчислюємо початкову позицію x для центрування таблиці
             total_table_width = sum(col_widths) + padding * (num_columns - 1)
             start_x = (img_width - total_table_width) // 2
             y_position = (img_height - len(lines) * (initial_font_size + padding)) // 2
 
-            # Draw each line of the table
+            # Малюємо кожен рядок таблиці
             for line in columns:
                 x_position = start_x
                 for col, max_width in zip(line, col_widths):
                     col = col.strip()
-                    # Truncate text if it exceeds the column width
+                    # Обрізаємо текст, якщо він виходить за межі колонки
                     while draw.textbbox((0, 0), col, font=font)[2] > max_width:
                         col = col[:-1] + "…"
                     draw.text((x_position, y_position), col, font=font, fill="white")
@@ -164,11 +188,14 @@ def overlay_text_on_image(table_text, image_path, output_folder, initial_font_si
 
             output_image_path = os.path.join(output_folder, f"market_overview_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
             img.save(output_image_path)
+            print(f"Image saved at: {output_image_path}")
+
             return output_image_path
 
     except Exception as e:
         print(f"Error creating image: {e}")
         return None
+
 
 
 def send_daily_events():
@@ -213,10 +240,19 @@ def send_day_end_info():
                         "tomorrow. Stay strong! 🔥")
     # Надсилаємо мотиваційне повідомлення всім користувачам
     send_message_to_all_users(post_market_text)
-    # Отримуємо текст з інформацією про ринкові зміни
-    events_text = get_market_indicators_price_changes()
+        # Отримуємо текст з інформацією про ринкові зміни
     # Створюємо зображення з текстом та зберігаємо у вихідній папці
+
+    events_text = get_market_indicators_price_changes()
+    print(f"Events text: {events_text}")
+    if not events_text or events_text == "No important events for the specified period.":
+        print("No events available or the text is empty.")
+        return
+
     result_path = overlay_text_on_image(events_text, input_image_path, OUTPUT_FOLDER)
     # Надсилаємо зображення всім користувачам
     if result_path:
         send_image_to_all_users(result_path)
+
+# send_day_end_info()
+# send_daily_events()
