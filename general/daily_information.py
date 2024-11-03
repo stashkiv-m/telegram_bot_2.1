@@ -68,7 +68,7 @@ def get_economic_events(country='United States', days_ahead=4):
             to_date=to_date
         )
         print(calendar.head())  # Додайте це для перевірки структури даних
-        # print(f"Calendar data fetched: {calendar}")
+        print(f"Calendar data fetched: {calendar}")
 
         if calendar is None or calendar.empty:
             print(f"No economic events found from {from_date} to {to_date}.")
@@ -117,25 +117,20 @@ def clear_folder(folder_path):
             print(f"Error deleting {file_path}: {e}")
 
 
+from PIL import Image, ImageDraw, ImageFont
+import os
+from datetime import datetime
+
 
 def overlay_text_on_image(table_text, image_path, output_folder, initial_font_size=25, padding=10):
     """Overlays formatted table text on an image, aligning columns dynamically and adjusting for image size."""
     os.makedirs(output_folder, exist_ok=True)
-    clear_folder(output_folder)
 
     try:
-        font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fonts', 'arial.ttf')
-        print(f"Path to font: {font_path}")
-
-        if not os.path.exists(font_path):
-            print("Font file does not exist at the specified path!")
-
-        try:
-            font = ImageFont.truetype(font_path, initial_font_size)
-            print("Font loaded successfully.")
-        except IOError as e:
-            print(f"Font not found at {font_path}. Using default font. Error: {e}")
-            font = ImageFont.load_default()
+        # Використання шрифту DejaVuSans-Bold
+        font_path = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+        font = ImageFont.truetype(font_path, initial_font_size)
+        print(f"Custom font loaded from {font_path}.")
 
         with Image.open(image_path) as img:
             print("Image opened successfully.")
@@ -183,7 +178,8 @@ def overlay_text_on_image(table_text, image_path, output_folder, initial_font_si
                     x_position += max_width + padding
                 y_position += initial_font_size + padding
 
-            output_image_path = os.path.join(output_folder, f"market_overview_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+            output_image_path = os.path.join(output_folder,
+                                             f"market_overview_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
             img.save(output_image_path)
             print(f"Image saved at: {output_image_path}")
 
@@ -192,6 +188,7 @@ def overlay_text_on_image(table_text, image_path, output_folder, initial_font_si
     except Exception as e:
         print(f"Error creating image: {e}")
         return None
+
 
 def send_daily_events():
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
