@@ -41,9 +41,10 @@ def schedule_func_call(func, hour: int = 22, minute: int = 35):
 
     # Створюємо планувальник
     scheduler = BackgroundScheduler(timezone=timezone)
-
+    # Додаємо завдання для запуску функції щодня у вказаний час
+    scheduler.add_job(func, 'cron', hour=hour, minute=minute)
     # Додаємо завдання для запуску функції у конкретний час з понеділка по п'ятницю
-    scheduler.add_job(func, 'cron', hour=hour, minute=minute, day_of_week='mon-fri')
+    # scheduler.add_job(func, 'cron', hour=hour, minute=minute, day_of_week='mon-fri')
 
     # Запускаємо планувальник
     scheduler.start()
