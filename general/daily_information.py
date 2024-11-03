@@ -58,7 +58,7 @@ import investpy
 from datetime import datetime, timedelta
 
 
-def get_economic_events(country='United States', days_ahead=5):
+def get_economic_events(country='United States', days_ahead=3):
     """Fetches high-importance economic events for a specified country and period."""
     try:
         # Форматування дат
