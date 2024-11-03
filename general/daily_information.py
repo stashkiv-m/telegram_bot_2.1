@@ -53,6 +53,7 @@ def get_market_indicators_price_changes():
         print(f"Error fetching market indicators: {e}")
         return f"Error fetching market indicators: {e}"
 
+
 def get_economic_events(country='United States', days_ahead=5):
     """Fetches high-importance economic events for a specified country and period."""
     try:
@@ -187,6 +188,7 @@ def send_daily_events():
                        "today. Stay sharp, stay confident, and trade wisely. Good luck! 💪")
     send_message_to_all_users(pre_market_text)
     events_text = get_economic_events()
+    print(events_text)
     print(f"Events text: {events_text}")
     if not events_text or events_text == "No important events for the specified period.":
         print("No events available or the text is empty.")
@@ -214,3 +216,6 @@ def send_day_end_info():
     result_path = overlay_text_on_image(events_text, input_image_path, output_folder)
     if result_path:
         send_image_to_all_users(result_path)
+
+
+send_daily_events()
