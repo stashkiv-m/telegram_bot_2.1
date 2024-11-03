@@ -1,72 +1,117 @@
+from PIL import Image, ImageDraw, ImageFont
 import os
 from datetime import datetime, timedelta
 import investpy
-from developer_functions.general_dev.massage_and_img_send import send_file_to_all_users, send_message_to_all_users
 
-# Базова директорія для збереження файлів
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-def get_important_economic_events(country='United States'):
-    print('send_important_economic_events запущено' )
+def get_economic_events(country='United States', days_ahead=5):
+    """Fetches high-importance economic events for a specified country and period."""
     try:
         today = datetime.today()
-        future_date = (today + timedelta(days=3)).strftime('%d/%m/%Y')
-        today_str = today.strftime('%d/%m/%Y')
-
+        from_date = today.strftime('%d/%m/%Y')
+        to_date = (today + timedelta(days=days_ahead)).strftime('%d/%m/%Y')
         calendar = investpy.news.economic_calendar(
             countries=[country],
-            from_date=today_str,
-            to_date=future_date
+            from_date=from_date,
+            to_date=to_date
         )
 
-        # Видаляємо колонку 'actual' для оптимізації
-        important_events = calendar[calendar['importance'] == 'high']
-        important_events = important_events[['date', 'time', 'event', 'forecast', 'previous']]
+        if calendar.empty:
+            return "No important events for the specified period."
 
-        def format_date(date_str):
-            # Форматуємо дату у форматі 'день/місяць'
-            event_date = datetime.strptime(date_str, '%d/%m/%Y')
-            return event_date.strftime('%d/%m')
+        important_events = calendar[calendar['importance'] == 'high'][['date', 'time', 'event', 'forecast', 'previous']]
+        important_events['date'] = important_events['date'].apply(lambda d: datetime.strptime(d, '%d/%m/%Y').strftime('%d/%m'))
 
-        important_events['date'] = important_events['date'].apply(format_date)
+        lines = [
+            f"Economic Events ({from_date} - {to_date})",
+            "Date      | Time     | Event                           | Forecast   | Previous",
+            "-" * 80
+        ]
 
-        if not important_events.empty:
-            # Замість таблиці, виводимо інформацію простим текстом
-            event_lines = []
-            for _, row in important_events.iterrows():
-                event_text = row['event'][:20]  # Обрізаємо текст події до 20 символів
-                forecast_text = f"Fcst: {row['forecast']}" if row['forecast'] else "Fcst: N/A"
-                previous_text = f"Prev: {row['previous']}" if row['previous'] else "Prev: N/A"
+        for _, row in important_events.iterrows():
+            event = (row['event'][:30] + '...') if len(row['event']) > 30 else row['event']
+            forecast = row['forecast'] or "N/A"
+            previous = row['previous'] or "N/A"
+            lines.append(f"{row['date']:<9} | {row['time']:<8} | {event:<30} | {forecast:<10} | {previous:<10}")
 
-                # Форматуємо кожен рядок без розділення колонок
-                line = f"{row['date']} {row['time']} - {event_text} {forecast_text} {previous_text}"
-                event_lines.append(line)
-
-            # Додаємо заголовок для інформативності
-            formatted_text = f"Economic Events for {today_str}\n\n" + "\n".join(event_lines)
-
-            # Додаємо інформацію про часовий пояс
-            formatted_text += "\n\n* All times are in Eastern Standard Time (EST)"
-
-            # Формуємо шлях до файлу з поточною датою
-            formatted_massage = (
-                f"Important Economic Events for {today_str}\n\n"
-                "Please check the details below to stay informed about key economic events.\n\n"
-            )
-            send_message_to_all_users(formatted_massage)
-            file_name = f"Important economic_events_{today.strftime('%Y%m%d')}.txt"
-            file_path = os.path.join(BASE_DIR, 'developer_functions', 'stock_dev', file_name)
-            print("Скоригований file_path:", file_path)  # Перевірка шляху
-
-            # Записуємо текст у файл
-            with open(file_path, 'w', encoding='utf-8') as f:
-                f.write(formatted_text)
-
-            send_file_to_all_users(file_path)
-            print("Файл успішно відправлено користувачам.")
-        else:
-            print("Немає важливих подій для вказаного періоду.")
+        lines.append("\n* All times are in Eastern Standard Time (EST)")
+        return "\n".join(lines)
 
     except Exception as e:
-        print(f"Error: {e}")
+        return f"Error fetching events: {e}"
+
+def clear_folder(folder_path):
+    """Removes all files from a specified folder."""
+    for file_name in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file_name)
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+        except Exception as e:
+            print(f"Error deleting {file_path}: {e}")
+
+def overlay_text_on_image(text, image_path, output_folder, font_size=25):
+    """Overlays formatted text on an image and aligns it as an Excel-like table."""
+    os.makedirs(output_folder, exist_ok=True)
+    clear_folder(output_folder)
+
+    try:
+        with Image.open(image_path) as img:
+            draw = ImageDraw.Draw(img)
+            img_width, img_height = img.size
+
+            try:
+                font = ImageFont.truetype("arial.ttf", font_size)
+            except IOError:
+                print("Font 'arial.ttf' not found, using default font.")
+                font = ImageFont.load_default()
+
+            # Split lines and create a 2D array for better formatting
+            lines = text.split('\n')
+            columns = [line.split('|') for line in lines]
+
+            # Calculate max width for each column
+            col_widths = []
+            for col_idx in range(len(columns[0])):
+                max_width = max(draw.textbbox((0, 0), col[col_idx].strip(), font=font)[2] for col in columns)
+                col_widths.append(max_width)
+
+            # Calculate total table width for centering
+            total_table_width = sum(col_widths) + (10 * (len(col_widths) - 1))
+            start_x = (img_width - total_table_width) // 2
+            y_position = (img_height - len(lines) * (font_size + 10)) // 2
+
+            for line in columns:
+                x_position = start_x
+                for col, max_width in zip(line, col_widths):
+                    col = col.strip()
+                    draw.text((x_position, y_position), col, font=font, fill="white")
+                    x_position += max_width + 10
+                y_position += font_size + 10
+
+            output_image_path = os.path.join(output_folder, f"market_overview_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+            img.save(output_image_path)
+            return output_image_path
+
+    except Exception as e:
+        print(f"Error creating image: {e}")
+        return None
+
+
+
+
+# Example usage
+if __name__ == "__main__":
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    IMG_FOLDER = os.path.join(BASE_DIR, 'img', 'daily_news')
+    OUTPUT_FOLDER = os.path.join(BASE_DIR, 'img', 'daily_news_output')
+    test_image_path = os.path.join(IMG_FOLDER, 'img1.jpg')
+
+    if os.path.exists(test_image_path):
+        events_text = get_economic_events()
+        result_path = overlay_text_on_image(events_text, test_image_path, OUTPUT_FOLDER)
+        if result_path:
+            print(f"Image created successfully: {result_path}")
+        else:
+            print("Failed to create image.")
+    else:
+        print(f"Test image not found at {test_image_path}.")
