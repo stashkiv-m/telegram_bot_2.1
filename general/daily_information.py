@@ -172,30 +172,51 @@ def overlay_text_on_image(table_text, image_path, output_folder, initial_font_si
 
 
 def send_daily_events():
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    IMG_FOLDER = os.path.join(BASE_DIR, 'img', 'daily_news')
-    OUTPUT_FOLDER = os.path.join(BASE_DIR, 'img', 'daily_news_output')
-    test_image_path = os.path.join(IMG_FOLDER, 'img1.jpg')
-    pre_market_text = ("Preparation is the key to success! 🚀 Here are the important events that could impact the market"
-                       " today. Stay sharp, stay confident, and trade wisely. Good luck! 💪")
-
+    # Отримуємо кореневий каталог проекту
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    # Створюємо шляхи до папок з вхідними та вихідними зображеннями
+    img_folder = os.path.join(base_dir, 'img', 'daily_news')
+    output_folder = os.path.join(base_dir, 'img', 'daily_news_output')
+    # Переконуємось, що папка для вихідних зображень існує
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    # Шлях до вхідного зображення
+    input_image_path = os.path.join(img_folder, 'img1.jpg')
+    # Мотиваційний текст перед торгами
+    pre_market_text = ("Preparation is the key to success! 🚀 Here are the important events that could impact the market "
+                       "today. Stay sharp, stay confident, and trade wisely. Good luck! 💪")
+    # Надсилаємо мотиваційне повідомлення всім користувачам
     send_message_to_all_users(pre_market_text)
+    # Отримуємо текст з інформацією про важливі економічні події
     events_text = get_economic_events()
-    result_path = overlay_text_on_image(events_text, test_image_path, OUTPUT_FOLDER)
-    send_image_to_all_users(result_path)
+    # Створюємо зображення з текстом та зберігаємо у вихідній папці
+    result_path = overlay_text_on_image(events_text, input_image_path, output_folder)
+    # Надсилаємо зображення всім користувачам
+    if result_path:
+        send_image_to_all_users(result_path)
 
 
 def send_day_end_info():
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    # Отримуємо кореневий каталог проекту
+    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    # Створюємо шляхи до папок з вхідними та вихідними зображеннями
     IMG_FOLDER = os.path.join(BASE_DIR, 'img', 'daily_news')
     OUTPUT_FOLDER = os.path.join(BASE_DIR, 'img', 'daily_news_output')
-    test_image_path = os.path.join(IMG_FOLDER, 'end.jpg')
+    # Переконуємось, що папка для вихідних зображень існує
+    if not os.path.exists(OUTPUT_FOLDER):
+        os.makedirs(OUTPUT_FOLDER)
+    # Приклад шляху до вхідного зображення
+    input_image_path = os.path.join(IMG_FOLDER, 'end.jpg')
+    # Мотиваційний текст для кінця дня
     post_market_text = ("🌅 The trading day comes to an end, but every moment is a learning experience. "
                         "Check out today's market changes, reflect, and get ready for new opportunities "
                         "tomorrow. Stay strong! 🔥")
-
+    # Надсилаємо мотиваційне повідомлення всім користувачам
     send_message_to_all_users(post_market_text)
+    # Отримуємо текст з інформацією про ринкові зміни
     events_text = get_market_indicators_price_changes()
-    result_path = overlay_text_on_image(events_text, test_image_path, OUTPUT_FOLDER)
-    send_image_to_all_users(result_path)
-
+    # Створюємо зображення з текстом та зберігаємо у вихідній папці
+    result_path = overlay_text_on_image(events_text, input_image_path, OUTPUT_FOLDER)
+    # Надсилаємо зображення всім користувачам
+    if result_path:
+        send_image_to_all_users(result_path)
