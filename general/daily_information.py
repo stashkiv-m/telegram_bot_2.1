@@ -6,8 +6,10 @@ from developer_functions.general_dev.massage_and_img_send import send_message_to
 import yfinance as yf
 from datetime import datetime
 
+
 def get_market_indicators_price_changes():
-    """Fetches price and percentage changes for major market indicators including stocks, forex, metals, and commodities."""
+    """Fetches price and percentage changes for major market indicators including stocks, forex, metals,
+     and commodities."""
     try:
         # Список основних індикаторів ринку
         market_indicators = {
@@ -97,6 +99,7 @@ def get_economic_events(country='United States', days_ahead=5):
     except Exception as e:
         return f"Error fetching events: {e}"
 
+
 def clear_folder(folder_path):
     """Removes all files from a specified folder."""
     for file_name in os.listdir(folder_path):
@@ -106,6 +109,7 @@ def clear_folder(folder_path):
                 os.remove(file_path)
         except Exception as e:
             print(f"Error deleting {file_path}: {e}")
+
 
 def overlay_text_on_image(table_text, image_path, output_folder, initial_font_size=25, padding=10):
     """Overlays formatted table text on an image, aligning columns dynamically and adjusting for image size."""
@@ -162,7 +166,8 @@ def overlay_text_on_image(table_text, image_path, output_folder, initial_font_si
                     x_position += max_width + padding
                 y_position += initial_font_size + padding
 
-            output_image_path = os.path.join(output_folder, f"market_overview_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+            output_image_path = os.path.join(output_folder,
+                                             f"market_overview_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
             img.save(output_image_path)
 
             return output_image_path
@@ -184,7 +189,8 @@ def send_daily_events():
     # Шлях до вхідного зображення
     input_image_path = os.path.join(img_folder, 'img1.jpg')
     # Мотиваційний текст перед торгами
-    pre_market_text = ("Preparation is the key to success! 🚀 Here are the important events that could impact the market "
+    pre_market_text = ("Preparation is the key to success! 🚀 Here are the important events that "
+                       "could impact the market "
                        "today. Stay sharp, stay confident, and trade wisely. Good luck! 💪")
     # Надсилаємо мотиваційне повідомлення всім користувачам
     send_message_to_all_users(pre_market_text)
