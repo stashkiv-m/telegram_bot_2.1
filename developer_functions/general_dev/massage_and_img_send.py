@@ -34,7 +34,7 @@ def initialize_bot_and_sheet():
     worksheet = sheet.get_worksheet(0)  # Отримання першого аркуша таблиці
 
     # Ініціалізація бота з токеном
-    bot_token = '7721716265:AAEuzhZyZM_pT0FQHsbx-FziENEg-cNT5do'
+    bot_token = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
     bot = Bot(token=bot_token)
 
 # Викликаємо функцію ініціалізації на початку
