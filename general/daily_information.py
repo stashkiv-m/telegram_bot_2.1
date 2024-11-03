@@ -187,7 +187,7 @@ def send_daily_events():
     pre_market_text = ("Preparation is the key to success! 🚀 Here are the important events that could impact the market "
                        "today. Stay sharp, stay confident, and trade wisely. Good luck! 💪")
     send_message_to_all_users(pre_market_text)
-    events_text = get_economic_events()
+    events_text = get_market_indicators_price_changes()
     print(events_text)
     print(f"Events text: {events_text}")
     if not events_text or events_text == "No important events for the specified period.":
