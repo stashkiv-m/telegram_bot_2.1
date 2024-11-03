@@ -60,6 +60,9 @@ def get_economic_events(country='United States', days_ahead=5):
         today = datetime.today()
         from_date = today.strftime('%d/%m/%Y')
         to_date = (today + timedelta(days=days_ahead)).strftime('%d/%m/%Y')
+
+        print(f"Fetching economic events from {from_date} to {to_date} for {country}.")
+
         calendar = investpy.news.economic_calendar(
             countries=[country],
             from_date=from_date,
@@ -67,11 +70,15 @@ def get_economic_events(country='United States', days_ahead=5):
         )
 
         if calendar.empty:
-            print("No economic events found for the specified period.")
+            print(f"No economic events found from {from_date} to {to_date}.")
             return "No important events for the specified period."
 
         important_events = calendar[calendar['importance'] == 'high'][['date', 'time', 'event', 'forecast', 'previous']]
         important_events['date'] = important_events['date'].apply(lambda d: datetime.strptime(d, '%d/%m/%Y').strftime('%d/%m'))
+
+        if important_events.empty:
+            print("No high-importance events found.")
+            return "No high-importance events for the specified period."
 
         lines = [
             f"Economic Events ({from_date} - {to_date})",
@@ -88,9 +95,23 @@ def get_economic_events(country='United States', days_ahead=5):
         lines.append("\n* All times are in Eastern Standard Time (EST)")
         return "\n".join(lines)
 
+    except ValueError as ve:
+        print(f"Value error: {ve}")
+        return f"Error fetching events: {ve}"
     except Exception as e:
-        print(f"Error fetching events: {e}")
+        print(f"Unexpected error: {e}")
         return f"Error fetching events: {e}"
+
+def clear_folder(folder_path):
+    """Removes all files from a specified folder."""
+    for file_name in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file_name)
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}")
+        except Exception as e:
+            print(f"Error deleting {file_path}: {e}")
 
 def clear_folder(folder_path):
     """Removes all files from a specified folder."""
@@ -187,7 +208,7 @@ def send_daily_events():
     pre_market_text = ("Preparation is the key to success! 🚀 Here are the important events that could impact the market "
                        "today. Stay sharp, stay confident, and trade wisely. Good luck! 💪")
     send_message_to_all_users(pre_market_text)
-    events_text = get_market_indicators_price_changes()
+    events_text = get_economic_events()
     print(events_text)
     print(f"Events text: {events_text}")
     if not events_text or events_text == "No important events for the specified period.":
