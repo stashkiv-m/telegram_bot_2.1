@@ -223,10 +223,6 @@ def send_day_end_info():
         send_image_to_all_users(result_path)
 
 
-send_daily_events()
-send_day_end_info()
-
-
 def test_get_economic_events_output(country='United States', days_ahead=4):
     """Тестова функція для виводу даних економічного календаря у консоль."""
     try:
@@ -255,5 +251,46 @@ def test_get_economic_events_output(country='United States', days_ahead=4):
         print(f"Unexpected error: {e}")
 
 
+import time
+
+
+def get_calendar_with_retry(country='United States', days_ahead=4, retries=3):
+    """Функція з повторними спробами отримати економічні події."""
+    # Визначаємо дати
+    today = datetime.today()
+    from_date = today.strftime('%d/%m/%Y')
+    to_date = (today + timedelta(days=days_ahead)).strftime('%d/%m/%Y')
+
+    for attempt in range(retries):
+        try:
+            print(f"Attempt {attempt + 1}: Fetching economic events from {from_date} to {to_date} for {country}.")
+            calendar = investpy.news.economic_calendar(
+                countries=[country],
+                from_date=from_date,
+                to_date=to_date
+            )
+
+            if calendar is not None and not calendar.empty:
+                print("Fetched calendar data:")
+                print(calendar)
+                return calendar
+            else:
+                print("No data received or calendar is empty.")
+
+        except ValueError as ve:
+            print(f"Attempt {attempt + 1}: Value error: {ve}")
+        except Exception as e:
+            print(f"Attempt {attempt + 1}: Unexpected error: {e}")
+
+        # Зачекайте перед повторною спробою
+        time.sleep(5)
+
+    print("All attempts to fetch calendar data failed.")
+    return None
+
+
 # Виклик тестової функції
-test_get_economic_events_output()
+get_calendar_with_retry()
+
+
+
