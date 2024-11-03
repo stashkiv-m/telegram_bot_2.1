@@ -67,7 +67,6 @@ def get_economic_events(country='United States', days_ahead=4):
             from_date=from_date,
             to_date=to_date
         )
-        print(calendar.head())  # Додайте це для перевірки структури даних
         print(f"Calendar data fetched: {calendar}")
 
         if calendar is None or calendar.empty:
@@ -117,18 +116,14 @@ def clear_folder(folder_path):
             print(f"Error deleting {file_path}: {e}")
 
 
-from PIL import Image, ImageDraw, ImageFont
-import os
-from datetime import datetime
-
-
 def overlay_text_on_image(table_text, image_path, output_folder, initial_font_size=25, padding=10):
     """Overlays formatted table text on an image, aligning columns dynamically and adjusting for image size."""
     os.makedirs(output_folder, exist_ok=True)
 
     try:
-        # Використання шрифту DejaVuSans-Bold
-        font_path = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+        # Вказуємо відносний шлях до шрифту
+        base_dir = os.path.abspath(os.path.dirname(__file__))
+        font_path = os.path.join(base_dir, 'fonts', 'dejavu-sans-bold.ttf')
         font = ImageFont.truetype(font_path, initial_font_size)
         print(f"Custom font loaded from {font_path}.")
 
@@ -178,8 +173,7 @@ def overlay_text_on_image(table_text, image_path, output_folder, initial_font_si
                     x_position += max_width + padding
                 y_position += initial_font_size + padding
 
-            output_image_path = os.path.join(output_folder,
-                                             f"market_overview_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+            output_image_path = os.path.join(output_folder, f"market_overview_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
             img.save(output_image_path)
             print(f"Image saved at: {output_image_path}")
 
@@ -201,8 +195,6 @@ def send_daily_events():
                        "today. Stay sharp, stay confident, and trade wisely. Good luck! 💪")
     send_message_to_all_users(pre_market_text)
     events_text = get_economic_events()
-    print(events_text)
-    print(f"Events text: {events_text}")
     if not events_text or events_text == "No important events for the specified period.":
         print("No events available or the text is empty.")
         return
@@ -223,7 +215,6 @@ def send_day_end_info():
                         "tomorrow. Stay strong! 🔥")
     send_message_to_all_users(post_market_text)
     events_text = get_market_indicators_price_changes()
-    print(f"Events text: {events_text}")
     if not events_text or events_text == "Error fetching market indicators":
         print("No indicators available or an error occurred.")
         return
@@ -234,3 +225,35 @@ def send_day_end_info():
 
 send_daily_events()
 send_day_end_info()
+
+
+def test_get_economic_events_output(country='United States', days_ahead=4):
+    """Тестова функція для виводу даних економічного календаря у консоль."""
+    try:
+        today = datetime.today()
+        from_date = today.strftime('%d/%m/%Y')
+        to_date = (today + timedelta(days=days_ahead)).strftime('%d/%m/%Y')
+        print(f"Fetching economic events from {from_date} to {to_date} for {country}.")
+
+        # Отримання даних економічного календаря
+        calendar = investpy.news.economic_calendar(
+            countries=[country],
+            from_date=from_date,
+            to_date=to_date
+        )
+
+        # Вивід отриманих даних у консоль
+        if calendar is not None:
+            print("Fetched calendar data:")
+            print(calendar)
+        else:
+            print("No data received. Calendar is None.")
+
+    except ValueError as ve:
+        print(f"Value error: {ve}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+
+
+# Виклик тестової функції
+test_get_economic_events_output()

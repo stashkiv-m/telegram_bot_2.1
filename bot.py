@@ -4,7 +4,7 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackContex
 
 from buttoms_and_function_call import *
 from developer_functions.general_dev.send_signal_to_user import signal_list_for_user
-from general.daily_information import send_daily_events, send_day_end_info
+from general.daily_information import send_daily_events, send_day_end_info, test_get_economic_events_output
 from general.universal_functions import symbol_info
 from general.user_list import  add_user_activity
 from keyboards import *
@@ -167,8 +167,9 @@ def main():
         signal_list_for_user(update, context)
 
     schedule_func_call(all_signals_calc_run, 22, 21)
-    schedule_func_call(send_daily_events, 14, 16)
-    # schedule_func_call(send_day_end_info, 13, 40)
+    schedule_func_call(test_get_economic_events_output, 15, 35)
+    schedule_func_call(test_get_economic_events_output, 15, 36)
+    schedule_func_call(test_get_economic_events_output, 15, 37)
 
     # Register command handlers
     dp.add_handler(CommandHandler("start", start))
