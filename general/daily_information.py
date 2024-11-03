@@ -5,6 +5,7 @@ import investpy
 import yfinance as yf
 from developer_functions.general_dev.massage_and_img_send import send_message_to_all_users, send_image_to_all_users
 
+
 def get_market_indicators_price_changes():
     """Fetches price and percentage changes for major market indicators including stocks, forex, metals, and commodities."""
     try:
@@ -54,7 +55,7 @@ def get_market_indicators_price_changes():
         return f"Error fetching market indicators: {e}"
 
 
-def get_economic_events(country='United States', days_ahead=3):
+def get_economic_events(country='United States', days_ahead=4):
     """Fetches high-importance economic events for a specified country and period."""
     try:
         # Форматування дат
@@ -124,15 +125,6 @@ def clear_folder(folder_path):
             print(f"Error deleting {file_path}: {e}")
 
 
-def clear_folder(folder_path):
-    """Removes all files from a specified folder."""
-    for file_name in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, file_name)
-        try:
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-        except Exception as e:
-            print(f"Error deleting {file_path}: {e}")
 
 def overlay_text_on_image(table_text, image_path, output_folder, initial_font_size=25, padding=10):
     """Overlays formatted table text on an image, aligning columns dynamically and adjusting for image size."""
@@ -228,6 +220,7 @@ def send_daily_events():
     result_path = overlay_text_on_image(events_text, input_image_path, output_folder)
     if result_path:
         send_image_to_all_users(result_path)
+
 
 def send_day_end_info():
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
