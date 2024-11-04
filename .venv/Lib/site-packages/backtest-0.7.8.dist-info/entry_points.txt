@@ -1,0 +1,3 @@
+[console_scripts]
+backtest = backtest.main:main
+
