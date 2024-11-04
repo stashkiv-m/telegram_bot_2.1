@@ -167,8 +167,8 @@ def main():
         signal_list_for_user(update, context)
 
     schedule_func_call(all_signals_calc_run, 22, 21)
-    schedule_func_call(send_daily_events(), 22, 3)
-    schedule_func_call(send_day_end_info(), 22, 4)
+    schedule_func_call(send_daily_events(), 7, 30)
+    schedule_func_call(send_day_end_info(), 15, 00)
 
     # Register command handlers
     dp.add_handler(CommandHandler("start", start))
