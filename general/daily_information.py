@@ -1,11 +1,11 @@
+import ecocal
 from PIL import Image, ImageDraw, ImageFont
 import os
-from datetime import timedelta, datetime
-import investpy
+from datetime import datetime, timedelta
+
 import yfinance as yf
 from developer_functions.general_dev.massage_and_img_send import send_message_to_all_users, send_image_to_all_users
-import time
-import requests
+
 
 def get_market_indicators_price_changes():
     """Fetches price and percentage changes for major market indicators including stocks, forex, metals, and commodities."""
@@ -56,53 +56,68 @@ def get_market_indicators_price_changes():
         return f"Error fetching market indicators: {e}"
 
 
-def get_economic_events(country='United States', days_ahead=4):
-    try:
-        today = datetime.today()
-        from_date = today.strftime('%d/%m/%Y')
-        to_date = (today + timedelta(days=days_ahead)).strftime('%d/%m/%Y')
-        print(f"Fetching economic events from {from_date} to {to_date} for {country}.")
+from datetime import datetime, timedelta
+import pytz
+import ecocal
 
-        calendar = investpy.news.economic_calendar(
-            countries=[country],
-            from_date=from_date,
-            to_date=to_date
-        )
-        print(f"Calendar data fetched: {calendar}")
+def get_economic_events():
+    # Встановлюємо дати від сьогодні до +5 днів
+    today = datetime.today().date()
+    end_date = today + timedelta(days=6)
 
-        if calendar is None or calendar.empty:
-            print(f"No economic events found from {from_date} to {to_date}.")
-            return "No important events for the specified period."
+    ec = ecocal.Calendar(
+        startHorizon=today.strftime("%Y-%m-%d"),
+        endHorizon=end_date.strftime("%Y-%m-%d"),
+        withDetails=True,
+        nbThreads=20,
+        preBuildCalendar=True
+    )
 
-        important_events = calendar[calendar['importance'] == 'high'][['date', 'time', 'event', 'forecast', 'previous']]
-        important_events['date'] = important_events['date'].apply(
-            lambda d: datetime.strptime(d, '%d/%m/%Y').strftime('%d/%m'))
-
-        if important_events.empty:
-            print("No high-importance events found.")
-            return "No high-importance events for the specified period."
-
-        lines = [
-            f"Economic Events ({from_date} - {to_date})",
-            "Date      | Time     | Event                           | Forecast   | Previous",
-            "-" * 80
+    if not ec.detailedCalendar.empty:
+        # Фільтруємо події з впливом HIGH та MEDIUM
+        high_medium_impact_events = ec.detailedCalendar[
+            ((ec.detailedCalendar['Impact'] == 'HIGH') | (ec.detailedCalendar['Impact'] == 'MEDIUM')) &
+            (ec.detailedCalendar['countryCode'] == 'US')
         ]
 
-        for _, row in important_events.iterrows():
-            event = (row['event'][:30] + '...') if len(row['event']) > 30 else row['event']
-            forecast = row['forecast'] if row['forecast'] else "N/A"
-            previous = row['previous'] if row['previous'] else "N/A"
-            lines.append(f"{row['date']:<9} | {row['time']:<8} | {event:<30} | {forecast:<10} | {previous:<10}")
+        if not high_medium_impact_events.empty:
+            selected_columns = high_medium_impact_events[['Start', 'Name', 'Impact', 'source']]
 
-        lines.append("\n* All times are in Eastern Standard Time (EST)")
-        return "\n".join(lines)
+            # Часовий пояс Нью-Йорка
+            ny_tz = pytz.timezone('America/New_York')
 
-    except ValueError as ve:
-        print(f"Value error: {ve}")
-        return f"Error fetching events: {ve}"
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        return f"Error fetching events: {e}"
+            # Конвертуємо дату та час події у формат Нью-Йорка
+            selected_columns.loc[:, 'Start'] = selected_columns['Start'].apply(
+                lambda x: datetime.strptime(x, '%m/%d/%Y %H:%M:%S')
+                .astimezone(ny_tz)
+                .strftime('%d/%m %H:%M') if isinstance(x, str) else x
+            )
+
+            # Формуємо текст для накладання
+            lines = [
+                "High and Medium Impact Economic Events (Next 5 Days)",
+                "Time Zone: New York (Eastern Time, ET)",
+                "Date      | Event                         | Impact   | Source   |",
+                "-" * 95
+            ]
+
+            for _, row in selected_columns.iterrows():
+                date = row['Start']
+                event = (row['Name'][:30] + '...') if len(row['Name']) > 30 else row['Name']
+                impact = row['Impact'] or "N/A"
+                source = row['source'] or "N/A"
+
+                lines.append(f"{date:<10} | {event:<30} | {impact:<8} | {source:<8} |")
+
+            lines.append("\n* All times are in New York local time (Eastern Time, ET)")
+            return "\n".join(lines)
+        else:
+            return "No high or medium-importance events found for the US."
+    else:
+        return "No detailed calendar data found."
+
+
+
 
 
 def clear_folder(folder_path):
@@ -222,80 +237,4 @@ def send_day_end_info():
     result_path = overlay_text_on_image(events_text, input_image_path, output_folder)
     if result_path:
         send_image_to_all_users(result_path)
-
-
-def test_get_economic_events_output(country='United States', days_ahead=4):
-    """Тестова функція для виводу даних економічного календаря у консоль."""
-    try:
-        today = datetime.today()
-        from_date = today.strftime('%d/%m/%Y')
-        to_date = (today + timedelta(days=days_ahead)).strftime('%d/%m/%Y')
-        print(f"Fetching economic events from {from_date} to {to_date} for {country}.")
-
-        # Отримання даних економічного календаря
-        calendar = investpy.news.economic_calendar(
-            countries=[country],
-            from_date=from_date,
-            to_date=to_date
-        )
-
-        # Вивід отриманих даних у консоль
-        if calendar is not None:
-            print("Fetched calendar data:")
-            print(calendar)
-        else:
-            print("No data received. Calendar is None.")
-
-    except ValueError as ve:
-        print(f"Value error: {ve}")
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-
-
-
-
-
-def get_calendar_with_retry(country='United States', days_ahead=4, retries=3):
-    """Функція з повторними спробами отримати економічні події."""
-    # Визначаємо дати
-    today = datetime.today()
-    from_date = today.strftime('%d/%m/%Y')
-    to_date = (today + timedelta(days=days_ahead)).strftime('%d/%m/%Y')
-
-    response = requests.get('https://www.investing.com/economic-calendar/')
-    print(f"Status code: {response.status_code}")
-    print(f"Response content: {response.text[:500]}")  # Вивести перші 500 символів відповіді
-
-    for attempt in range(retries):
-        try:
-            print(f"Attempt {attempt + 1}: Fetching economic events from {from_date} to {to_date} for {country}.")
-            calendar = investpy.news.economic_calendar(
-                countries=[country],
-                from_date=from_date,
-                to_date=to_date
-            )
-
-            if calendar is not None and not calendar.empty:
-                print("Fetched calendar data:")
-                print(calendar)
-                return calendar
-            else:
-                print("No data received or calendar is empty.")
-
-        except ValueError as ve:
-            print(f"Attempt {attempt + 1}: Value error: {ve}")
-        except Exception as e:
-            print(f"Attempt {attempt + 1}: Unexpected error: {e}")
-
-        # Зачекайте перед повторною спробою
-        time.sleep(5)
-
-    print("All attempts to fetch calendar data failed.")
-    return None
-
-
-# Виклик тестової функції
-get_calendar_with_retry()
-
-
 

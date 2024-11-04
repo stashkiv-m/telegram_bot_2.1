@@ -4,8 +4,7 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackContex
 
 from buttoms_and_function_call import *
 from developer_functions.general_dev.send_signal_to_user import signal_list_for_user
-from general.daily_information import send_daily_events, send_day_end_info, test_get_economic_events_output, \
-    get_calendar_with_retry
+from general.daily_information import send_daily_events, send_day_end_info
 from general.universal_functions import symbol_info
 from general.user_list import  add_user_activity
 from keyboards import *
@@ -168,9 +167,8 @@ def main():
         signal_list_for_user(update, context)
 
     schedule_func_call(all_signals_calc_run, 22, 21)
-    schedule_func_call(get_calendar_with_retry, 15, 55)
-    schedule_func_call(get_calendar_with_retry, 15, 56)
-    schedule_func_call(get_calendar_with_retry, 15, 57)
+    schedule_func_call(send_daily_events(), 21, 32)
+    schedule_func_call(send_day_end_info(), 21, 33)
 
     # Register command handlers
     dp.add_handler(CommandHandler("start", start))
