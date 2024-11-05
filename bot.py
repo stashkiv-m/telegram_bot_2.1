@@ -123,14 +123,32 @@ def main():
         update_menu_state('stock_menu')
 
     def stock_mrkt_overview_func_button_call(update: Update, context: CallbackContext) -> None:
+        # Отримуємо ID користувача та його ім'я
+        user_id = update.message.from_user.id
+        username = update.message.from_user.username
+
+        # Викликаємо функцію для запису активності користувача
+        add_user_activity(user_id, username)
         update_menu_state('mrkt_overview')
         send_market_overview(update, context)
 
     def stock_company_info_func_button_call(update: Update, context: CallbackContext) -> None:
+        # Отримуємо ID користувача та його ім'я
+        user_id = update.message.from_user.id
+        username = update.message.from_user.username
+
+        # Викликаємо функцію для запису активності користувача
+        add_user_activity(user_id, username)
         symbol_info(update, context)
         update_menu_state('stock_company_info')
 
     def stock_signal_func_button_call(update: Update, context: CallbackContext) -> None:
+        # Отримуємо ID користувача та його ім'я
+        user_id = update.message.from_user.id
+        username = update.message.from_user.username
+
+        # Викликаємо функцію для запису активності користувача
+        add_user_activity(user_id, username)
         update_menu_state('stock_signal')
         signal_list_for_user(update, context)
 
