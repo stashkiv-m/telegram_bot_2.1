@@ -1,10 +1,13 @@
+import random
+
 import ecocal
 from PIL import Image, ImageDraw, ImageFont
 import os
 from datetime import datetime, timedelta
 
 import yfinance as yf
-from developer_functions.general_dev.massage_and_img_send import send_message_to_all_users, send_image_to_all_users
+from developer_functions.general_dev.massage_and_img_send import send_image_to_all_users, send_message_to_all_users
+
 
 
 def get_market_indicators_price_changes():
@@ -117,23 +120,8 @@ def get_economic_events():
         return "No detailed calendar data found."
 
 
-
-
-
-def clear_folder(folder_path):
-    """Removes all files from a specified folder."""
-    for file_name in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, file_name)
-        try:
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-                print(f"Deleted file: {file_path}")
-        except Exception as e:
-            print(f"Error deleting {file_path}: {e}")
-
-
-def overlay_text_on_image(table_text, image_path, output_folder, initial_font_size=25, padding=10):
-    """Overlays formatted table text on an image, aligning columns dynamically and adjusting for image size."""
+def overlay_text_on_image(text, image_path, output_folder, initial_font_size=25, padding=10):
+    """Overlays formatted text or table text on an image, aligning dynamically and adjusting for image size."""
     os.makedirs(output_folder, exist_ok=True)
 
     try:
@@ -148,48 +136,75 @@ def overlay_text_on_image(table_text, image_path, output_folder, initial_font_si
             draw = ImageDraw.Draw(img)
             img_width, img_height = img.size
 
-            lines = table_text.split('\n')
-            print("Number of lines:", len(lines))
+            # Розподіл рядків залежно від формату (таблиця або звичайний текст)
+            if '|' in text:
+                # Табличний режим
+                lines = text.split('\n')
+                print("Number of lines (table mode):", len(lines))
+                columns = [line.split('|') for line in lines if '|' in line]
+                if not columns:
+                    print("No columns detected. Exiting function.")
+                    return None
 
-            columns = [line.split('|') for line in lines if '|' in line]
-            if not columns:
-                print("No columns detected. Exiting function.")
-                return None
+                num_columns = len(columns[0])
+                col_widths = [0] * num_columns
 
-            num_columns = len(columns[0])
-            col_widths = [0] * num_columns
+                # Обчислення ширини стовпців
+                for col_idx in range(num_columns):
+                    col_widths[col_idx] = max(
+                        draw.textbbox((0, 0), col[col_idx].strip(), font=font)[2] for col in columns
+                    )
 
-            for col_idx in range(num_columns):
-                col_widths[col_idx] = max(
-                    draw.textbbox((0, 0), col[col_idx].strip(), font=font)[2] for col in columns
-                )
+                # Зменшення розміру шрифту, якщо текст не вміщується
+                while sum(col_widths) + padding * (num_columns - 1) > img_width:
+                    initial_font_size -= 1
+                    if initial_font_size <= 10:
+                        font = ImageFont.load_default()
+                        print("Reached minimum font size. Using default font.")
+                        break
+                    font = ImageFont.truetype(font_path, initial_font_size)
+                    col_widths = [max(
+                        draw.textbbox((0, 0), col[col_idx].strip(), font=font)[2] for col in columns
+                    ) for col_idx in range(num_columns)]
 
-            while sum(col_widths) + padding * (num_columns - 1) > img_width:
-                initial_font_size -= 1
-                if initial_font_size <= 10:
-                    font = ImageFont.load_default()
-                    print("Reached minimum font size. Using default font.")
-                    break
-                font = ImageFont.truetype(font_path, initial_font_size)
-                col_widths = [max(
-                    draw.textbbox((0, 0), col[col_idx].strip(), font=font)[2] for col in columns
-                ) for col_idx in range(num_columns)]
+                # Центрування тексту таблиці
+                total_table_width = sum(col_widths) + padding * (num_columns - 1)
+                start_x = (img_width - total_table_width) // 2
+                y_position = (img_height - len(lines) * (initial_font_size + padding)) // 2
 
-            total_table_width = sum(col_widths) + padding * (num_columns - 1)
-            start_x = (img_width - total_table_width) // 2
-            y_position = (img_height - len(lines) * (initial_font_size + padding)) // 2
+                # Відображення таблиці
+                for line in columns:
+                    x_position = start_x
+                    for col, max_width in zip(line, col_widths):
+                        col = col.strip()
+                        while draw.textbbox((0, 0), col, font=font)[2] > max_width:
+                            col = col[:-1] + "…"
+                        draw.text((x_position, y_position), col, font=font, fill="white")
+                        x_position += max_width + padding
+                    y_position += initial_font_size + padding
 
-            for line in columns:
-                x_position = start_x
-                for col, max_width in zip(line, col_widths):
-                    col = col.strip()
-                    while draw.textbbox((0, 0), col, font=font)[2] > max_width:
-                        col = col[:-1] + "…"
-                    draw.text((x_position, y_position), col, font=font, fill="white")
-                    x_position += max_width + padding
-                y_position += initial_font_size + padding
+            else:
+                # Режим звичайного тексту
+                text_width, text_height = draw.textbbox((0, 0), text, font=font)[2:]
 
-            output_image_path = os.path.join(output_folder, f"market_overview_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+                # Зменшення розміру шрифту для звичайного тексту
+                while text_width > img_width - 2 * padding:
+                    initial_font_size -= 1
+                    if initial_font_size <= 10:
+                        font = ImageFont.load_default()
+                        print("Reached minimum font size for plain text. Using default font.")
+                        break
+                    font = ImageFont.truetype(font_path, initial_font_size)
+                    text_width, text_height = draw.textbbox((0, 0), text, font=font)[2:]
+
+                # Центрування звичайного тексту
+                x_position = (img_width - text_width) // 2
+                y_position = (img_height - text_height) // 2
+                draw.text((x_position, y_position), text, font=font, fill="white")
+
+            # Збереження зображення
+            output_image_path = os.path.join(output_folder,
+                                             f"market_overview_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
             img.save(output_image_path)
             print(f"Image saved at: {output_image_path}")
 
@@ -200,20 +215,45 @@ def overlay_text_on_image(table_text, image_path, output_folder, initial_font_si
         return None
 
 
+def clear_folder(folder_path):
+    """Removes all files from a specified folder."""
+    for file_name in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file_name)
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}")
+        except Exception as e:
+            print(f"Error deleting {file_path}: {e}")
+
+
 def send_daily_events():
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     img_folder = os.path.join(base_dir, 'img', 'daily_news')
     output_folder = os.path.join(base_dir, 'img', 'daily_news_output')
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
-    input_image_path = os.path.join(img_folder, 'img1.jpg')
-    pre_market_text = ("Preparation is the key to success! 🚀 Here are the important events that could impact the market "
-                       "today. Stay sharp, stay confident, and trade wisely. Good luck! 💪")
+
+    # Вибір випадкового зображення з папки
+    image_files = [f for f in os.listdir(img_folder) if f.endswith(('.jpg', '.png'))]
+    if not image_files:
+        print("No images found in the folder.")
+        return
+    input_image_path = os.path.join(img_folder, random.choice(image_files))
+
+    # Текст перед відкриттям ринку
+    pre_market_text = (
+        "Preparation is the key to success! 🚀 Here are the important events that could impact the market "
+        "today. Stay sharp, stay confident, and trade wisely. Good luck! 💪")
     send_message_to_all_users(pre_market_text)
+
+    # Отримання тексту економічних подій
     events_text = get_economic_events()
     if not events_text or events_text == "No important events for the specified period.":
         print("No events available or the text is empty.")
         return
+
+    # Накладання тексту на випадково вибране зображення
     result_path = overlay_text_on_image(events_text, input_image_path, output_folder)
     if result_path:
         send_image_to_all_users(result_path)
@@ -238,3 +278,26 @@ def send_day_end_info():
     if result_path:
         send_image_to_all_users(result_path)
 
+
+def send_img_with_text(image_text, massage_text=None):
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    img_folder = os.path.join(base_dir, 'img', 'daily_news')
+    output_folder = os.path.join(base_dir, 'img', 'daily_news_output')
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # Вибір випадкового зображення з папки
+    image_files = [f for f in os.listdir(img_folder) if f.endswith(('.jpg', '.png'))]
+    if not image_files:
+        print("No images found in the folder.")
+        return
+    input_image_path = os.path.join(img_folder, random.choice(image_files))
+
+    # Текст перед відкриттям ринку, якщо задано massage_text
+    if massage_text is not None:
+        send_message_to_all_users(massage_text)
+
+    # Накладання тексту на випадково вибране зображення
+    result_path = overlay_text_on_image(image_text, input_image_path, output_folder)
+    if result_path:
+        send_image_to_all_users(result_path)

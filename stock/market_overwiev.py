@@ -132,17 +132,17 @@ def format_results(results):
     formatted_output['Total Buy Signals'] = f"{results['total_buy_signals']}"
     formatted_output['Total Sell Signals'] = f"{results['total_sell_signals']}"
 
-    # Сигнали по індустріях
-    formatted_output['Top 5 Buy Signal Industries'] = format_table(results['top_5_buy_groups'],
-                                                                   ['Industry', 'Buy', 'Buy_pct'], [15, 5, 8])
-    formatted_output['Top 5 Sell Signal Industries'] = format_table(results['top_5_sell_groups'],
-                                                                    ['Industry', 'Sell', 'Sell_pct'], [15, 5, 8])
-
-    # Top 5 та Bottom 5 акцій по росту та падінню
-    formatted_output['Top 5 Stocks Growth'] = format_table(results['top_5_stocks_growth'], ['Symbol', 'growth'],
-                                                           [10, 10])
-    formatted_output['Bottom 5 Stocks Decline'] = format_table(results['bottom_5_stocks_decline'], ['Symbol', 'growth'],
-                                                               [10, 10])
+    # # Сигнали по індустріях
+    # formatted_output['Top 5 Buy Signal Industries'] = format_table(results['top_5_buy_groups'],
+    #                                                                ['Industry', 'Buy', 'Buy_pct'], [15, 5, 8])
+    # formatted_output['Top 5 Sell Signal Industries'] = format_table(results['top_5_sell_groups'],
+    #                                                                 ['Industry', 'Sell', 'Sell_pct'], [15, 5, 8])
+    #
+    # # Top 5 та Bottom 5 акцій по росту та падінню
+    # formatted_output['Top 5 Stocks Growth'] = format_table(results['top_5_stocks_growth'], ['Symbol', 'growth'],
+    #                                                        [10, 10])
+    # formatted_output['Bottom 5 Stocks Decline'] = format_table(results['bottom_5_stocks_decline'], ['Symbol', 'growth'],
+    #                                                            [10, 10])
 
     # Решта інформації про ринок
     formatted_output['Top 5 Market Cap Industries (Avg)'] = format_table(results['top_5_market_cap'],

@@ -4,46 +4,6 @@ Total Buy Signals:
 Total Sell Signals:
 176 (73.64%)
 
-Top 5 Buy Signal Industries:
-| Industry        | Buy   | Buy_pct  |
-|-----------------|-------|----------|
-| Ban-Reg         |  8.00 |     3.35 |
-| Sof-App         |  7.00 |     2.93 |
-| Bio             |  5.00 |     2.09 |
-| AssMan          |  4.00 |     1.67 |
-| Oil&GasE&p      |  3.00 |     1.26 |
-
-
-Top 5 Sell Signal Industries:
-| Industry        | Sell  | Sell_pct |
-|-----------------|-------|----------|
-| Ban-Reg         | 32.00 |    13.39 |
-| Bio             | 21.00 |     8.79 |
-| AssMan          | 11.00 |     4.60 |
-| Gol             |  5.00 |     2.09 |
-| Ins-Pro&Cas     |  5.00 |     2.09 |
-
-
-Top 5 Stocks Growth:
-| Symbol     | growth     |
-|------------|------------|
-| EBET       |     900.00 |
-| CSSE       |     636.36 |
-| CSSEN      |     340.00 |
-| BFI        |     209.68 |
-| EVA        |     200.00 |
-
-
-Bottom 5 Stocks Decline:
-| Symbol     | growth     |
-|------------|------------|
-| HALL       |     -90.00 |
-| GNPX       |     -82.83 |
-| IDEX       |     -76.19 |
-| CALA       |     -66.67 |
-| BSGM       |     -63.18 |
-
-
 Top 5 Market Cap Industries (Avg):
 | Industry        | Market Cap |
 |-----------------|------------|

@@ -5,6 +5,7 @@ import os
 import json
 import random
 
+
 # Ініціалізація глобальних змінних
 bot = None
 worksheet = None
@@ -98,3 +99,5 @@ def send_file_to_all_users(file_path: str):
                 print(f"Файл надіслано користувачу {user_id}")
             except Exception as e:
                 print(f"Не вдалося надіслати файл користувачу {user_id}. Помилка: {e}")
+
+

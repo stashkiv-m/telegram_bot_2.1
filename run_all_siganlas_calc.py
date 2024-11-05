@@ -4,6 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from developer_functions.general_dev.massage_and_img_send import send_message_to_all_users, send_image_to_all_users
 from developer_functions.general_dev.signals_calc import process_assets_from_file
+from general.daily_information import send_img_with_text
 from language_state import language_state
 
 
@@ -28,11 +29,10 @@ def all_signals_calc_run():
     process_assets_from_file(file_path_stock, 'stock', output_file=output_file_stock)
     # process_assets_from_file(file_path_forex, 'forex', output_file=output_file_forex)
 
-    send_image_to_all_users()
     if language == "Ukrainian":
-        send_message_to_all_users("Нові сигнали вже доступні! Ознайомтеся з оновленим списком!")
+        send_img_with_text("Нові сигнали вже доступні! Ознайомтеся з оновленим списком!")
     elif language == 'English':
-        send_message_to_all_users("New signals are in! View the updated list of signals!")
+        send_img_with_text("New signals are in! View the updated list of signals!")
 
 
 def schedule_func_call(func, hour: int = 22, minute: int = 35):
