@@ -1,0 +1,28 @@
+
+=== MACD Signals ===
+No data available.
+
+=== MA Signals ===
+No data available.
+
+
+=== Industry Abbreviations ===
+| Abbreviation | Full Industry Name |
+|--------------|---------------------|
+| Air          | Airlines |
+
+
+=== Strategy Descriptions ===
+HG_Und: High Growth and Undervalued: High ROE, ROA, low Debt, high margins, and undervalued.
+HQ: High Quality: High ROE, ROA, low Debt, and high margins.
+DivGr: Dividend Growth: High ROE, ROA, low Debt, high margins, with dividends.
+DivLd: Dividend Leader: High ROE, ROA, and strong dividend payout.
+Dist: Distressed: High debt, negative earnings, and poor margins.
+StblFin: Stable Financial: High liquidity ratios, positive margins, and strong financial stability.
+ValPl: Value Play: Low PE and P/B ratio, indicating undervalued stocks.
+AggGr: Aggressive Growth: High revenue and asset turnover ratios, focusing on growth.
+BalOp: Balanced Opportunity: Mixed fundamentals but some growth potential.
+ModInc: Moderate Income: Mixed income metrics with low to moderate risk.
+MixFund: Mixed Fundamentals: Stable with low growth potential, but not at risk.
+NegRet: Negative Returns: Stocks with negative ROE or ROA.
+Unk: Unknown: No specific strategy classification available.

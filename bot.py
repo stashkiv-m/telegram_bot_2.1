@@ -184,7 +184,7 @@ def main():
         update_menu_state('crypto_signals')
         signal_list_for_user(update, context)
 
-    schedule_func_call(all_signals_calc_run, 22, 50)
+    schedule_func_call(all_signals_calc_run, 20, 10)
     schedule_func_call(send_daily_events, 7, 30)
     schedule_func_call(send_day_end_info, 15, 00)
 
