@@ -11,7 +11,7 @@ from language_state import language_state
 
 
 def all_signals_calc_run():
-    language = language_state().rstrip('\n')
+    # language = language_state().rstrip('\n')
     BASE_DIR = os.getcwd()  # Поточна робоча директорія на сервері
 
     # Шлях до файлів
@@ -36,35 +36,19 @@ def all_signals_calc_run():
 
     # Перевірка умови та результат
     if total_buy > total_sell:
-        if language == "Ukrainian":
-            send_img_with_text(
-                f"Нові сигнали вже доступні! Ознайомтеся з оновленим списком! "
-                f"Поточна кількість сигналів BUY: {total_buy}. "
-                f"Поточна кількість сигналів SELL: {total_sell}.",
-                'bull.jpg', 'market_type',
-            )
-        elif language == 'English':
-            send_img_with_text(
-                f"New signals are in! View the updated list of signals! "
-                f"Total number of BUY signals: {total_buy}. "
-                f"Total number of SELL signals: {total_sell}.",
-                'bull.jpg', 'market_type',
+        send_img_with_text(
+            f"New signals are in! "
+            f"BUY: {total_buy} "
+            f"SELL: {total_sell} ",
+            'bull.jpg', 'market_type',50
             )
     else:
-        if language == "Ukrainian":
-            send_img_with_text(
-                f"Нові сигнали вже доступні! Ознайомтеся з оновленим списком! "
-                f"Поточна кількість сигналів BUY: {total_buy}. "
-                f"Поточна кількість сигналів SELL: {total_sell}.",
-                'bear.jpg', 'market_type',
-            )
-        elif language == 'English':
-            send_img_with_text(
-                f"New signals are in! View the updated list of signals! "
-                f"Total number of BUY signals: {total_buy}. "
-                f"Total number of SELL signals: {total_sell}.",
-                'bear.jpg', 'market_type',
-            )
+        send_img_with_text(
+            f"New signals are in! "
+            f"BUY: {total_buy} "
+            f"SELL: {total_sell} ",
+            'bear.jpg', 'market_type',50
+        )
 
 
 def schedule_func_call(func, hour: int = 22, minute: int = 35):

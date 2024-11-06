@@ -279,7 +279,7 @@ def send_day_end_info():
         send_image_to_all_users(result_path)
 
 
-def send_img_with_text(image_text, image_name=None, folder_name='daily_news', massage_text=None):
+def send_img_with_text(image_text, image_name=None, folder_name='daily_news', text_size=25, massage_text=None):
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     img_folder = os.path.join(base_dir, 'img', folder_name)
     output_folder = os.path.join(base_dir, 'img', 'daily_news_output')
@@ -309,8 +309,8 @@ def send_img_with_text(image_text, image_name=None, folder_name='daily_news', ma
     if massage_text is not None:
         send_message_to_all_users(massage_text)
 
-    # Накладання тексту на вибране зображення
-    result_path = overlay_text_on_image(image_text, input_image_path, output_folder)
+    # Накладання тексту на вибране зображення з використанням text_size
+    result_path = overlay_text_on_image(image_text, input_image_path, output_folder, initial_font_size=text_size)
     if result_path:
         send_image_to_all_users(result_path)
 
