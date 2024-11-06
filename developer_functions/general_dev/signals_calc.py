@@ -112,7 +112,7 @@ def add_sector_industry_and_last_7_closes(df, symbol):
 
 
 # Функція для обробки списку активів з файлу та збереження сигналів
-def process_assets_from_file(file_path, asset_type, output_file=None):
+def signal_calc_function_from_file(file_path, asset_type, output_file=None):
     asset_df = pd.read_csv(file_path)
     all_signals = []
 
@@ -195,7 +195,7 @@ def main():
         print("Невірний тип активу. Виберіть 'crypto', 'stock', або 'forex'.")
         return
 
-    process_assets_from_file(file_path, asset_type, output_file=output_file)
+    signal_calc_function_from_file(file_path, asset_type, output_file=output_file)
 
 
 # Виклик головної функції

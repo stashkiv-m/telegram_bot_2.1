@@ -265,7 +265,7 @@ def send_day_end_info():
     output_folder = os.path.join(base_dir, 'img', 'daily_news_output')
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
-    input_image_path = os.path.join(img_folder, 'end.jpg')
+    input_image_path = os.path.join(img_folder, '1.jpg')
     post_market_text = ("🌅 The trading day comes to an end, but every moment is a learning experience. "
                         "Check out today's market changes, reflect, and get ready for new opportunities "
                         "tomorrow. Stay strong! 🔥")
@@ -279,25 +279,39 @@ def send_day_end_info():
         send_image_to_all_users(result_path)
 
 
-def send_img_with_text(image_text, massage_text=None):
+def send_img_with_text(image_text, image_name=None, folder_name='daily_news', massage_text=None):
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    img_folder = os.path.join(base_dir, 'img', 'daily_news')
+    img_folder = os.path.join(base_dir, 'img', folder_name)
     output_folder = os.path.join(base_dir, 'img', 'daily_news_output')
+
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-    # Вибір випадкового зображення з папки
-    image_files = [f for f in os.listdir(img_folder) if f.endswith(('.jpg', '.png'))]
-    if not image_files:
-        print("No images found in the folder.")
+    # Перевірка наявності папки зображень
+    if not os.path.exists(img_folder):
+        print(f"The specified folder '{folder_name}' was not found.")
         return
-    input_image_path = os.path.join(img_folder, random.choice(image_files))
+
+    # Вибір зображення: задане або випадкове
+    if image_name:
+        input_image_path = os.path.join(img_folder, image_name)
+        if not os.path.isfile(input_image_path):
+            print(f"The specified image '{image_name}' was not found in the folder '{folder_name}'.")
+            return
+    else:
+        image_files = [f for f in os.listdir(img_folder) if f.endswith(('.jpg', '.png'))]
+        if not image_files:
+            print(f"No images found in the folder '{folder_name}'.")
+            return
+        input_image_path = os.path.join(img_folder, random.choice(image_files))
 
     # Текст перед відкриттям ринку, якщо задано massage_text
     if massage_text is not None:
         send_message_to_all_users(massage_text)
 
-    # Накладання тексту на випадково вибране зображення
+    # Накладання тексту на вибране зображення
     result_path = overlay_text_on_image(image_text, input_image_path, output_folder)
     if result_path:
         send_image_to_all_users(result_path)
+
+
