@@ -184,12 +184,9 @@ def main():
         update_menu_state('crypto_signals')
         signal_list_for_user(update, context)
 
-    schedule_func_call(all_signals_calc_run, 20, 10)
+    schedule_func_call(all_signals_calc_run, 22, 15)
     schedule_func_call(send_daily_events, 7, 30)
     schedule_func_call(send_day_end_info, 15, 00)
-    all_signals_calc_run()
-    send_daily_events()
-    send_day_end_info()
 
     # Register command handlers
     dp.add_handler(CommandHandler("start", start))
