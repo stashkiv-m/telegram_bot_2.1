@@ -6,7 +6,7 @@ from buttoms_and_function_call import *
 from developer_functions.general_dev.send_signal_to_user import signal_list_for_user
 from general.daily_information import send_daily_events, send_day_end_info
 from general.universal_functions import symbol_info
-from general.user_list import  add_user_activity
+from general.user_list import add_user_activity, user_activity_and_access
 from keyboards import *
 from language_state import update_language_state, language_state
 from run_all_siganlas_calc import schedule_func_call, all_signals_calc_run
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Token for your bot (ensure to keep this token private in real-world applications)
 
-TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
+TOKEN = '7721716265:AAEuzhZyZM_pT0FQHsbx-FziENEg-cNT5do'
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -35,33 +35,28 @@ def start(update: Update, context: CallbackContext) -> None:
     # Відправляємо привітання та опис проекту залежно від мови
     if language == 'Ukrainian':
         greeting = (
-            "https://t.me/stashkiv_mykhailo створив цього бота, щоб надати людям доступ до найкращих ідей для інвестицій та спекуляцій.\n\n"
-            "Цей проект спрямований на підвищення фінансової грамотності населення, щоб люди не потрапляли на шахрайські схеми та інші фінансові пастки.\n"
-            "Усі кошти, зібрані за допомогою цього бота, будуть спрямовані на розробку нових функцій.\n"
-            "Ті, хто підтримає проект, отримають передчасний доступ до нових функцій та можливостей бота.\n\n"
-            "Бот може аналізувати акції, криптовалюти та форекс, надаючи технічний аналіз і рекомендації. В планах — використання AI для більш точного аналізу та нових функцій.\n"
-            "Бот не може гарантувати прибуток або повністю передбачити рух ринку, але може надати корисну інформацію для прийняття рішень."
+            "https://t.me/stashkiv_mykhailo\n\n"
+            "Бот аналізує акції, надаючи технічний та фундаментальий аналіз. Згодом буде крипто та форекс \n"
+            "Бот не гарантує прибутків, але надає корисну інформацію для прийняття рішень."
         )
         support_info = (
-            "Якщо хочете підтримати проект, буду вдячний за фінансову підтримку:\n\n"
-            "PayPal: business.stashkiv@gmail.com\n\n"
-            "ETH ERC 20 гаманець: 0x281ce314d2f3762ccb591a987ad9a793bf0be2a7\n\n"
-            "Усі внески будуть використані на розвиток нових можливостей бота та покращення його функціональності."
+            "Підтримати проєкт можна за реквізитами:\n\n"
+            "PayPal: business.stashkiv@gmail.com\n"
+            "ETH: 0x281ce314d2f3762ccb591a987ad9a793bf0be2a7\n\n"
+            "Ваш внесок допоможе в розробці нових функцій бота."
         )
+
     else:
         greeting = (
-            "https://t.me/stashkiv_mykhailo created this bot to provide people with access to the best ideas for investments and speculations.\n\n"
-            "This project aims to improve financial literacy, helping people avoid scams and other financial traps.\n"
-            "All funds collected through this bot will be used for developing new features.\n"
-            "Supporters will receive early access to new features and capabilities of the bot.\n\n"
-            "The bot can analyze stocks, cryptocurrencies, and forex, providing technical analysis and recommendations. Future plans include integrating AI for more precise analysis and new functionalities.\n"
-            "The bot cannot guarantee profits or fully predict market movements, but it can provide valuable insights for decision-making."
+            "https://t.me/stashkiv_mykhailo\n\n"
+            "The bot analyzes stocks, providing technical and fundamental analysis. Crypto and forex will be added later.\n"
+            "The bot doesn't guarantee profits but provides valuable information for decision-making."
         )
         support_info = (
-            "If you'd like to support the project, I would appreciate any financial contributions:\n\n"
-            "PayPal: business.stashkiv@gmail.com\n\n"
-            "ETH ERC 20 Wallet: 0x281ce314d2f3762ccb591a987ad9a793bf0be2a7\n\n"
-            "All contributions will be used to develop new features and improve the bot's functionality."
+            "Support the project via:\n\n"
+            "PayPal: business.stashkiv@gmail.com\n"
+            "ETH: 0x281ce314d2f3762ccb591a987ad9a793bf0be2a7\n\n"
+            "Your contribution helps develop new bot features."
         )
 
     # Виклик функції з передачею необхідних аргументів
@@ -76,22 +71,18 @@ def start(update: Update, context: CallbackContext) -> None:
 
 def menu(update, context):
     context.user_data['menu_stack'] = ['menu']
-    # Отримуємо ID користувача та його ім'я
-    user_id = update.message.from_user.id
-    username = update.message.from_user.username
-
-    # Викликаємо функцію для запису активності користувача
-    add_user_activity(user_id, username)
-
-    keyboard = [
-        [KeyboardButton("Stock")],
-        # [KeyboardButton("Forex")],
-        # [KeyboardButton("Crypto")],
-        [KeyboardButton("Back")],
-    ]
-    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
-    context.bot.send_message(chat_id=update.effective_chat.id, text='Menu:', reply_markup=reply_markup)
-    update_menu_state('menu')
+    if user_activity_and_access(update, context):
+        keyboard = [
+            [KeyboardButton("Stock")],
+            # [KeyboardButton("Forex")],
+            # [KeyboardButton("Crypto")],
+            [KeyboardButton("Back")],
+        ]
+        reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
+        context.bot.send_message(chat_id=update.effective_chat.id, text='Menu:', reply_markup=reply_markup)
+        update_menu_state('menu')
+    else:
+        pass
 
 
 def main():
@@ -123,34 +114,26 @@ def main():
         update_menu_state('stock_menu')
 
     def stock_mrkt_overview_func_button_call(update: Update, context: CallbackContext) -> None:
-        # Отримуємо ID користувача та його ім'я
-        user_id = update.message.from_user.id
-        username = update.message.from_user.username
+        if user_activity_and_access(update, context):
 
-        # Викликаємо функцію для запису активності користувача
-        add_user_activity(user_id, username)
-        update_menu_state('mrkt_overview')
-        send_market_overview(update, context)
+            update_menu_state('mrkt_overview')
+            send_market_overview(update, context)
+        else:
+            pass
 
     def stock_company_info_func_button_call(update: Update, context: CallbackContext) -> None:
-        # Отримуємо ID користувача та його ім'я
-        user_id = update.message.from_user.id
-        username = update.message.from_user.username
-
-        # Викликаємо функцію для запису активності користувача
-        add_user_activity(user_id, username)
-        symbol_info(update, context)
-        update_menu_state('stock_company_info')
+        if user_activity_and_access(update, context):
+            symbol_info(update, context)
+            update_menu_state('stock_company_info')
+        else:
+            pass
 
     def stock_signal_func_button_call(update: Update, context: CallbackContext) -> None:
-        # Отримуємо ID користувача та його ім'я
-        user_id = update.message.from_user.id
-        username = update.message.from_user.username
-
-        # Викликаємо функцію для запису активності користувача
-        add_user_activity(user_id, username)
-        update_menu_state('stock_signal')
-        signal_list_for_user(update, context)
+        if user_activity_and_access(update, context):
+            update_menu_state('stock_signal')
+            signal_list_for_user(update, context)
+        else:
+            pass
 
     def forex_func_button_call(update: Update, context: CallbackContext) -> None:
         forex_keyboard(update, context)
@@ -184,7 +167,7 @@ def main():
         update_menu_state('crypto_signals')
         signal_list_for_user(update, context)
 
-    schedule_func_call(all_signals_calc_run, 22, 15)
+    schedule_func_call(all_signals_calc_run, 22, 25)
     schedule_func_call(send_daily_events, 7, 30)
     schedule_func_call(send_day_end_info, 15, 00)
 

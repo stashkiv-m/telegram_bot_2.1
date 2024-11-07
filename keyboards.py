@@ -15,9 +15,6 @@ def create_start_keyboard():
     return ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
 
 
-
-
-
 def stock_keyboard(update, context):
     # Оновлюємо стек меню
     context.user_data['menu_stack'] = context.user_data.get('menu_stack', []) + ['stock']

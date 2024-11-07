@@ -1,6 +1,7 @@
 import yfinance as yf
 from telegram.ext import MessageHandler, Filters
 
+
 from crypto.get_crypto_data import *
 from developer_functions.general_dev.chart import generate_chart
 from general.technical_analys_chart import analyze_ticker
@@ -17,6 +18,7 @@ def symbol_info(update, context):
     # Реєструвати обробник повідомлень для обробки введення користувача
     dp = context.dispatcher
     dp.add_handler(MessageHandler(Filters.text, handle_ticker_input))
+
 
 
 def handle_ticker_input(update, context):
