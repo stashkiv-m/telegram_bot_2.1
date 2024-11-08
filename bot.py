@@ -1,19 +1,22 @@
 import logging
-from telegram import Update
+import os
+
+from telegram import Update, Bot
 from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackContext, Updater
 
 from buttoms_and_function_call import *
 from developer_functions.general_dev.send_signal_to_user import signal_list_for_user
 from general.daily_information import send_daily_events, send_day_end_info
 from general.universal_functions import symbol_info
-from general.user_list import add_user_activity, user_activity_and_access
+from general.user_list import  user_activity_and_access
 from keyboards import *
 from language_state import update_language_state, language_state
 from run_all_siganlas_calc import schedule_func_call, all_signals_calc_run
-from state_update_menu import update_menu_state
+from state_update_menu import update_menu_state, menu_state
 from telegram.ext import CallbackContext
 
 from stock.market_overwiev import send_market_overview
+from user_state import update_user_state, user_state
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -26,6 +29,7 @@ TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
 
 
 def start(update: Update, context: CallbackContext) -> None:
+
     # Зберігаємо стан меню
     context.user_data['menu_stack'] = ['start']
 
@@ -81,6 +85,44 @@ def menu(update, context):
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
         context.bot.send_message(chat_id=update.effective_chat.id, text='Menu:', reply_markup=reply_markup)
         update_menu_state('menu')
+    else:
+        pass
+
+
+def handle_photo(update: Update, context: CallbackContext) -> None:
+    state = user_state().rstrip('\n')
+    if state == 'guest':
+        ADMIN_CHAT_ID = 1440645936
+
+        # Створюємо екземпляр другого бота
+        second_bot = Bot(token='7342427635:AAFwm6vpbifNorUhWoiJvWxE18IVtK4UARQ')
+
+        # Отримуємо дані користувача
+        user_id = update.message.from_user.id
+        username = update.message.from_user.username if update.message.from_user.username else "No Username"
+
+        # Отримуємо фото з повідомлення
+        photo_file = update.message.photo[-1].get_file()  # Отримуємо файл з найкращою якістю
+
+        # Завантажуємо фото локально
+        file_path = f"{photo_file.file_id}.jpg"
+        photo_file.download(file_path)
+
+        # Формуємо підпис до фото, щоб відправити разом з ID та іменем користувача
+        caption_text = f"Фото від користувача:\nID: {user_id}\nUsername: {username}"
+
+        # Використовуємо другого бота для пересилання фото з підписом до адміністратора
+        with open(file_path, 'rb') as img:
+            second_bot.send_photo(chat_id=ADMIN_CHAT_ID, photo=img, caption=caption_text)
+
+        # Відповідь користувачеві
+        update.message.reply_text("Ваш скріншот відправлено на перевірку.")
+
+        # Оновлюємо статус користувача
+        update_user_state('wait')
+
+        # Видаляємо локально збережене фото після відправки
+        os.remove(file_path)
     else:
         pass
 
@@ -167,12 +209,15 @@ def main():
         update_menu_state('crypto_signals')
         signal_list_for_user(update, context)
 
-    schedule_func_call(all_signals_calc_run, 22, 30)
+    schedule_func_call(all_signals_calc_run, 21, 30)
     schedule_func_call(send_daily_events, 7, 30)
     schedule_func_call(send_day_end_info, 15, 00)
 
     # Register command handlers
     dp.add_handler(CommandHandler("start", start))
+
+    dp.add_handler(MessageHandler(Filters.photo, handle_photo))
+
     dp.add_handler(MessageHandler(Filters.regex(r'^About Bot$'), about_bot_func_button_call))
     dp.add_handler(MessageHandler(Filters.regex(r'^Language'), language_func_button_call))
     dp.add_handler(MessageHandler(Filters.regex(r'^Ukrainian'), ukr_language))

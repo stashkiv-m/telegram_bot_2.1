@@ -1,13 +1,11 @@
 import random
-
-import ecocal
 from PIL import Image, ImageDraw, ImageFont
 import os
-from datetime import datetime, timedelta
-
 import yfinance as yf
 from developer_functions.general_dev.massage_and_img_send import send_image_to_all_users, send_message_to_all_users
-
+from datetime import datetime, timedelta
+import pytz
+import ecocal
 
 
 def get_market_indicators_price_changes():
@@ -59,9 +57,7 @@ def get_market_indicators_price_changes():
         return f"Error fetching market indicators: {e}"
 
 
-from datetime import datetime, timedelta
-import pytz
-import ecocal
+
 
 def get_economic_events():
     # Встановлюємо дати від сьогодні до +5 днів
