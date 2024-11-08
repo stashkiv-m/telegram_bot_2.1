@@ -126,6 +126,14 @@ def handle_photo(update: Update, context: CallbackContext) -> None:
     else:
         pass
 
+def clear_state_files():
+    # Очищаємо файл language_state.csv
+    with open("language_state.csv", "w") as file:
+        pass  # Очищає файл, зберігаючи його порожнім
+
+    # Очищаємо файл user_state.csv
+    with open("user_state.csv", "w") as file:
+        pass  # Очищає файл, зберігаючи його порожнім
 
 def main():
     """Start the bot."""
@@ -134,6 +142,7 @@ def main():
     # test
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
+    clear_state_files()
 
     def about_bot_func_button_call(update: Update, context: CallbackContext) -> None:
         about_bot(update, context)
@@ -209,7 +218,7 @@ def main():
         update_menu_state('crypto_signals')
         signal_list_for_user(update, context)
 
-    schedule_func_call(all_signals_calc_run, 21, 30)
+    schedule_func_call(all_signals_calc_run, 22, 00)
     schedule_func_call(send_daily_events, 7, 30)
     schedule_func_call(send_day_end_info, 15, 00)
 

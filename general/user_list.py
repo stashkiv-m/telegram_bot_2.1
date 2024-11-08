@@ -141,13 +141,13 @@ def user_activity_and_access(update, context):
         return True
 
     # Дії в залежності від стану користувача
-    if state == 'wait':
-        update.message.reply_text(payment_message)
-    elif check_user_at_list(user_id):
-        # Якщо доступ закінчився
-        update_user_state('guest')
+    if check_user_at_list(user_id):
         update.message.reply_text(expired_access_message)
+        update_user_state('guest')
         send_payment_details()
+    elif state == 'wait':
+        update.message.reply_text(payment_message)
+        # Якщо доступ закінчився
         return False
     else:
         # Встановлюємо користувача як 'guest' і просимо надіслати скріншот
