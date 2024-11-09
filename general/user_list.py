@@ -53,6 +53,19 @@ def check_user_access(user_id):
     return False
 
 
+def check_expired_user_at_list(user_id):
+    # Зчитування даних з таблиці доступу
+    access_data = access_worksheet.get_all_records()
+
+    # Перевірка, чи є користувач в таблиці доступу
+    for row in access_data:
+        if str(row['User ID']) == str(user_id) and row['Access Granted'] == 'FALSE':
+            return True  # Доступ дозволено
+
+    # Якщо користувача немає в таблиці, доступ заборонено
+    return False
+
+
 def check_user_at_list(user_id):
     # Зчитування даних з таблиці доступу
     access_data = access_worksheet.get_all_records()
@@ -72,6 +85,7 @@ def add_user_activity(user_id, username):
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     activity_worksheet.append_row([user_id, username, current_time, state])
     print(f"User {username} (ID: {user_id}) activity recorded at {current_time}.")
+
 
 # Функція для надсилання повідомлення з реквізитами для оплати
 def send_payment_message(user_id):
@@ -99,36 +113,36 @@ def user_activity_and_access(update, context):
     # Встановлюємо платіжні дані на основі мови
     if language == 'Ukrainian':
         payment_details = (
-            "Вибачте, але ваш доступ обмежено. Щоб отримати повний доступ до бота, будь ласка, оформіть підписку "
-            "за 25 доларів на місяць за наступними реквізитами:\n\n"
-            "Після оплати надішліть скріншот безпосередньо цьому чат-боту.\n"
-            "Реквізити для оплати:\n"
-            "PayPal: business.stashkiv@gmail.com\n"
-            "USDT (Network ETH ERC20) : \n\n"
+            "💰 Щоб отримати доступ до бота, будь ласка, оформіть підписку за 25 доларів на місяць за наступними реквізитами:\n\n"
+            "📸 Після оплати надішліть скріншот безпосередньо цьому чат-боту.\n\n"
+            "💳 Реквізити для оплати:\n"
+            "🅿️ PayPal: business.stashkiv@gmail.com\n"
+            "💸 USDT (Мережа ETH ERC20): \n\n"
+            "🆓 Долучайтесь до нашого безкоштовного каналу, де я ділюсь різними ідеями та публікую інструкцію до бота: https://t.me/trade_navigator_channel"
         )
         eth_address = '0x281ce314d2f3762ccb591a987ad9a793bf0be2a7'
         payment_message = (
-            'Ви отримаєте доступ відразу після підтвердження платежу.\n'
-            '(Платежі обробляються від 08:00 по 20:00 за центральним часом.)\n'
-            'Питання? business.stashkiv@gmail.com'
+            "🔓 Ви отримаєте доступ відразу після підтвердження платежу.\n"
+            "(⌛ Платежі обробляються від 08:00 до 20:00 за центральним часом.)\n"
+            "📩 Питання? business.stashkiv@gmail.com"
         )
-        expired_access_message = 'Ваш доступ закінчився. Будь ласка, надішліть скріншот оплати.'
+        expired_access_message = "⏳ Ваш доступ закінчився. Будь ласка, надішліть скріншот оплати."
     else:
         payment_details = (
-            "Sorry, but your access is restricted. To gain full access to the bot, please subscribe for $25 per "
-            "month using the following payment details:\n\n"
-            "After payment, send a screenshot directly to this chatbot.\n"
-            "Payment details:\n"
-            "PayPal: business.stashkiv@gmail.com\n"
-            "USDT (Network ETH ERC20) : \n\n"
+            "💰 To gain access to the bot, please subscribe for $25 per month using the following payment details:\n\n"
+            "📸 After payment, send a screenshot directly to this chatbot.\n\n"
+            "💳 Payment details:\n"
+            "🅿️ PayPal: business.stashkiv@gmail.com\n"
+            "💸 USDT (Network ETH ERC20): \n\n"
+            "🆓 Join our free channel where I share various ideas and provide instructions for using the bot: https://t.me/trade_navigator_channel"
         )
         eth_address = '0x281ce314d2f3762ccb591a987ad9a793bf0be2a7'
         payment_message = (
-            'You will receive access immediately after payment confirmation.\n'
-            '(Payments are processed from 08:00 to 20:00 Central Time.)\n'
-            'Questions? business.stashkiv@gmail.com'
+            "🔓 You will receive access immediately after payment confirmation.\n"
+            "(⌛ Payments are processed from 08:00 to 20:00 Central Time.)\n"
+            "📩 Questions? business.stashkiv@gmail.com"
         )
-        expired_access_message = 'Your access has expired. Please send a screenshot of the payment.'
+        expired_access_message = "⏳ Your access has expired. Please send a screenshot of the payment."
 
     # Функція для надсилання платіжних деталей
     def send_payment_details():
@@ -141,10 +155,11 @@ def user_activity_and_access(update, context):
         return True
 
     # Дії в залежності від стану користувача
-    if check_user_at_list(user_id):
+    if check_expired_user_at_list(user_id):
         update.message.reply_text(expired_access_message)
-        update_user_state('guest')
+        update_user_state('expired')
         send_payment_details()
+        return False
     elif state == 'wait':
         update.message.reply_text(payment_message)
         # Якщо доступ закінчився

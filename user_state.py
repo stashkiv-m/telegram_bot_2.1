@@ -1,8 +1,8 @@
 import csv
-import csv
 
 # Глобальна змінна для зберігання станів меню
 global_menu_stack = []
+
 
 def update_user_stack(file_path='user_state.csv'):
     global global_menu_stack  # Використовуємо глобальну змінну

@@ -1,0 +1,121 @@
+Total Buy Signals:
+63 (26.36%)
+
+Total Sell Signals:
+176 (73.64%)
+
+Top 5 Market Cap Industries (Avg):
+| Industry        | Market Cap |
+|-----------------|------------|
+| ConEle          | 352.17 $B  |
+| DisSto          | 185.20 $B  |
+| Ban-Div         | 148.70 $B  |
+| DruMan-Gen      | 148.35 $B  |
+| IntRet          | 134.66 $B  |
+
+
+Top 5 ROE Industries (Avg):
+| Industry        | ROE (%)    |
+|-----------------|------------|
+| Oil&GasMid      |     269.87 |
+| Dia&Res         |     209.66 |
+| EleCom          |     135.47 |
+| Lum&WooPro      |      95.64 |
+| Uti-RegGas      |      66.39 |
+
+
+Top 5 ROA Industries (Avg):
+| Industry        | ROA (%)    |
+|-----------------|------------|
+| Oil&GasMid      |       6.15 |
+| Uti-RegGas      |       0.64 |
+| EleCom          |      -1.70 |
+| Lum&WooPro      |      -3.56 |
+| Dia&Res         |      -8.70 |
+
+
+Top 5 Net Margin Industries (Avg):
+| Industry        | Net Margin (%) |
+|-----------------|------------|
+| MorFin          |      75.37 |
+| DruMan-Spe&Gen  |      53.21 |
+| AssMan          |      49.94 |
+| Uti-IndPowPro   |      35.69 |
+| MarShi          |      34.75 |
+
+
+Bottom 5 Debt to Assets Industries (Avg):
+| Industry        | Debt to Assets |
+|-----------------|------------|
+| Ins-Rei         |       0.03 |
+| Ins-Lif         |       0.05 |
+| Ins-Div         |       0.06 |
+| Ins-Pro&Cas     |       0.06 |
+| SheCom          |       0.07 |
+
+
+Bottom 5 Book Value Industries (Avg):
+| Industry        | Book Value Per Share |
+|-----------------|------------|
+| MedCarFac       |     -12.22 |
+| TraSer          |      -0.26 |
+| Gam             |       2.07 |
+| MedDis          |       2.54 |
+| InfOpe          |       2.66 |
+
+
+Top 3 Growth Industries (Avg):
+| Industry        | growth     |
+|-----------------|------------|
+| Gam             |      79.62 |
+| Lum&WooPro      |      52.20 |
+| Ent             |      30.91 |
+
+
+Bottom 3 Decline Industries (Avg):
+| Industry        | growth     |
+|-----------------|------------|
+| Sil             |     -17.47 |
+| OthPreMet&Min   |      -9.72 |
+| Pol&TreCon      |      -6.88 |
+
+
+Industry Abbreviations:
+| Abbreviation | Full Industry Name |
+|--------------|---------------------|
+| ConEle       | Consumer Electronics |
+| DisSto       | Discount Stores |
+| Ban-Div      | Banks - Diversified |
+| DruMan-Gen   | Drug Manufacturers - General |
+| IntRet       | Internet Retail |
+| Oil&GasMid   | Oil & Gas Midstream |
+| Dia&Res      | Diagnostics & Research |
+| EleCom       | Electronic Components |
+| Lum&WooPro   | Lumber & Wood Production |
+| Uti-RegGas   | Utilities - Regulated Gas |
+| MorFin       | Mortgage Finance |
+| DruMan-Spe&Gen | Drug Manufacturers - Specialty & Generic |
+| AssMan       | Asset Management |
+| Uti-IndPowPro | Utilities - Independent Power Producers |
+| MarShi       | Marine Shipping |
+| Ins-Rei      | Insurance - Reinsurance |
+| Ins-Lif      | Insurance - Life |
+| Ins-Div      | Insurance - Diversified |
+| Ins-Pro&Cas  | Insurance - Property & Casualty |
+| SheCom       | Shell Companies |
+| MedCarFac    | Medical Care Facilities |
+| TraSer       | Travel Services |
+| Gam          | Gambling |
+| MedDis       | Medical Distribution |
+| InfOpe       | Infrastructure Operations |
+| Ent          | Entertainment |
+| Sil          | Silver |
+| OthPreMet&Min | Other Precious Metals & Mining |
+| Pol&TreCon   | Pollution & Treatment Controls |
+| Ban-Reg      | Banks - Regional |
+| Sof-App      | Software - Application |
+| Bio          | Biotechnology |
+| Oil&GasE&p   | Oil & Gas E&P |
+| Gol          | Gold |
+
+

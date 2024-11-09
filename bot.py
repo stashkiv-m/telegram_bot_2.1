@@ -38,36 +38,36 @@ def start(update: Update, context: CallbackContext) -> None:
 
     # Відправляємо привітання та опис проекту залежно від мови
     if language == 'Ukrainian':
-        greeting = (
-            "https://t.me/stashkiv_mykhailo\n\n"
-            "Бот аналізує акції, надаючи технічний та фундаментальий аналіз. Згодом буде крипто та форекс \n"
-            "Бот не гарантує прибутків, але надає корисну інформацію для прийняття рішень."
-        )
-        support_info = (
-            "Підтримати проєкт можна за реквізитами:\n\n"
-            "PayPal: business.stashkiv@gmail.com\n"
-            "ETH: 0x281ce314d2f3762ccb591a987ad9a793bf0be2a7\n\n"
-            "Ваш внесок допоможе в розробці нових функцій бота."
-        )
+        # Відправляємо привітання та опис проекту залежно від мови
+        if language == 'Ukrainian':
+            greeting = (
+                "https://t.me/stashkiv_mykhailo\n\n"
+                "Цей бот аналізує фінансові ринки та надає корисну інформацію для прийняття рішень. Наразі доступні:\n"
+                "- 📈 Аналіз акцій: фундаментальні та технічні показники для вибору кращих активів.\n"
+                "- 📊 Сигнали купівлі/продажу на основі індикаторів MACD та MA.\n"
+                "- 🗂 Класифікація активів за галузями та прибутковістю для зручного порівняння.\n"
+                "- 🔔 Повідомлення про важливі економічні події та відстеження календаря ринку.\n\n"
+                "Незабаром будуть додані аналіз криптовалют та форексу.\n"
+                "Бот не гарантує прибутків, але надає корисну інформацію для обґрунтованих рішень."
+            )
 
-    else:
-        greeting = (
-            "https://t.me/stashkiv_mykhailo\n\n"
-            "The bot analyzes stocks, providing technical and fundamental analysis. Crypto and forex will be added later.\n"
-            "The bot doesn't guarantee profits but provides valuable information for decision-making."
-        )
-        support_info = (
-            "Support the project via:\n\n"
-            "PayPal: business.stashkiv@gmail.com\n"
-            "ETH: 0x281ce314d2f3762ccb591a987ad9a793bf0be2a7\n\n"
-            "Your contribution helps develop new bot features."
-        )
+        else:
+            greeting = (
+                "https://t.me/stashkiv_mykhailo\n\n"
+                "This bot analyzes financial markets and provides useful information for making decisions. Currently available:\n"
+                "- 📈 Stock analysis: fundamental and technical indicators to select top assets.\n"
+                "- 📊 Buy/sell signals based on MACD and MA indicators.\n"
+                "- 🗂 Asset classification by industry and profitability for easy comparison.\n"
+                "- 🔔 Notifications for important economic events and market calendar tracking.\n\n"
+                "Crypto and forex analysis will be added soon.\n"
+                "The bot doesn't guarantee profits but provides valuable information for informed decisions."
+            )
 
     # Виклик функції з передачею необхідних аргументів
 
     # Відправляємо повідомлення користувачу
     context.bot.send_message(chat_id=update.effective_chat.id, text=greeting, reply_markup=create_start_keyboard())
-    context.bot.send_message(chat_id=update.effective_chat.id, text=support_info)
+
 
     # Оновлюємо стан меню
     update_menu_state('start')
@@ -84,6 +84,7 @@ def menu(update, context):
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
         context.bot.send_message(chat_id=update.effective_chat.id, text='Menu:', reply_markup=reply_markup)
+        update_user_state('active')
         update_menu_state('menu')
     else:
         pass
@@ -91,7 +92,7 @@ def menu(update, context):
 
 def handle_photo(update: Update, context: CallbackContext) -> None:
     state = user_state().rstrip('\n')
-    if state == 'guest':
+    if state == 'guest' or state == 'expired':
         ADMIN_CHAT_ID = 1440645936
 
         # Створюємо екземпляр другого бота
@@ -109,7 +110,7 @@ def handle_photo(update: Update, context: CallbackContext) -> None:
         photo_file.download(file_path)
 
         # Формуємо підпис до фото, щоб відправити разом з ID та іменем користувача
-        caption_text = f"Фото від користувача:\nID: {user_id}\nUsername: {username}"
+        caption_text = f"New payment notification ! Від користувача:\nID: {user_id}\nUsername: {username}"
 
         # Використовуємо другого бота для пересилання фото з підписом до адміністратора
         with open(file_path, 'rb') as img:
@@ -166,7 +167,7 @@ def main():
 
     def stock_mrkt_overview_func_button_call(update: Update, context: CallbackContext) -> None:
         if user_activity_and_access(update, context):
-
+            update_user_state('active')
             update_menu_state('mrkt_overview')
             send_market_overview(update, context)
         else:
@@ -175,6 +176,7 @@ def main():
     def stock_company_info_func_button_call(update: Update, context: CallbackContext) -> None:
         if user_activity_and_access(update, context):
             symbol_info(update, context)
+            update_user_state('active')
             update_menu_state('stock_company_info')
         else:
             pass
@@ -182,41 +184,42 @@ def main():
     def stock_signal_func_button_call(update: Update, context: CallbackContext) -> None:
         if user_activity_and_access(update, context):
             update_menu_state('stock_signal')
+            update_user_state('active')
             signal_list_for_user(update, context)
         else:
             pass
 
-    def forex_func_button_call(update: Update, context: CallbackContext) -> None:
-        forex_keyboard(update, context)
-        update_menu_state('forex_menu')
-
-    def forex_mrkt_overview_func_button_call(update: Update, context: CallbackContext) -> None:
-        test_button(update, context)
-        update_menu_state('forex_mrkt_overview')
-
-    def forex_pairs_info_func_button_call(update: Update, context: CallbackContext) -> None:
-        symbol_info(update, context)
-        update_menu_state('forex_pairs_info')
-
-    def forex_signals_func_button_call(update: Update, context: CallbackContext) -> None:
-        update_menu_state('forex_signal')
-        signal_list_for_user(update, context)
-
-    def crypto_func_button_call(update: Update, context: CallbackContext) -> None:
-        crypto_keyboard(update, context)
-        update_menu_state('crypto_menu')
-
-    def crypto_mrkt_overview_func_button_call(update: Update, context: CallbackContext) -> None:
-        test_button(update, context)
-        update_menu_state('crypto_mrkt_overview')
-
-    def crypto_info_func_button_call(update: Update, context: CallbackContext) -> None:
-        symbol_info(update, context)
-        update_menu_state('crypto_info')
-
-    def crypto_signals_func_button_call(update: Update, context: CallbackContext) -> None:
-        update_menu_state('crypto_signals')
-        signal_list_for_user(update, context)
+    # def forex_func_button_call(update: Update, context: CallbackContext) -> None:
+    #     forex_keyboard(update, context)
+    #     update_menu_state('forex_menu')
+    #
+    # def forex_mrkt_overview_func_button_call(update: Update, context: CallbackContext) -> None:
+    #     test_button(update, context)
+    #     update_menu_state('forex_mrkt_overview')
+    #
+    # def forex_pairs_info_func_button_call(update: Update, context: CallbackContext) -> None:
+    #     symbol_info(update, context)
+    #     update_menu_state('forex_pairs_info')
+    #
+    # def forex_signals_func_button_call(update: Update, context: CallbackContext) -> None:
+    #     update_menu_state('forex_signal')
+    #     signal_list_for_user(update, context)
+    #
+    # def crypto_func_button_call(update: Update, context: CallbackContext) -> None:
+    #     crypto_keyboard(update, context)
+    #     update_menu_state('crypto_menu')
+    #
+    # def crypto_mrkt_overview_func_button_call(update: Update, context: CallbackContext) -> None:
+    #     test_button(update, context)
+    #     update_menu_state('crypto_mrkt_overview')
+    #
+    # def crypto_info_func_button_call(update: Update, context: CallbackContext) -> None:
+    #     symbol_info(update, context)
+    #     update_menu_state('crypto_info')
+    #
+    # def crypto_signals_func_button_call(update: Update, context: CallbackContext) -> None:
+    #     update_menu_state('crypto_signals')
+    #     signal_list_for_user(update, context)
 
     schedule_func_call(all_signals_calc_run, 15, 00)
     schedule_func_call(send_daily_events, 7, 30)
@@ -239,17 +242,17 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex(r'^Company information$'), stock_company_info_func_button_call))
     dp.add_handler(MessageHandler(Filters.regex(r'^Stock Signals$'), stock_signal_func_button_call))
 
-    # Register message handlers for Forex menu
-    dp.add_handler(MessageHandler(Filters.regex(r'^Forex$'), forex_func_button_call))
-    dp.add_handler(MessageHandler(Filters.regex(r'^Forex Market Overview$'), forex_mrkt_overview_func_button_call))
-    dp.add_handler(MessageHandler(Filters.regex(r'^Pairs info$'), forex_pairs_info_func_button_call))
-    dp.add_handler(MessageHandler(Filters.regex(r'^Forex Signals$'), forex_signals_func_button_call))
-
-    # Register message handlers for Crypto menu
-    dp.add_handler(MessageHandler(Filters.regex(r'^Crypto$'), crypto_func_button_call))
-    dp.add_handler(MessageHandler(Filters.regex(r'^Crypto Market Overview$'), crypto_mrkt_overview_func_button_call))
-    dp.add_handler(MessageHandler(Filters.regex(r'^Cryptocurrencies info$'), crypto_info_func_button_call))
-    dp.add_handler(MessageHandler(Filters.regex(r'^Crypto Signals$'), crypto_signals_func_button_call))
+    # # Register message handlers for Forex menu
+    # dp.add_handler(MessageHandler(Filters.regex(r'^Forex$'), forex_func_button_call))
+    # dp.add_handler(MessageHandler(Filters.regex(r'^Forex Market Overview$'), forex_mrkt_overview_func_button_call))
+    # dp.add_handler(MessageHandler(Filters.regex(r'^Pairs info$'), forex_pairs_info_func_button_call))
+    # dp.add_handler(MessageHandler(Filters.regex(r'^Forex Signals$'), forex_signals_func_button_call))
+    #
+    # # Register message handlers for Crypto menu
+    # dp.add_handler(MessageHandler(Filters.regex(r'^Crypto$'), crypto_func_button_call))
+    # dp.add_handler(MessageHandler(Filters.regex(r'^Crypto Market Overview$'), crypto_mrkt_overview_func_button_call))
+    # dp.add_handler(MessageHandler(Filters.regex(r'^Cryptocurrencies info$'), crypto_info_func_button_call))
+    # dp.add_handler(MessageHandler(Filters.regex(r'^Crypto Signals$'), crypto_signals_func_button_call))
 
     # Back button
     dp.add_handler(MessageHandler(Filters.regex(r'^Back$'), back_function))

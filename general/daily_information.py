@@ -310,4 +310,12 @@ def send_img_with_text(image_text, image_name=None, folder_name='daily_news', te
     if result_path:
         send_image_to_all_users(result_path)
 
+    # Очищення папки після відправки
+    for file in os.listdir(output_folder):
+        file_path = os.path.join(output_folder, file)
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+        except Exception as e:
+            print(f"Error deleting file {file_path}: {e}")
 
