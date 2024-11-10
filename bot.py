@@ -29,7 +29,6 @@ TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
 
 
 def start(update: Update, context: CallbackContext) -> None:
-
     # Зберігаємо стан меню
     context.user_data['menu_stack'] = ['start']
 
@@ -38,32 +37,27 @@ def start(update: Update, context: CallbackContext) -> None:
 
     # Відправляємо привітання та опис проекту залежно від мови
     if language == 'Ukrainian':
-        # Відправляємо привітання та опис проекту залежно від мови
-        if language == 'Ukrainian':
-            greeting = (
-                "https://t.me/stashkiv_mykhailo\n\n"
-                "Цей бот аналізує фінансові ринки та надає корисну інформацію для прийняття рішень. Наразі доступні:\n"
-                "- 📈 Аналіз акцій: фундаментальні та технічні показники для вибору кращих активів.\n"
-                "- 📊 Сигнали купівлі/продажу на основі індикаторів MACD та MA.\n"
-                "- 🗂 Класифікація активів за галузями та прибутковістю для зручного порівняння.\n"
-                "- 🔔 Повідомлення про важливі економічні події та відстеження календаря ринку.\n\n"
-                "Незабаром будуть додані аналіз криптовалют та форексу.\n"
-                "Бот не гарантує прибутків, але надає корисну інформацію для обґрунтованих рішень."
-            )
-
-        else:
-            greeting = (
-                "https://t.me/stashkiv_mykhailo\n\n"
-                "This bot analyzes financial markets and provides useful information for making decisions. Currently available:\n"
-                "- 📈 Stock analysis: fundamental and technical indicators to select top assets.\n"
-                "- 📊 Buy/sell signals based on MACD and MA indicators.\n"
-                "- 🗂 Asset classification by industry and profitability for easy comparison.\n"
-                "- 🔔 Notifications for important economic events and market calendar tracking.\n\n"
-                "Crypto and forex analysis will be added soon.\n"
-                "The bot doesn't guarantee profits but provides valuable information for informed decisions."
-            )
-
-    # Виклик функції з передачею необхідних аргументів
+        greeting = (
+            "https://t.me/stashkiv_mykhailo\n\n"
+            "Цей бот аналізує фінансові ринки та надає корисну інформацію для прийняття рішень. Наразі доступні:\n"
+            "- 📈 Аналіз акцій: фундаментальні та технічні показники для вибору кращих активів.\n"
+            "- 📊 Сигнали купівлі/продажу на основі індикаторів MACD та MA.\n"
+            "- 🗂 Класифікація активів за галузями та прибутковістю для зручного порівняння.\n"
+            "- 🔔 Повідомлення про важливі економічні події та відстеження календаря ринку.\n\n"
+            "Незабаром будуть додані аналіз криптовалют та форексу.\n"
+            "Бот не гарантує прибутків, але надає корисну інформацію для обґрунтованих рішень."
+        )
+    else:
+        greeting = (
+            "https://t.me/stashkiv_mykhailo\n\n"
+            "This bot analyzes financial markets and provides useful information for making decisions. Currently available:\n"
+            "- 📈 Stock analysis: fundamental and technical indicators to select top assets.\n"
+            "- 📊 Buy/sell signals based on MACD and MA indicators.\n"
+            "- 🗂 Asset classification by industry and profitability for easy comparison.\n"
+            "- 🔔 Notifications for important economic events and market calendar tracking.\n\n"
+            "Crypto and forex analysis will be added soon.\n"
+            "The bot doesn't guarantee profits but provides valuable information for informed decisions."
+        )
 
     # Відправляємо повідомлення користувачу
     context.bot.send_message(chat_id=update.effective_chat.id, text=greeting, reply_markup=create_start_keyboard())
