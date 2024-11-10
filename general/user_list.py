@@ -113,12 +113,10 @@ def user_activity_and_access(update, context):
     # Встановлюємо платіжні дані на основі мови
     if language == 'Ukrainian':
         payment_details = (
-            "💰 Щоб отримати доступ до бота, будь ласка, оформіть підписку за 25 доларів на місяць за наступними реквізитами:\n\n"
+            "💰 Щоб отримати доступ до бота, будь ласка, оформіть підписку за 10 доларів на місяць за наступними реквізитами:\n\n"
             "📸 Після оплати надішліть скріншот безпосередньо цьому чат-боту.\n\n"
-            "💳 Реквізити для оплати:\n"
-            "🅿️ PayPal: business.stashkiv@gmail.com\n"
-            "💸 USDT (Мережа ETH ERC20): \n\n"
             "🆓 Долучайтесь до нашого безкоштовного каналу, де я ділюсь різними ідеями та публікую інструкцію до бота: https://t.me/trade_navigator_channel"
+            "💳 Реквізити для оплати:\n"
         )
         eth_address = '0x281ce314d2f3762ccb591a987ad9a793bf0be2a7'
         payment_message = (
@@ -131,10 +129,8 @@ def user_activity_and_access(update, context):
         payment_details = (
             "💰 To gain access to the bot, please subscribe for $25 per month using the following payment details:\n\n"
             "📸 After payment, send a screenshot directly to this chatbot.\n\n"
+            "🆓 Join our free channel where I share various ideas and provide instructions for using the bot: https://t.me/trade_navigator_channel\n"
             "💳 Payment details:\n"
-            "🅿️ PayPal: business.stashkiv@gmail.com\n"
-            "💸 USDT (Network ETH ERC20): \n\n"
-            "🆓 Join our free channel where I share various ideas and provide instructions for using the bot: https://t.me/trade_navigator_channel"
         )
         eth_address = '0x281ce314d2f3762ccb591a987ad9a793bf0be2a7'
         payment_message = (
@@ -147,7 +143,12 @@ def user_activity_and_access(update, context):
     # Функція для надсилання платіжних деталей
     def send_payment_details():
         context.bot.send_message(chat_id=user_id, text=payment_details)
+        context.bot.send_message(chat_id=user_id, text="USDT (Network ETH ERC20):")
         context.bot.send_message(chat_id=user_id, text=eth_address)
+        context.bot.send_message(chat_id=user_id, text="🅿️ PayPal:")
+        context.bot.send_message(chat_id=user_id, text="business.stashkiv@gmail.com")
+        context.bot.send_message(chat_id=user_id, text="Monobank:")
+        context.bot.send_message(chat_id=user_id, text="4441111068030711")
 
     # Перевірка доступу користувача
     if check_user_access(user_id):
@@ -167,7 +168,6 @@ def user_activity_and_access(update, context):
     else:
         # Встановлюємо користувача як 'guest' і просимо надіслати скріншот
         update_user_state('guest')
-        update.message.reply_text('Будь ласка, надішліть скріншот оплати.\nPlease send a screenshot of the payment.')
         send_payment_details()
         return False
 
