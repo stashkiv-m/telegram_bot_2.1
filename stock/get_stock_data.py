@@ -121,68 +121,82 @@ def get_dynamic_conclusion(
 ):
     high_profitability = "High" in short_assessments['ROE']
     moderate_profitability = "Moderate" in short_assessments['ROE']
+    low_profitability = "Low" in short_assessments['ROE']
     high_debt = "High Risk" in short_assessments['Debt-to-Equity']
     low_debt = "Low Risk" in short_assessments['Debt-to-Equity']
-    strong_liquidity = "Liquid" in short_assessments['Current Ratio'] and "Strong" in short_assessments['Quick Ratio']
+    strong_liquidity = "High" in short_assessments['Current Ratio']
+    average_liquidity = "Moderate" in short_assessments['Current Ratio']
+    low_liquidity = "Low" in short_assessments['Current Ratio']
     attractive_dividends = "High" in short_assessments['Dividend Yield']
+    moderate_dividends = "Moderate" in short_assessments['Dividend Yield']
     low_valuation = "Undervalued" in short_assessments['P/E Ratio'] and "Low" in short_assessments['Price to Book']
 
-    # Текст висновку залежить від мови
+    # Висновок залежить від мови
     if language == 'Ukrainian':
         conclusion = []
 
-        # ROE and profitability assessment
+        # Оцінка прибутковості (ROE)
         if high_profitability:
             conclusion.append(
-                f"Компанія демонструє високий рівень прибутковості, з рентабельністю власного капіталу (ROE) на рівні {roe}%, "
-                f"що вказує на ефективне використання капіталу для генерації прибутку."
+                f"Компанія має високу прибутковість з рентабельністю власного капіталу (ROE) на рівні {roe}%, що показує ефективне використання капіталу."
             )
         elif moderate_profitability:
             conclusion.append(
-                f"Рентабельність власного капіталу (ROE) складає {roe}%, що свідчить про помірний рівень прибутковості. "
-                f"Це може вказувати на стабільне, хоча й не дуже динамічне зростання."
+                f"Рентабельність власного капіталу (ROE) становить {roe}%, що свідчить про стабільну прибутковість, хоча і не надто високу."
             )
-        else:
+        elif low_profitability:
             conclusion.append(
-                f"Рентабельність власного капіталу (ROE) складає {roe}%, що є низьким показником, можливо, вказуючи на обмежену прибутковість компанії."
+                f"Рентабельність власного капіталу (ROE) на рівні {roe}% є низькою, що може вказувати на обмежену прибутковість компанії."
             )
 
-        # Debt assessment
+        # Оцінка боргу
         if high_debt:
             conclusion.append(
-                f"Компанія має високий рівень заборгованості у розмірі {format_number(total_debt)}, що підвищує фінансові ризики "
-                f"та може вплинути на здатність компанії підтримувати стійкість у складних умовах."
+                f"Компанія має високий рівень боргу ({format_number(total_debt)}), що підвищує ризики та може вплинути на її фінансову стабільність."
             )
         elif low_debt:
             conclusion.append(
-                f"Заборгованість компанії є низькою ({short_assessments['Debt-to-Equity']}), що знижує фінансові ризики та забезпечує фінансову стабільність."
+                f"Борг компанії є низьким, що сприяє зниженню фінансових ризиків та підтримці стабільності."
             )
 
-        # Liquidity assessment
+        # Оцінка ліквідності
         if strong_liquidity:
             conclusion.append(
-                "Сильна ліквідність вказує на здатність компанії швидко покривати свої короткострокові зобов'язання, що сприяє стабільності."
+                "Компанія має високу ліквідність, що дозволяє їй швидко покривати короткострокові зобов'язання."
+            )
+        elif average_liquidity:
+            conclusion.append(
+                "Ліквідність компанії знаходиться на середньому рівні, що забезпечує достатню фінансову гнучкість."
+            )
+        elif low_liquidity:
+            conclusion.append(
+                "Низька ліквідність може обмежувати можливості компанії у виплаті поточних зобов'язань."
             )
 
-        # Gross Margin assessment
-        conclusion.append(
-            f"Валовий прибуток компанії на рівні {gross_margin}%, що свідчить про {('високу' if gross_margin > 40 else 'середню') if gross_margin else 'низьку'} ефективність контролю над витратами."
-        )
+        # Валовий прибуток
+        if gross_margin:
+            conclusion.append(
+                f"Валовий прибуток компанії становить {gross_margin}%, що свідчить про {'високу' if gross_margin > 40 else 'середню' if gross_margin > 20 else 'низьку'} ефективність у контролі над витратами."
+            )
 
-        # Dividend yield assessment
+        # Дивідендна дохідність
         if attractive_dividends:
             conclusion.append(
-                f"Висока дивідендна дохідність ({dividend_yield}%) робить компанію привабливою для інвесторів, які шукають стабільний дохід."
+                f"Висока дивідендна дохідність ({dividend_yield}%) є привабливою для інвесторів, які шукають стабільний дохід."
+            )
+        elif moderate_dividends:
+            conclusion.append(
+                f"Помірна дивідендна дохідність ({dividend_yield}%) може зацікавити інвесторів, але не є дуже високою."
             )
         else:
             conclusion.append(
-                f"Дивідендна дохідність компанії є {('помірною' if dividend_yield else 'відсутньою')}, що може не задовольняти інвесторів, які шукають дохід від дивідендів."
+                "Дивідендна дохідність відсутня або дуже низька, що може не задовольняти інвесторів, які шукають дохід від дивідендів."
             )
 
-        # Valuation
+        # Оцінка вартості
         if low_valuation:
             conclusion.append(
-                "Акції компанії оцінюються як недооцінені, що може представляти привабливу інвестиційну можливість."
+                "Акції компанії недооцінені, що може представляти вигідну інвестиційну можливість."
             )
 
         return " ".join(conclusion)
@@ -190,55 +204,69 @@ def get_dynamic_conclusion(
     else:  # English as default
         conclusion = []
 
-        # ROE and profitability assessment
+        # Profitability assessment (ROE)
         if high_profitability:
             conclusion.append(
-                f"The company demonstrates high profitability, with a return on equity (ROE) of {roe}%, indicating efficient capital usage for profit generation."
+                f"The company shows high profitability, with a return on equity (ROE) of {roe}%, indicating effective capital use."
             )
         elif moderate_profitability:
             conclusion.append(
-                f"The return on equity (ROE) of {roe}% suggests a moderate level of profitability, indicating stable, though not rapid, growth."
+                f"The return on equity (ROE) is {roe}%, reflecting moderate profitability, stable yet not rapid."
             )
-        else:
+        elif low_profitability:
             conclusion.append(
-                f"The return on equity (ROE) of {roe}% is low, potentially pointing to limited profitability."
+                f"The return on equity (ROE) of {roe}% is low, potentially indicating limited profitability."
             )
 
         # Debt assessment
         if high_debt:
             conclusion.append(
-                f"The company carries a high debt level of {format_number(total_debt)}, increasing financial risks and possibly affecting resilience in challenging conditions."
+                f"The company has a high debt level ({format_number(total_debt)}), increasing financial risks and possibly affecting stability."
             )
         elif low_debt:
             conclusion.append(
-                f"The company's debt is low ({short_assessments['Debt-to-Equity']}), reducing financial risks and supporting stability."
+                f"The company has low debt, which reduces financial risk and supports stability."
             )
 
         # Liquidity assessment
         if strong_liquidity:
             conclusion.append(
-                "Strong liquidity indicates the company's ability to quickly cover its short-term obligations, supporting financial stability."
+                "The company has high liquidity, allowing it to quickly cover short-term obligations."
+            )
+        elif average_liquidity:
+            conclusion.append(
+                "The company's liquidity is moderate, providing adequate financial flexibility."
+            )
+        elif low_liquidity:
+            conclusion.append(
+                "Low liquidity may limit the company's ability to meet current obligations."
             )
 
-        # Gross Margin assessment
-        conclusion.append(
-            f"The gross margin of {gross_margin}% reflects {('high' if gross_margin > 40 else 'average') if gross_margin else 'low'} cost control efficiency."
-        )
+        # Gross margin assessment
+        if gross_margin:
+            conclusion.append(
+                f"The company's gross margin is {gross_margin}%, indicating {'high' if gross_margin > 40 else 'average' if gross_margin > 20 else 'low'} cost control efficiency."
+            )
 
         # Dividend yield assessment
         if attractive_dividends:
             conclusion.append(
-                f"A high dividend yield ({dividend_yield}%) makes the company attractive for income-focused investors."
+                f"A high dividend yield ({dividend_yield}%) makes the company appealing for income-seeking investors."
+            )
+        elif moderate_dividends:
+            conclusion.append(
+                f"A moderate dividend yield ({dividend_yield}%) may interest investors, though it is not very high."
             )
         else:
             conclusion.append(
-                f"The company's dividend yield is {('moderate' if dividend_yield else 'absent')}, which may not appeal to income-seeking investors."
+                "The dividend yield is absent or very low, which may not satisfy income-focused investors."
             )
 
         # Valuation
         if low_valuation:
             conclusion.append(
-                "The stock is considered undervalued, potentially presenting an attractive investment opportunity."
+                "The company's stock is considered undervalued, presenting a potentially attractive investment opportunity."
             )
 
         return " ".join(conclusion)
+

@@ -86,11 +86,9 @@ def generate_text_analysis(ticker, top_line_start, top_line_end, bottom_line_sta
     # Аналіз трендових ліній для 'stock_company_info'
     if state == 'stock_company_info' and top_line_start and top_line_end:
         support_resistance_analysis.append(
-            f"The {ticker} shows a {trend_direction} trend with an upper trendline starting at "
-            f"{top_line_start[1]:.2f} and ending at {top_line_end[1]:.2f}."
+            f"The {ticker} shows a {trend_direction} trend."
             if language == 'English' else
-            f"Актив {ticker} демонструє {trend_direction} тренд із верхньою трендовою лінією, що починається на рівні "
-            f"{top_line_start[1]:.2f} та закінчується на {top_line_end[1]:.2f}."
+            f"Актив {ticker} демонструє {trend_direction} тренд. "
         )
 
     # Визначення найближчого рівня та відстані до нього
@@ -130,7 +128,7 @@ def generate_text_analysis(ticker, top_line_start, top_line_end, bottom_line_sta
             if language == 'English' else
             f"Ціна щойно пробила ключовий рівень {closest_level:.2f}, що може вказувати на подальший висхідний рух."
         )
-    else:
+    elif latest_close > closest_level:
         support_resistance_analysis.append(
             f"The price is approaching the support level at {closest_level:.2f}. If this level holds, it could offer a buying opportunity. "
             "A failure to hold may signal further decline."

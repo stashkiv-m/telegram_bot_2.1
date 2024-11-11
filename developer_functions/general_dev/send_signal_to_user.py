@@ -2,6 +2,8 @@ import os
 import pandas as pd
 from telegram import Update
 from telegram.ext import CallbackContext
+
+from language_state import language_state
 from state_update_menu import menu_state
 
 
@@ -32,6 +34,8 @@ def clean_percentage(value):
 
 
 def determine_strategy(row=None):
+    language = language_state().rstrip('\n')
+
     strategy_abbr = {
         "High Growth Undervalued": "HG_Und",
         "High Quality": "HQ",
@@ -48,21 +52,38 @@ def determine_strategy(row=None):
         "Unknown": "Unk"
     }
 
-    strategy_descriptions = {
-        "HG_Und": "High Growth and Undervalued: High ROE, ROA, low Debt, high margins, and undervalued.",
-        "HQ": "High Quality: High ROE, ROA, low Debt, and high margins.",
-        "DivGr": "Dividend Growth: High ROE, ROA, low Debt, high margins, with dividends.",
-        "DivLd": "Dividend Leader: High ROE, ROA, and strong dividend payout.",
-        "Dist": "Distressed: High debt, negative earnings, and poor margins.",
-        "StblFin": "Stable Financial: High liquidity ratios, positive margins, and strong financial stability.",
-        "ValPl": "Value Play: Low PE and P/B ratio, indicating undervalued stocks.",
-        "AggGr": "Aggressive Growth: High revenue and asset turnover ratios, focusing on growth.",
-        "BalOp": "Balanced Opportunity: Mixed fundamentals but some growth potential.",
-        "ModInc": "Moderate Income: Mixed income metrics with low to moderate risk.",
-        "MixFund": "Mixed Fundamentals: Stable with low growth potential, but not at risk.",
-        "NegRet": "Negative Returns: Stocks with negative ROE or ROA.",
-        "Unk": "Unknown: No specific strategy classification available."
-    }
+    if language == 'Ukrainian':
+        strategy_descriptions = {
+            "HG_Und": "Високий ріст і недооціненість: високий ROE, ROA, низький борг, високі маржі та недооціненість.",
+            "HQ": "Висока якість: високий ROE, ROA, низький борг і високі маржі.",
+            "DivGr": "Зростання дивідендів: високий ROE, ROA, низький борг, високі маржі та дивіденди.",
+            "DivLd": "Лідер дивідендів: високий ROE, ROA та сильна виплата дивідендів.",
+            "Dist": "Складне становище: високий борг, негативні прибутки та низькі маржі.",
+            "StblFin": "Стабільність фінансів: високі коефіцієнти ліквідності, позитивні маржі та фінансова стабільність.",
+            "ValPl": "Цінова гра: низький PE та P/B коефіцієнти, що вказують на недооціненість.",
+            "AggGr": "Агресивне зростання: високі доходи та оборот активів, зосередження на зростанні.",
+            "BalOp": "Збалансована можливість: змішані фінансові показники, але є потенціал зростання.",
+            "ModInc": "Помірний дохід: змішані доходи з низьким або помірним ризиком.",
+            "MixFund": "Змішані фінанси: стабільність з низьким потенціалом зростання, але без ризиків.",
+            "NegRet": "Негативна дохідність: акції з негативним ROE або ROA.",
+            "Unk": "Невідомо: конкретна стратегія не визначена."
+        }
+    else:
+        strategy_descriptions = {
+            "HG_Und": "High Growth and Undervalued: High ROE, ROA, low Debt, high margins, and undervalued.",
+            "HQ": "High Quality: High ROE, ROA, low Debt, and high margins.",
+            "DivGr": "Dividend Growth: High ROE, ROA, low Debt, high margins, with dividends.",
+            "DivLd": "Dividend Leader: High ROE, ROA, and strong dividend payout.",
+            "Dist": "Distressed: High debt, negative earnings, and poor margins.",
+            "StblFin": "Stable Financial: High liquidity ratios, positive margins, and strong financial stability.",
+            "ValPl": "Value Play: Low PE and P/B ratio, indicating undervalued stocks.",
+            "AggGr": "Aggressive Growth: High revenue and asset turnover ratios, focusing on growth.",
+            "BalOp": "Balanced Opportunity: Mixed fundamentals but some growth potential.",
+            "ModInc": "Moderate Income: Mixed income metrics with low to moderate risk.",
+            "MixFund": "Mixed Fundamentals: Stable with low growth potential, but not at risk.",
+            "NegRet": "Negative Returns: Stocks with negative ROE or ROA.",
+            "Unk": "Unknown: No specific strategy classification available."
+        }
 
     if row is None:
         return strategy_abbr, strategy_descriptions
@@ -230,7 +251,7 @@ def signal_list_for_user(update: Update, context: CallbackContext):
 
     df = pd.read_csv(file_path)
     macd_df, ma_df, abbrev_dict = filter_and_classify_signals(df, state)
-    _, strategy_descriptions = determine_strategy(None)
+    _, strategy_descriptions = determine_strategy(row=None)
 
     with open(output_file, 'w', encoding='utf-8') as file:
         file.write(create_user_table_by_strategy(macd_df, "MACD Signals", abbrev_dict))
