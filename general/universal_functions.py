@@ -4,7 +4,7 @@ from telegram.ext import MessageHandler, Filters
 
 from crypto.get_crypto_data import *
 from developer_functions.general_dev.chart import generate_chart
-from general.technical_analys_chart import analyze_ticker
+# from general.technical_analys_chart import analyze_ticker
 from language_state import language_state
 from state_update_menu import menu_state
 from stock.get_stock_data import get_stock_metrics
@@ -36,7 +36,8 @@ def handle_ticker_input(update, context):
             metrics_table = get_stock_metrics(symbol, ticker, language)
 
             # Генеруємо текстовий аналіз і шлях до графіка
-            analysis = analyze_ticker(ticker=ticker, data=data, language=language, state=state)
+            # analysis = analyze_ticker(ticker=ticker, data=data, language=language, state=state)
+            analysis = 'Technical analysis is not yet available.'
             img_path = generate_chart(ticker)
 
             # Відправляємо графік і результати аналізу користувачу
@@ -57,7 +58,8 @@ def handle_ticker_input(update, context):
             data = symbol.history(period="1y")
 
             # Генеруємо текстовий аналіз для криптовалюти
-            analysis = analyze_ticker(ticker=ticker, data=data, language=language, state=state)
+            # analysis = analyze_ticker(ticker=ticker, data=data, language=language, state=state)
+            analysis = 'Technical analysis is not yet available.'
             img_path = generate_chart(ticker + '-USD')
 
             # Відправляємо графік та аналіз користувачу
@@ -78,7 +80,9 @@ def handle_ticker_input(update, context):
             data = symbol.history(period="1y")
 
             # Генеруємо текстовий аналіз для форекса
-            analysis = analyze_ticker(ticker=ticker, data=data, language=language, state=state)
+            # analysis = analyze_ticker(ticker=ticker, data=data, language=language, state=state)
+            analysis = 'Technical analysis is not yet available.'
+
             img_path = generate_chart(ticker + '=X')
 
             # Відправляємо графік та аналіз користувачу

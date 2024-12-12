@@ -8,7 +8,7 @@ from buttoms_and_function_call import *
 from developer_functions.general_dev.send_signal_to_user import signal_list_for_user
 from general.daily_information import send_daily_events, send_day_end_info
 from general.universal_functions import symbol_info
-from general.user_list import  user_activity_and_access
+from general.user_list import user_activity_and_access
 from keyboards import *
 from language_state import update_language_state, language_state
 from run_all_siganlas_calc import schedule_func_call, all_signals_calc_run
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 # Token for your bot (ensure to keep this token private in real-world applications)
 
-TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
+TOKEN = '7721716265:AAEuzhZyZM_pT0FQHsbx-FziENEg-cNT5do'
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -62,7 +62,6 @@ def start(update: Update, context: CallbackContext) -> None:
     # Відправляємо повідомлення користувачу
     context.bot.send_message(chat_id=update.effective_chat.id, text=greeting, reply_markup=create_start_keyboard())
 
-
     # Оновлюємо стан меню
     update_menu_state('start')
 
@@ -90,7 +89,7 @@ def handle_photo(update: Update, context: CallbackContext) -> None:
         ADMIN_CHAT_ID = 1440645936
 
         # Створюємо екземпляр другого бота
-        second_bot = Bot(token='7342427635:AAFwm6vpbifNorUhWoiJvWxE18IVtK4UARQ')
+        second_bot = Bot(token='7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY')
 
         # Отримуємо дані користувача
         user_id = update.message.from_user.id
@@ -121,6 +120,7 @@ def handle_photo(update: Update, context: CallbackContext) -> None:
     else:
         pass
 
+
 def clear_state_files():
     # Очищаємо файл language_state.csv
     with open("language_state.csv", "w") as file:
@@ -129,6 +129,7 @@ def clear_state_files():
     # Очищаємо файл user_state.csv
     with open("user_state.csv", "w") as file:
         pass  # Очищає файл, зберігаючи його порожнім
+
 
 def main():
     """Start the bot."""
@@ -215,7 +216,7 @@ def main():
     #     update_menu_state('crypto_signals')
     #     signal_list_for_user(update, context)
 
-    schedule_func_call(all_signals_calc_run, 15, 00)
+    schedule_func_call(all_signals_calc_run, 21, 00)
     schedule_func_call(send_daily_events, 7, 30)
     schedule_func_call(send_day_end_info, 15, 00)
 
@@ -232,7 +233,7 @@ def main():
 
     # Register message handlers for stock menu
     dp.add_handler(MessageHandler(Filters.regex(r'^Stock$'), stock_func_button_call))
-    dp.add_handler(MessageHandler(Filters.regex(r"^Stocks Market Overview"), stock_mrkt_overview_func_button_call))
+    # dp.add_handler(MessageHandler(Filters.regex(r"^Stocks Market Overview"), stock_mrkt_overview_func_button_call))
     dp.add_handler(MessageHandler(Filters.regex(r'^Company information$'), stock_company_info_func_button_call))
     dp.add_handler(MessageHandler(Filters.regex(r'^Stock Signals$'), stock_signal_func_button_call))
 

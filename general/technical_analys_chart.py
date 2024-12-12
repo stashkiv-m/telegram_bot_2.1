@@ -1,21 +1,10 @@
 import numpy as np
+import pandas as pd
+import yfinance as yf
+from scipy.signal import find_peaks
 
 
-def calculate_trend_lines_and_levels(data, interval_percent=35):
-    """
-    Розраховує координати трендових ліній, ключові рівні та 200-денну ковзну середню (EMA).
-
-    Параметри:
-    - data: DataFrame, що містить історичні дані з колонками 'High', 'Low' та 'Close'.
-    - interval_percent: відсоток, що визначає розмір інтервалу для пошуку ключових рівнів.
-
-    Повертає:
-    - top_line_start, top_line_end: координати верхньої трендової лінії.
-    - bottom_line_start, bottom_line_end: координати нижньої трендової лінії.
-    - key_levels: список ключових рівнів.
-    - ma_200: значення 200-денної ковзної середньої.
-    """
-
+def calculate_trend_lines(data):
     def rmax(data):
         return [(i, p) for i, p in enumerate(data['High']) if p == max(data['High'][max(0, i - 5):i + 6])]
 
@@ -23,19 +12,16 @@ def calculate_trend_lines_and_levels(data, interval_percent=35):
         return [(i, p) for i, p in enumerate(data['Low']) if p == min(data['Low'][max(0, i - 5):i + 6])]
 
     def get_trend_line(points, data_length):
-        if len(points) < 2:
-            return None, None
         start = points[0]
         end = max(points[1:], key=lambda x: x[1])
         m = (end[1] - start[1]) / (end[0] - start[0])
         y_end = m * (data_length - start[0]) + start[1]
         return start, (data_length, y_end)
 
-    # Розрахунок верхньої та нижньої ліній тренду
     top_line_start, top_line_end = get_trend_line(rmax(data), len(data))
     bottom_line_start, bottom_line_end = get_trend_line(rmin(data), len(data))
 
-    # Розрахунок ключових рівнів
+    interval_percent = 35
     high = data['High'].max()
     low = data['Low'].min()
     range_size = high - low
@@ -48,154 +34,168 @@ def calculate_trend_lines_and_levels(data, interval_percent=35):
         total_count = count_highs + count_lows
         levels.append((i + interval_size / 2, total_count))
 
-    # Вибір трьох найважливіших рівнів
     levels.sort(key=lambda x: x[1], reverse=True)
-    key_levels = [level[0] for level in levels[:3]]  # Три найважливіші рівні
+    key_level = [level[0] for level in levels[:3]]  # Три найважливіші рівні
 
-    # Розрахунок 200-денної ковзної середньої (EMA)
-    ma_200 = data['Close'].ewm(span=200, adjust=False).mean().iloc[-1]
-
-    return top_line_start, top_line_end, bottom_line_start, bottom_line_end, key_levels, ma_200
+    return top_line_start, top_line_end, bottom_line_start, bottom_line_end, key_level
 
 
-def generate_text_analysis(ticker, top_line_start, top_line_end, bottom_line_start, bottom_line_end, key_levels, ma_200,
-                           latest_close, language='Ukrainian', state=''):
+def calculate_relative_highs_lows(df, date_column="Date", high_column="High", low_column="Low", period_days=365):
+    # Переконаємося, що колонка з датами має формат datetime
+    df[date_column] = pd.to_datetime(df[date_column])
+
+    # Фільтруємо дані за заданий період
+    start_date = df[date_column].max() - pd.Timedelta(days=period_days)
+    df_filtered = df[df[date_column] >= start_date].reset_index(drop=True)
+
+    # Знаходимо відносні максимуми для колонки High
+    high_peaks, _ = find_peaks(df_filtered[high_column])
+
+    # Знаходимо відносні мінімуми для колонки Low
+    low_troughs, _ = find_peaks(-df_filtered[low_column])
+
+    # Додаємо колонки для результатів
+    df_filtered["Relative High"] = False
+    df_filtered["Relative Low"] = False
+
+    df_filtered.loc[high_peaks, "Relative High"] = True
+    df_filtered.loc[low_troughs, "Relative Low"] = True
+
+    return df_filtered
+
+
+# Приклад використання функції
+# Задайте ваш DataFrame і бажаний період у днях
+# df = ваш DataFrame
+# result = calculate_relative_highs_lows(df, date_column="Date", high_column="High", low_column="Low", period_days=180)
+# print(result)
+
+
+def price_position(prices, trends_lines):
+    price = prices[-1]
+    trends_line = trends_lines[-1]
+    lines_sorted = sorted(trends_line)  # Сортуємо лінії за значенням
+    lower_line = None
+    upper_line = None
+
+    for i in range(len(lines_sorted)):
+        if lines_sorted[i] <= price:
+            lower_line = lines_sorted[i]
+        elif lines_sorted[i] > price:
+            upper_line = lines_sorted[i]
+            break
+
+    return lower_line, price, upper_line
+
+
+def get_y_trend_lines(coords, x):
     """
-    Генерує текстовий опис технічного аналізу на основі розрахованих ліній тренду, ключових рівнів та 200-денної EMA.
-    Враховує напрямок руху ціни, близькість до ключових рівнів та можливі сценарії пробою або відбою від рівнів.
+    Обчислює координати Y для верхньої та нижньої трендових ліній за заданим X.
+
+    :param coords: Список координат у форматі [(x1, y1), (x2, y2), (x3, y3), (x4, y4)],
+                   де перші дві координати — верхня лінія тренду,
+                   а інші дві — нижня.
+    :param x: Значення X, для якого потрібно обчислити Y.
+    :return: Словник із координатами Y для верхньої та нижньої ліній.
     """
+    last_line_x = coords[1][0] - x
+    # Розпакування координат
+    x1, y1 = coords[0]
+    x2, y2 = coords[1]
+    x3, y3 = coords[2]
+    x4, y4 = coords[3]
 
-    # Визначення напрямку тренду на основі EMA 200 та відстані від неї
-    distance_to_ma = abs(latest_close - ma_200)
-    trend_strength_threshold = 0.02 * latest_close  # Наприклад, 2% відстань для сильного тренду
-    neutral_threshold = 0.01 * latest_close  # Поріг для нейтрального тренду (1%)
+    # Формули для обчислення Y за рівнянням прямої y = mx + b
+    # Верхня лінія
+    m_upper = (y2 - y1) / (x2 - x1)  # Кутовий коефіцієнт
+    b_upper = y1 - m_upper * x1  # Вільний член
+    y_upper = m_upper * last_line_x + b_upper
 
-    if distance_to_ma < neutral_threshold:
-        trend_direction = "neutral" if language == 'English' else "нейтральний"
-    elif latest_close > ma_200 and distance_to_ma > trend_strength_threshold:
-        trend_direction = "strong upward" if language == 'English' else "сильний висхідний"
-    elif latest_close < ma_200 and distance_to_ma > trend_strength_threshold:
-        trend_direction = "strong downward" if language == 'English' else "сильний низхідний"
-    elif latest_close > ma_200:
-        trend_direction = "upward" if language == 'English' else "висхідний"
-    else:
-        trend_direction = "downward" if language == 'English' else "низхідний"
+    # Нижня лінія
+    m_lower = (y4 - y3) / (x4 - x3)  # Кутовий коефіцієнт
+    b_lower = y3 - m_lower * x3  # Вільний член
+    y_lower = m_lower * last_line_x + b_lower
 
-    support_resistance_analysis = []
-
-    # Аналіз трендових ліній для 'stock_company_info'
-    if state == 'stock_company_info' and top_line_start and top_line_end:
-        support_resistance_analysis.append(
-            f"The {ticker} shows a {trend_direction} trend."
-            if language == 'English' else
-            f"Актив {ticker} демонструє {trend_direction} тренд. "
-        )
-
-    # Визначення найближчого рівня та відстані до нього
-    closest_level = min(key_levels, key=lambda x: abs(x - latest_close))
-    distance_to_level = abs(latest_close - closest_level)
-    level_proximity_threshold = 0.02 * latest_close  # Поріг близькості для рівнів (2%)
-
-    # Логіка для різних сценаріїв
-    if distance_to_level < level_proximity_threshold:
-        if trend_direction in ["upward", "strong upward"]:
-            support_resistance_analysis.append(
-                f"The price of {ticker} is close to the key level {closest_level:.2f} in an upward trend. "
-                "If the price consolidates at this level, a breakout is possible. However, if the trend weakens, a pullback could occur."
-                if language == 'English' else
-                f"Ціна активу {ticker} знаходиться біля ключового рівня {closest_level:.2f} при висхідному тренді. "
-                "Якщо ціна консолідується на цьому рівні, можливий пробій. Проте, якщо тренд ослабне, можливий відкат."
-            )
-        elif trend_direction in ["downward", "strong downward"]:
-            support_resistance_analysis.append(
-                f"The price is near the key level {closest_level:.2f} in a downward trend. "
-                "A consolidation at this level could lead to further decline, but a bounce might indicate a temporary support."
-                if language == 'English' else
-                f"Ціна перебуває біля ключового рівня {closest_level:.2f} при низхідному тренді. "
-                "Консолідація на цьому рівні може призвести до подальшого падіння, але відскок може вказати на тимчасову підтримку."
-            )
-        else:
-            support_resistance_analysis.append(
-                f"The price of {ticker} is currently near the key level {closest_level:.2f}, suggesting indecisiveness. "
-                "Traders should monitor for potential breakouts or rebounds."
-                if language == 'English' else
-                f"Ціна активу {ticker} наразі перебуває біля ключового рівня {closest_level:.2f}, що свідчить про невизначеність. "
-                "Трейдерам варто спостерігати за можливими пробоями або відскоками."
-            )
-    elif latest_close > closest_level:
-        support_resistance_analysis.append(
-            f"The price has just broken above the key level {closest_level:.2f}, which may suggest further upward movement."
-            if language == 'English' else
-            f"Ціна щойно пробила ключовий рівень {closest_level:.2f}, що може вказувати на подальший висхідний рух."
-        )
-    elif latest_close > closest_level:
-        support_resistance_analysis.append(
-            f"The price is approaching the support level at {closest_level:.2f}. If this level holds, it could offer a buying opportunity. "
-            "A failure to hold may signal further decline."
-            if language == 'English' else
-            f"Ціна наближається до рівня підтримки на рівні {closest_level:.2f}. Якщо рівень витримає, це може бути гарною можливістю для покупки. "
-            "Невдача утримати рівень може сигналізувати про подальше падіння."
-        )
-
-    # Загальний аналіз ситуації на ринку
-    analysis = "\n".join(support_resistance_analysis)
-    analysis += (
-        f"\nCurrently, the price is trading at {latest_close:.2f}. Observe how the price interacts with these levels for potential breakout or reversal signals."
-        if language == 'English' else
-        f"\nНаразі ціна торгується на рівні {latest_close:.2f}. Слідкуйте за взаємодією ціни з цими рівнями для можливих сигналів пробою або розвороту."
-    )
-
-    # Додаткові рекомендації на основі тренду
-    if trend_direction == "strong upward" or trend_direction == "upward":
-        analysis += (
-            "\nThe upward trend suggests potential further growth, especially if resistance levels are broken."
-            if language == 'English' else
-            "\nВисхідний тренд вказує на можливість подальшого зростання, особливо якщо рівні опору будуть пробиті."
-        )
-    elif trend_direction == "strong downward" or trend_direction == "downward":
-        analysis += (
-            "\nThe downward trend indicates market weakness; exercise caution with purchases."
-            if language == 'English' else
-            "\nНизхідний тренд вказує на слабкість ринку; будьте обережні з покупками."
-        )
-    elif trend_direction == "neutral":
-        analysis += (
-            "\nThe neutral trend suggests uncertainty, which may precede a change in price direction."
-            if language == 'English' else
-            "\nНейтральний тренд вказує на невизначеність, що може передувати зміні напрямку ціни."
-        )
-
-    return analysis
+    return {"upper_y": y_upper, "lower_y": y_lower}
 
 
-
-def analyze_ticker(ticker, data, language='Ukrainian', state=''):
+def find_extrema_indices(data, periods, mode):
     """
-    Розраховує трендові лінії, ключові рівні та повертає текстовий аналіз для активу.
+    Finds the indices of relative extrema (minima or maxima) in a list of data based on the given period.
 
-    Параметри:
-    - ticker: тикер активу.
-    - data: DataFrame, що містить історичні дані.
-    - language: мова аналізу ('Ukrainian' або 'English').
-    - state: стан меню, який впливає на аналіз ('stock_company_info' чи інші).
+    Parameters:
+    - data (list): The list of numeric values.
+    - periods (int): The number of previous and subsequent periods to consider.
+    - mode (str): Either 'min' for minima or 'max' for maxima.
 
-    Повертає:
-    - Текстовий опис технічного аналізу.
+    Returns:
+    - list: A list of indices corresponding to extrema.
     """
-    # Розрахунок трендових ліній, рівнів та EMA 200
-    top_line_start, top_line_end, bottom_line_start, bottom_line_end, key_levels, ma_200 = calculate_trend_lines_and_levels(data)
-    latest_close = data['Close'].iloc[-1]
+    if mode not in ["min", "max"]:
+        raise ValueError("Mode must be either 'min' or 'max'.")
 
-    # Генерація текстового аналізу
-    return generate_text_analysis(
-        ticker=ticker,
-        top_line_start=top_line_start,
-        top_line_end=top_line_end,
-        bottom_line_start=bottom_line_start,
-        bottom_line_end=bottom_line_end,
-        key_levels=key_levels,
-        ma_200=ma_200,
-        latest_close=latest_close,
-        language=language,
-        state=state
-    )
+    extrema_indices = []
+    for i in range(len(data)):
+        # Define the range of indices to check
+        start_idx = max(0, i - periods)
+        end_idx = min(len(data), i + periods + 1)
+        window = data[start_idx:end_idx]
+
+        # Determine if current value is a local extremum
+        if mode == "min" and data[i] == min(window):
+            extrema_indices.append(i)
+        elif mode == "max" and data[i] == max(window):
+            extrema_indices.append(i)
+
+    return extrema_indices
+
+
+def determine_trend(lines):
+    y_start_top = (lines[0][1])
+    y_end_top = (lines[1][1])
+    y_start_bot = (lines[2][1])
+    y_end_bot = (lines[3][1])
+    if y_start_top < y_end_top and y_start_bot < y_end_bot:
+        return 'upward trend'
+    if y_start_top > y_end_top and y_start_bot > y_end_bot:
+        return 'downward trend'
+
+
+stock = yf.Ticker("AAPL")
+data = stock.history(period="1y")
+# Використання функції
+
+
+def technical_analysis():
+    price_list = (data['Close'].tolist()[-30:])
+    price_list_high = (data['High'].tolist()[-30:])
+    price_list_low = (data['Low'].tolist()[-30:])
+    print(price_list_high)
+    # print(price_list_low)
+
+    tend_lines = (calculate_trend_lines(data))
+    key_levels = tend_lines[-1]
+    trend_line = tend_lines[0:4]
+
+    extrema_indices_max = find_extrema_indices(price_list_high, 15, 'max')
+    extrema_indices_min = find_extrema_indices(price_list_high, 15, 'min')
+    trend = determine_trend(trend_line)
+    print(extrema_indices_max)
+    # print(extrema_indices_min)
+    # print(key_levels)
+    # print(trend_line)
+    # print(trend)
+    # print(get_y_trend_lines(trend_line, extrema_indices_max[0]))
+
+    def extrema_and_line(extrema_index, key_levels, trend_lines, price_list):
+        print('extr', extrema_index)
+
+        last_index = extrema_index[-1]
+        y_coords = get_y_trend_lines(trend_lines, last_index)
+        print('y', y_coords)
+        print(price_list[last_index])
+        print(price_list)
+    extrema_and_line(extrema_indices_max, key_levels, trend_line, price_list_high)
+
+
+technical_analysis()
