@@ -25,34 +25,33 @@ def get_price_dependent_metrics(symbol):
         return {}
 
 
-def fetch_ohlcv(symbol, asset_type, timeframe='1d', retries=3):
+def fetch_ohlcv(symbol, asset_type, timeframe='1d'):
     """
-    Завантажує історичні дані для символу з повторами у разі помилки.
+    Завантажує історичні дані для символу, пропускаючи тікери з помилкою.
     """
-    end_date = datetime.now().strftime('%Y-%m-%d')
-    start_date = (datetime.now() - timedelta(days=205)).strftime('%Y-%m-%d')
+    try:
+        end_date = datetime.now().strftime('%Y-%m-%d')
+        start_date = (datetime.now() - timedelta(days=205)).strftime('%Y-%m-%d')
 
-    for attempt in range(retries):
-        try:
-            if asset_type == 'crypto':
-                df = yf.download(f'{symbol}-USD', start=start_date, end=end_date, interval=timeframe)
-            elif asset_type == 'forex':
-                df = yf.download(f'{symbol}=X', start=start_date, end=end_date, interval=timeframe)
-            else:
-                df = yf.download(symbol, start=start_date, end=end_date, interval=timeframe)
+        if asset_type == 'crypto':
+            df = yf.download(f'{symbol}-USD', start=start_date, end=end_date, interval=timeframe)
+        elif asset_type == 'forex':
+            df = yf.download(f'{symbol}=X', start=start_date, end=end_date, interval=timeframe)
+        else:
+            df = yf.download(symbol, start=start_date, end=end_date, interval=timeframe)
 
-            if df.empty:
-                raise ValueError(f"No data available for {symbol}")
+        if df.empty:
+            print(f"No data available for {symbol}")
+            return None
 
-            df.reset_index(inplace=True)
-            df = df[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
-            df.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
-            return df
-        except Exception as e:
-            print(f"Attempt {attempt + 1} failed for {symbol}: {e}")
-            time.sleep(2)  # Затримка між спробами
-    print(f"Failed to fetch data for {symbol} after {retries} retries.")
-    return None
+        df.reset_index(inplace=True)
+        df = df[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
+        df.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
+        return df
+
+    except Exception as e:
+        print(f"Error fetching data for {symbol}: {e}")
+        return None
 
 
 def calculate_ma_signals(df, short_window, long_window):
@@ -138,9 +137,23 @@ def signal_calc_function_from_file(file_path, asset_type, output_file=None):
             for col, value in metrics.items():
                 last_signal[col] = value
 
-        all_signals.append(last_signal)
+                for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
+                            'MACD Profit (%)', 'MACD Take Profit (%)', 'MACD Stop Loss (%)',
+                            'Market Cap', 'PE Ratio', 'PS Ratio', 'P/B Ratio', 'ROE (%)', 'ROA (%)',
+                            'Gross Margin (%)', 'Operating Margin (%)', 'EBIT Margin (%)',
+                            'EBITDA Margin (%)', 'Net Margin (%)', 'Current Ratio', 'Quick Ratio',
+                            'Debt to Assets', 'Debt to Equity', 'Long Term Debt to Assets', 'Book Value Per Share']:
+                    last_signal[col] = row[col]
+            else:
+                # Додавання тільки технічних метрик для форексу та криптовалют
+                for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
+                            'MACD Profit (%)', 'MACD Take Profit (%)', 'MACD Stop Loss (%)']:
+                    last_signal[col] = row[col]
 
-        time.sleep(0.5)  # Затримка для уникнення перевантаження
+            last_signal['Symbol'] = symbol
+            all_signals.append(last_signal)
+
+        time.sleep(0.3)  # Затримка для уникнення перевантаження
 
     if all_signals:
         combined_signals = pd.concat(all_signals, ignore_index=True)

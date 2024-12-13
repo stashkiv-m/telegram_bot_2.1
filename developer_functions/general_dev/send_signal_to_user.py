@@ -170,7 +170,6 @@ def add_industry_abbreviations(abbrev_dict):
     return abbrev_table
 
 
-
 def add_strategy_descriptions(strategy_descriptions):
     strategy_table = "\n\n=== Strategy Descriptions ===\n"
     for code, description in strategy_descriptions.items():
@@ -178,33 +177,38 @@ def add_strategy_descriptions(strategy_descriptions):
     return strategy_table
 
 
-def filter_and_classify_signals(df, state, forex_min_profit=5.0, other_min_profit=20.0):
+def filter_and_classify_signals(df, state, forex_min_profit=5.0, other_min_profit=15.0):
     macd_rows, ma_rows = [], []
     abbrev_dict = {}
 
     for _, row in df.iterrows():
+        # Виводимо поточний рядок для перевірки
+
         macd_signal = row.get('MACD Signal')
         ma_signal = row.get('MA Signal')
 
-        # Check for valid signals (Buy or Sell)
-        if macd_signal not in ['Buy', 'Sell'] and ma_signal not in ['Buy', 'Sell']:
-            continue
+        # Виводимо сигнали
 
+        # Перевірка мінімального порогу прибутковості
         min_profit_threshold = forex_min_profit if state == 'forex_signal' else other_min_profit
         profit_macd = safe_float_conversion(row.get('MACD Profit (%)'))
         profit_ma = safe_float_conversion(row.get('MA Profit (%)'))
 
-        # Skip rows if profits are below the threshold
+        # Пропускаємо рядки, які не відповідають критеріям сигналів і прибутковості
+        if macd_signal not in ['Buy', 'Sell'] and ma_signal not in ['Buy', 'Sell']:
+
+            continue
         if (profit_macd is not None and profit_macd < min_profit_threshold) and \
                 (profit_ma is not None and profit_ma < min_profit_threshold):
+
             continue
 
         industry = row.get('Industry')
-        # Abbreviate industry only for rows with signals
+        # Скорочуємо назву галузі
         if pd.notna(industry):
             industry = abbreviate_industry(industry, abbrev_dict=abbrev_dict)
 
-        # Determine the strategy for stocks
+        # Визначаємо стратегію для акцій
         strategy_short, _ = determine_strategy(row) if state == 'stock_signal' else ("Unk", "")
 
         if macd_signal in ['Buy', 'Sell'] and (profit_macd is not None and profit_macd >= min_profit_threshold):
@@ -236,6 +240,7 @@ def signal_list_for_user(update: Update, context: CallbackContext):
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     state = menu_state().rstrip('\n')
 
+
     if state == 'crypto_signals':
         file_path = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signal.csv')
         output_file = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signals.txt')
@@ -250,12 +255,16 @@ def signal_list_for_user(update: Update, context: CallbackContext):
         return
 
     df = pd.read_csv(file_path)
+
     macd_df, ma_df, abbrev_dict = filter_and_classify_signals(df, state)
     _, strategy_descriptions = determine_strategy(row=None)
 
     with open(output_file, 'w', encoding='utf-8') as file:
-        file.write(create_user_table_by_strategy(macd_df, "MACD Signals", abbrev_dict))
-        file.write(create_user_table_by_strategy(ma_df, "MA Signals", abbrev_dict))
+        table_macd = create_user_table_by_strategy(macd_df, "MACD Signals", abbrev_dict)
+        table_ma = create_user_table_by_strategy(ma_df, "MA Signals", abbrev_dict)
+
+        file.write(table_macd)
+        file.write(table_ma)
         file.write(add_industry_abbreviations(abbrev_dict))
         file.write(add_strategy_descriptions(strategy_descriptions))
 
@@ -263,3 +272,4 @@ def signal_list_for_user(update: Update, context: CallbackContext):
         context.bot.send_document(chat_id=update.effective_chat.id, document=document)
 
     return macd_df, ma_df
+
