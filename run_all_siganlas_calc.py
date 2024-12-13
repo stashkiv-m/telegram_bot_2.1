@@ -15,7 +15,7 @@ def all_signals_calc_run():
     BASE_DIR = os.getcwd()  # Поточна робоча директорія на сервері
 
     # Шлях до файлів
-    file_path_stock = os.path.join(BASE_DIR, 'developer_functions', 'stock_dev', 'stock_backtest_optimized_test.csv')
+    file_path_stock = os.path.join(BASE_DIR, 'developer_functions', 'stock_dev', 'stock_backtest_optimized.csv')
     output_file_stock = os.path.join(BASE_DIR, 'developer_functions', 'stock_dev', 'stock_signal.csv')
 
     # Виконання функції обробки сигналів
