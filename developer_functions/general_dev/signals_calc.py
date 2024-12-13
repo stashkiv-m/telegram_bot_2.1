@@ -153,7 +153,7 @@ def signal_calc_function_from_file(file_path, asset_type, output_file=None):
             last_signal['Symbol'] = symbol
             all_signals.append(last_signal)
 
-        time.sleep(0.3)  # Затримка для уникнення перевантаження
+        time.sleep(0.5)  # Затримка для уникнення перевантаження
 
     if all_signals:
         combined_signals = pd.concat(all_signals, ignore_index=True)
