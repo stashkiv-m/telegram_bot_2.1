@@ -20,12 +20,10 @@ def symbol_info(update, context):
     dp.add_handler(MessageHandler(Filters.text, handle_ticker_input))
 
 
-
 def handle_ticker_input(update, context):
     state = menu_state().rstrip('\n')
     language = language_state().rstrip('\n')
     ticker = update.message.text.upper()
-
     try:
         # Завантажуємо дані на основі стану
         if state == 'stock_company_info':

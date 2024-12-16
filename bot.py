@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 # Token for your bot (ensure to keep this token private in real-world applications)
 
-TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
+TOKEN = '7721716265:AAEuzhZyZM_pT0FQHsbx-FziENEg-cNT5do'
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -156,6 +156,22 @@ def main():
         update_language_state('English')
         context.bot.send_message(chat_id=update.effective_chat.id, text="Language changed to English. 🇬🇧")
 
+    # def watch_list_func_button_call(update: Update, context: CallbackContext) -> None:
+    #     if user_activity_and_access(update, context):
+    #         watchlist_keyboard(update, context)
+    #         send_ticker_list(update, context)
+    #         update_menu_state('watchlist')
+    #
+    # def add_ticker_to_watchlist_button_call(update: Update, context: CallbackContext) -> None:
+    #     update_menu_state('add_to_watchlist')
+    #
+    #     add_ticker_to_list(update, context)
+    #
+    # def remove_ticker_from_list_button_call(update: Update, context: CallbackContext) -> None:
+    #     update_menu_state('remove_from_watchlist')
+    #
+    #     remove_ticker_from_list(update, context)
+
     def stock_func_button_call(update: Update, context: CallbackContext) -> None:
         stock_keyboard(update, context)
         update_menu_state('stock_menu')
@@ -216,7 +232,7 @@ def main():
     #     update_menu_state('crypto_signals')
     #     signal_list_for_user(update, context)
 
-    schedule_func_call(all_signals_calc_run, 22, 1)
+    schedule_func_call(all_signals_calc_run, 20, 15)
     schedule_func_call(send_daily_events, 7, 30)
     schedule_func_call(send_day_end_info, 15, 00)
 
@@ -233,7 +249,10 @@ def main():
 
     # Register message handlers for stock menu
     dp.add_handler(MessageHandler(Filters.regex(r'^Stock$'), stock_func_button_call))
-    # dp.add_handler(MessageHandler(Filters.regex(r"^Stocks Market Overview"), stock_mrkt_overview_func_button_call))
+    # dp.add_handler(MessageHandler(Filters.regex(r"^WatchList"), watch_list_func_button_call))
+    # dp.add_handler(MessageHandler(Filters.regex(r"^Add"), add_ticker_to_watchlist_button_call))
+    # dp.add_handler(MessageHandler(Filters.regex(r"^Remove"), remove_ticker_from_list_button_call,
+    #                               update_menu_state('remove_from_watchlist') ))
     dp.add_handler(MessageHandler(Filters.regex(r'^Company information$'), stock_company_info_func_button_call))
     dp.add_handler(MessageHandler(Filters.regex(r'^Stock Signals$'), stock_signal_func_button_call))
 

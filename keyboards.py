@@ -24,12 +24,33 @@ def stock_keyboard(update, context):
         # [KeyboardButton("Stocks Market Overview")],
         [KeyboardButton("Company information")],
         [KeyboardButton("Stock Signals")],
+        # [KeyboardButton("WatchList")],
         [KeyboardButton("Back")]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
 
     # Надсилаємо повідомлення з інформацією про акції
     context.bot.send_message(chat_id=update.effective_chat.id,  text="Welcome to Stock",
+                             reply_markup=reply_markup)
+    # Оновлення стану меню
+    update_menu_state('stock')
+
+
+def watchlist_keyboard(update, context):
+    # Оновлюємо стек меню
+    context.user_data['watchlist'] = context.user_data.get('watchlist', []) + ['stock']
+
+    # Створюємо клавіатуру
+    keyboard = [
+        # [KeyboardButton("Stocks Market Overview")],
+        [KeyboardButton("Add")],
+        [KeyboardButton("Remove")],
+        [KeyboardButton("Back")]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
+
+    # Надсилаємо повідомлення з інформацією про акції
+    context.bot.send_message(chat_id=update.effective_chat.id,  text="Welcome to Watchlist",
                              reply_markup=reply_markup)
     # Оновлення стану меню
     update_menu_state('stock')
