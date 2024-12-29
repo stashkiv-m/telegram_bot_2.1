@@ -89,7 +89,7 @@ def handle_photo(update: Update, context: CallbackContext) -> None:
         ADMIN_CHAT_ID = 1440645936
 
         # Створюємо екземпляр другого бота
-        second_bot = Bot(token='7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY')
+        second_bot = Bot(token='7561762364:AAEH5uobIEzbZ3CQl01fVPnBUKAw9iUDeJM')
 
         # Отримуємо дані користувача
         user_id = update.message.from_user.id
@@ -232,7 +232,7 @@ def main():
     #     update_menu_state('crypto_signals')
     #     signal_list_for_user(update, context)
 
-    schedule_func_call(all_signals_calc_run, 18, 25)
+    schedule_func_call(all_signals_calc_run, 15, 1)
     schedule_func_call(send_daily_events, 7, 30)
     schedule_func_call(send_day_end_info, 15, 00)
 
