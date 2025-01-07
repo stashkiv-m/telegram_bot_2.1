@@ -233,6 +233,7 @@ def main():
     #     signal_list_for_user(update, context)
 
     schedule_func_call(all_signals_calc_run, 15, 1)
+    all_signals_calc_run()
     schedule_func_call(send_daily_events, 7, 30)
     schedule_func_call(send_day_end_info, 15, 00)
 
