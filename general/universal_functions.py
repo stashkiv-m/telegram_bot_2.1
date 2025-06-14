@@ -29,6 +29,7 @@ def handle_ticker_input(update, context):
         if state == 'stock_company_info':
             symbol = yf.Ticker(ticker)
             data = symbol.history(period="1y")
+            print(data)
 
             # Отримуємо таблицю метрик для акції
             metrics_table = get_stock_metrics(symbol, ticker, language)
