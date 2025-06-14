@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 # Token for your bot (ensure to keep this token private in real-world applications)
 
-TOKEN = '7721716265:AAEuzhZyZM_pT0FQHsbx-FziENEg-cNT5do'
+TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -71,8 +71,6 @@ def menu(update, context):
     if user_activity_and_access(update, context):
         keyboard = [
             [KeyboardButton("Stock")],
-            # [KeyboardButton("Forex")],
-            # [KeyboardButton("Crypto")],
             [KeyboardButton("Back")],
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
@@ -121,6 +119,7 @@ def handle_photo(update: Update, context: CallbackContext) -> None:
         pass
 
 
+
 def clear_state_files():
     # Очищаємо файл language_state.csv
     with open("language_state.csv", "w") as file:
@@ -132,6 +131,7 @@ def clear_state_files():
 
 
 def main():
+
     """Start the bot."""
     # Initialize the Updater with your bot's TOKEN
     updater = Updater(TOKEN, use_context=True)
@@ -155,22 +155,6 @@ def main():
     def english_language(update: Update, context: CallbackContext) -> None:
         update_language_state('English')
         context.bot.send_message(chat_id=update.effective_chat.id, text="Language changed to English. 🇬🇧")
-
-    # def watch_list_func_button_call(update: Update, context: CallbackContext) -> None:
-    #     if user_activity_and_access(update, context):
-    #         watchlist_keyboard(update, context)
-    #         send_ticker_list(update, context)
-    #         update_menu_state('watchlist')
-    #
-    # def add_ticker_to_watchlist_button_call(update: Update, context: CallbackContext) -> None:
-    #     update_menu_state('add_to_watchlist')
-    #
-    #     add_ticker_to_list(update, context)
-    #
-    # def remove_ticker_from_list_button_call(update: Update, context: CallbackContext) -> None:
-    #     update_menu_state('remove_from_watchlist')
-    #
-    #     remove_ticker_from_list(update, context)
 
     def stock_func_button_call(update: Update, context: CallbackContext) -> None:
         stock_keyboard(update, context)
@@ -200,38 +184,6 @@ def main():
         else:
             pass
 
-    # def forex_func_button_call(update: Update, context: CallbackContext) -> None:
-    #     forex_keyboard(update, context)
-    #     update_menu_state('forex_menu')
-    #
-    # def forex_mrkt_overview_func_button_call(update: Update, context: CallbackContext) -> None:
-    #     test_button(update, context)
-    #     update_menu_state('forex_mrkt_overview')
-    #
-    # def forex_pairs_info_func_button_call(update: Update, context: CallbackContext) -> None:
-    #     symbol_info(update, context)
-    #     update_menu_state('forex_pairs_info')
-    #
-    # def forex_signals_func_button_call(update: Update, context: CallbackContext) -> None:
-    #     update_menu_state('forex_signal')
-    #     signal_list_for_user(update, context)
-    #
-    # def crypto_func_button_call(update: Update, context: CallbackContext) -> None:
-    #     crypto_keyboard(update, context)
-    #     update_menu_state('crypto_menu')
-    #
-    # def crypto_mrkt_overview_func_button_call(update: Update, context: CallbackContext) -> None:
-    #     test_button(update, context)
-    #     update_menu_state('crypto_mrkt_overview')
-    #
-    # def crypto_info_func_button_call(update: Update, context: CallbackContext) -> None:
-    #     symbol_info(update, context)
-    #     update_menu_state('crypto_info')
-    #
-    # def crypto_signals_func_button_call(update: Update, context: CallbackContext) -> None:
-    #     update_menu_state('crypto_signals')
-    #     signal_list_for_user(update, context)
-
     schedule_func_call(all_signals_calc_run, 15, 1)
     # all_signals_calc_run()
     schedule_func_call(send_daily_events, 7, 30)
@@ -250,24 +202,8 @@ def main():
 
     # Register message handlers for stock menu
     dp.add_handler(MessageHandler(Filters.regex(r'^Stock$'), stock_func_button_call))
-    # dp.add_handler(MessageHandler(Filters.regex(r"^WatchList"), watch_list_func_button_call))
-    # dp.add_handler(MessageHandler(Filters.regex(r"^Add"), add_ticker_to_watchlist_button_call))
-    # dp.add_handler(MessageHandler(Filters.regex(r"^Remove"), remove_ticker_from_list_button_call,
-    #                               update_menu_state('remove_from_watchlist') ))
     dp.add_handler(MessageHandler(Filters.regex(r'^Company information$'), stock_company_info_func_button_call))
     dp.add_handler(MessageHandler(Filters.regex(r'^Stock Signals$'), stock_signal_func_button_call))
-
-    # # Register message handlers for Forex menu
-    # dp.add_handler(MessageHandler(Filters.regex(r'^Forex$'), forex_func_button_call))
-    # dp.add_handler(MessageHandler(Filters.regex(r'^Forex Market Overview$'), forex_mrkt_overview_func_button_call))
-    # dp.add_handler(MessageHandler(Filters.regex(r'^Pairs info$'), forex_pairs_info_func_button_call))
-    # dp.add_handler(MessageHandler(Filters.regex(r'^Forex Signals$'), forex_signals_func_button_call))
-    #
-    # # Register message handlers for Crypto menu
-    # dp.add_handler(MessageHandler(Filters.regex(r'^Crypto$'), crypto_func_button_call))
-    # dp.add_handler(MessageHandler(Filters.regex(r'^Crypto Market Overview$'), crypto_mrkt_overview_func_button_call))
-    # dp.add_handler(MessageHandler(Filters.regex(r'^Cryptocurrencies info$'), crypto_info_func_button_call))
-    # dp.add_handler(MessageHandler(Filters.regex(r'^Crypto Signals$'), crypto_signals_func_button_call))
 
     # Back button
     dp.add_handler(MessageHandler(Filters.regex(r'^Back$'), back_function))
@@ -277,6 +213,7 @@ def main():
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT, SIGTERM, or SIGABRT.
     updater.idle()
+
 
 
 if __name__ == '__main__':

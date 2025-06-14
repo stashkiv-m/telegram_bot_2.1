@@ -28,6 +28,7 @@ def handle_ticker_input(update, context):
         # Завантажуємо дані на основі стану
         if state == 'stock_company_info':
             symbol = yf.Ticker(ticker)
+            print(symbol)
             data = symbol.history(period="1y")
             print(data)
 
@@ -36,14 +37,14 @@ def handle_ticker_input(update, context):
 
             # Генеруємо текстовий аналіз і шлях до графіка
             # analysis = analyze_ticker(ticker=ticker, data=data, language=language, state=state)
-            analysis = 'Technical analysis is not yet available.'
+
             img_path = generate_chart(ticker)
 
             # Відправляємо графік і результати аналізу користувачу
             context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(img_path, 'rb'))
             # Форматуємо текст з заголовками для кожної секції
             full_message = (
-                f"**Technical Analysis:**\n{analysis}\n\n"
+
                 f"**Fundamental Metrics:**\n{metrics_table}\n"
             )
 
@@ -58,7 +59,7 @@ def handle_ticker_input(update, context):
 
             # Генеруємо текстовий аналіз для криптовалюти
             # analysis = analyze_ticker(ticker=ticker, data=data, language=language, state=state)
-            analysis = 'Technical analysis is not yet available.'
+
             img_path = generate_chart(ticker + '-USD')
 
             # Відправляємо графік та аналіз користувачу
@@ -67,7 +68,6 @@ def handle_ticker_input(update, context):
             # Отримуємо та відправляємо таблицю метрик для криптовалюти
             metrics_table = get_crypto_info_from_coinmarketcap(ticker, language)
             full_message = (
-                f"**Technical Analysis:**\n{analysis}\n\n"
                 f"**Fundamental Metrics:**\n{metrics_table}\n"
             )
 
@@ -104,7 +104,5 @@ def handle_ticker_input(update, context):
             error_message += " (Ex: EUR-USD)"
 
         context.bot.send_message(chat_id=update.effective_chat.id, text=error_message)
-
-
 
 

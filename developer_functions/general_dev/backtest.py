@@ -6,8 +6,7 @@ import datetime
 
 # Сьогоднішня дата
 today = datetime.date.today()
-one_year_ago = today - datetime.timedelta(days=165)
-
+period_ago = today - datetime.timedelta(days=200)
 
 def fetch_fundamental_data(symbol, report_type='Quarterly'):
     try:
@@ -90,12 +89,13 @@ def fetch_ohlcv(symbol, asset_type):
     try:
         # Якщо актив — це криптовалюта, додаємо суфікс -USD
         if asset_type == 'crypto':
-            df = yf.download(f'{symbol}-USD', start=one_year_ago, interval='1d')
+            df = yf.download(f'{symbol}-USD', start=period_ago, interval='1d')
         # Якщо актив — це форекс, додаємо суфікс USD=X
         elif asset_type == 'forex':
-            df = yf.download(f'{symbol}=X', start=one_year_ago, interval='1d')
+            df = yf.download(f'{symbol}=X', start=period_ago, interval='1d')
         else:
-            df = yf.download(symbol, start=one_year_ago, interval='1d')
+
+            df = yf.download(symbol, start=period_ago, interval='1d')
 
         if df.empty:
             raise ValueError(f"No data available for {symbol}")
@@ -352,20 +352,20 @@ def main():
 def run_all():
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    file_path_crypto = os.path.join(base_dir, '..', 'crypto_dev', 'crypto_list.csv')
+    # file_path_crypto = os.path.join(base_dir, '..', 'crypto_dev', 'crypto_list.csv')
     file_path_stock = os.path.join(base_dir, '..', 'stock_dev', 'stock_list.csv')
-    file_path_forex = os.path.join(base_dir, '..', 'forex_dev', 'forex_list.csv')
+    # file_path_forex = os.path.join(base_dir, '..', 'forex_dev', 'forex_list.csv')
 
     # Вибір, який бектест запускати: криптовалюта, акції або форекс
 
-    run_backtest_from_file(file_path_crypto, asset_type='crypto')
+    # run_backtest_from_file(file_path_crypto, asset_type='crypto')
 
     run_backtest_from_file(file_path_stock, asset_type='stock')
 
-    run_backtest_from_file(file_path_forex, asset_type='forex')
+    # run_backtest_from_file(file_path_forex, asset_type='forex')
 
 
 if __name__ == "__main__":
-    # run_all()
-    main()
+    run_all()
+    # main()
 

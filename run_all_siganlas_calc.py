@@ -10,45 +10,47 @@ from general.daily_information import send_img_with_text
 from language_state import language_state
 
 
-def all_signals_calc_run():
-    # language = language_state().rstrip('\n')
-    BASE_DIR = os.getcwd()  # Поточна робоча директорія на сервері
+import os
+import pandas as pd
 
-    # Шлях до файлів
+def all_signals_calc_run():
+    BASE_DIR = os.getcwd()
+
     file_path_stock = os.path.join(BASE_DIR, 'developer_functions', 'stock_dev', 'stock_backtest_optimized.csv')
     output_file_stock = os.path.join(BASE_DIR, 'developer_functions', 'stock_dev', 'stock_signal.csv')
 
-    # Виконання функції обробки сигналів
+    # Генеруємо файл із сигналами
     signal_calc_function_from_file(file_path_stock, 'stock', output_file=output_file_stock)
 
-    # Підрахунок значень "Buy" та "Sell" у колонках MA Signal та MACD Signal
+    # Зчитуємо результат построково і одразу виводимо сигнали
     stock_data = pd.read_csv(output_file_stock)
 
-    # Підрахунок кількості "Buy" і "Sell" в обох колонках
-    buy_count_ma = stock_data['MA Signal'].value_counts().get('Buy', 0)
-    sell_count_ma = stock_data['MA Signal'].value_counts().get('Sell', 0)
-    buy_count_macd = stock_data['MACD Signal'].value_counts().get('Buy', 0)
-    sell_count_macd = stock_data['MACD Signal'].value_counts().get('Sell', 0)
+    total_buy = 0
+    total_sell = 0
 
-    # Загальна кількість "Buy" і "Sell"
-    total_buy = buy_count_ma + buy_count_macd
-    total_sell = sell_count_ma + sell_count_macd
+    for _, row in stock_data.iterrows():
+        ticker = row.get('Ticker', 'UNKNOWN')
+        ma_signal = row.get('MA Signal', '')
+        macd_signal = row.get('MACD Signal', '')
 
-    # Перевірка умови та результат
+        if ma_signal in ['Buy', 'Sell']:
+            print(f"[MA] {ticker}: {ma_signal}")
+            total_buy += ma_signal == 'Buy'
+            total_sell += ma_signal == 'Sell'
+
+        if macd_signal in ['Buy', 'Sell']:
+            print(f"[MACD] {ticker}: {macd_signal}")
+            total_buy += macd_signal == 'Buy'
+            total_sell += macd_signal == 'Sell'
+
+    # Після всіх сигналів — загальне повідомлення
+    summary_msg = f"New signals are in!\nBUY: {total_buy}\nSELL: {total_sell}"
+
     if total_buy > total_sell:
-        send_img_with_text(
-            f"New signals are in! "
-            f"BUY: {total_buy} "
-            f"SELL: {total_sell} ",
-            'bull.jpg', 'market_type',50
-            )
+        send_img_with_text(summary_msg, 'bull.jpg', 'market_type', 50)
     else:
-        send_img_with_text(
-            f"New signals are in! "
-            f"BUY: {total_buy} "
-            f"SELL: {total_sell} ",
-            'bear.jpg', 'market_type',50
-        )
+        send_img_with_text(summary_msg, 'bear.jpg', 'market_type', 50)
+
 
 
 def schedule_func_call(func, hour: int = 22, minute: int = 35):
@@ -65,3 +67,5 @@ def schedule_func_call(func, hour: int = 22, minute: int = 35):
     # Запускаємо планувальник
     scheduler.start()
     print(f"Планувальник запущено. Оновлення о {hour:02d}:{minute:02d}, з понеділка по п'ятницю.")
+
+all_signals_calc_run()

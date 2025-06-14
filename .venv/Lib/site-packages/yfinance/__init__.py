@@ -20,15 +20,21 @@
 #
 
 from . import version
+from .search import Search
+from .lookup import Lookup
 from .ticker import Ticker
 from .tickers import Tickers
 from .multi import download
+from .live import WebSocket, AsyncWebSocket
 from .utils import enable_debug_mode
 from .cache import set_tz_cache_location
 from .domain.sector import Sector
 from .domain.industry import Industry
-from .screener.screener import Screener
-from .screener.screener_query import EquityQuery
+from .domain.market import Market
+from .data import YfData
+
+from .screener.query import EquityQuery, FundQuery
+from .screener.screener import screen, PREDEFINED_SCREENER_QUERIES
 
 __version__ = version.version
 __author__ = "Ran Aroussi"
@@ -36,5 +42,13 @@ __author__ = "Ran Aroussi"
 import warnings
 warnings.filterwarnings('default', category=DeprecationWarning, module='^yfinance')
 
-__all__ = ['download', 'Ticker', 'Tickers', 'enable_debug_mode', 'set_tz_cache_location', 'Sector', 'Industry',
-           'EquityQuery','Screener']
+__all__ = ['download', 'Market', 'Search', 'Lookup', 'Ticker', 'Tickers', 'enable_debug_mode', 'set_tz_cache_location', 'Sector', 'Industry', 'WebSocket', 'AsyncWebSocket']
+# screener stuff:
+__all__ += ['EquityQuery', 'FundQuery', 'screen', 'PREDEFINED_SCREENER_QUERIES']
+
+# Config stuff:
+_NOTSET=object()
+def set_config(proxy=_NOTSET):
+    if proxy is not _NOTSET:
+        YfData(proxy=proxy)
+__all__ += ["set_config"]
