@@ -11,7 +11,8 @@ from state_update_menu import menu_state
 matplotlib.use('Agg')  # Бекенд без GUI
 
 
-def generate_chart(ticker):
+def generate_chart(ticker, ignore_state_check=False):
+
     """
     Малює графік свічок для акцій або криптовалют з індикаторами MACD, трендовими лініями та ключовими рівнями.
     """
@@ -105,7 +106,8 @@ def generate_chart(ticker):
                          panel_ratios=(6, 2, 1), returnfig=True)
 
     # Додаємо трендові лінії та ключові рівні на графік
-    state = menu_state().rstrip('\n')
+    state = (menu_state() or '').rstrip('\n') if not ignore_state_check else ''
+
     ax = axes[0]
     if state == 'stock_company_info':
         ax.plot([top_line_start[0], top_line_end[0]], [top_line_start[1], top_line_end[1]], color='green', lw=1)

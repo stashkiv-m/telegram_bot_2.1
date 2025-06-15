@@ -52,7 +52,6 @@ def all_signals_calc_run():
         send_img_with_text(summary_msg, 'bear.jpg', 'market_type', 50)
 
 
-
 def schedule_func_call(func, hour: int = 22, minute: int = 35):
     # Використовуємо часову зону Eastern Time (US/Eastern)
     timezone = pytz.timezone('America/Chicago')
@@ -68,4 +67,3 @@ def schedule_func_call(func, hour: int = 22, minute: int = 35):
     scheduler.start()
     print(f"Планувальник запущено. Оновлення о {hour:02d}:{minute:02d}, з понеділка по п'ятницю.")
 
-all_signals_calc_run()

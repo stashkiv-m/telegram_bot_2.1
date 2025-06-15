@@ -56,7 +56,7 @@ def get_stock_metrics(stock, ticker, language='English'):
     gross_margin = round((gross_profit / revenue) * 100, 2) if revenue and gross_profit else None
     operating_margin = round((operating_income / revenue) * 100, 2) if revenue and operating_income else None
     profit_margin = round((net_income / revenue) * 100, 2) if revenue and net_income else None
-    dividend_yield = round(stock.info.get('dividendYield', 0) * 100, 2) if stock.info.get('dividendYield') else None
+    dividend_yield = round(stock.info.get('dividendYield', 0), 2) if stock.info.get('dividendYield') else None
     asset_turnover = round(revenue / total_assets, 2) if revenue and total_assets else None
     inventory_turnover = round(revenue / balance_sheet.loc["Inventory"].iloc[0],
                                2) if "Inventory" in balance_sheet.index and revenue else None
@@ -96,7 +96,6 @@ def get_stock_metrics(stock, ticker, language='English'):
             report += f"{key}: {value}\n"
 
     return report
-
 
 
 

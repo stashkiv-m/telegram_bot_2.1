@@ -5,6 +5,12 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 
+from developer_functions.general_dev.massage_and_img_send import send_chart_and_metrics_to_all_users
+
+
+from developer_functions.general_dev.chart import generate_chart
+from stock.get_stock_data import get_stock_metrics
+
 
 def get_price_dependent_metrics(symbol):
     """
@@ -18,6 +24,11 @@ def get_price_dependent_metrics(symbol):
             'Forward P/E': info.get('forwardPE'),
             'P/B Ratio': info.get('priceToBook'),
             'Dividend Yield (%)': info.get('dividendYield') * 100 if info.get('dividendYield') else None,
+            'Gross Margin (%)': info.get('grossMargins') * 100 if info.get('grossMargins') else None,
+            'Operating Margin (%)': info.get('operatingMargins') * 100 if info.get('operatingMargins') else None,
+            'Profit Margin (%)': info.get('profitMargins') * 100 if info.get('profitMargins') else None,
+            'ROA (%)': info.get('returnOnAssets') * 100 if info.get('returnOnAssets') else None,
+            'ROE (%)': info.get('returnOnEquity') * 100 if info.get('returnOnEquity') else None,
         }
         return metrics
     except Exception as e:
@@ -34,11 +45,11 @@ def fetch_ohlcv(symbol, asset_type, timeframe='1d'):
         start_date = (datetime.now() - timedelta(days=205)).strftime('%Y-%m-%d')
 
         if asset_type == 'crypto':
-            df = yf.download(f'{symbol}-USD', start=start_date, end=end_date, interval=timeframe)
+            df = yf.download(f'{symbol}-USD', start=start_date, end=end_date, interval=timeframe, progress=False)
         elif asset_type == 'forex':
-            df = yf.download(f'{symbol}=X', start=start_date, end=end_date, interval=timeframe)
+            df = yf.download(f'{symbol}=X', start=start_date, end=end_date, interval=timeframe, progress=False)
         else:
-            df = yf.download(symbol, start=start_date, end=end_date, interval=timeframe)
+            df = yf.download(symbol, start=start_date, end=end_date, interval=timeframe, progress=False)
 
         if df.empty:
             print(f"No data available for {symbol}")
@@ -73,8 +84,7 @@ def calculate_macd_signals(df, short_period, long_period, signal_period):
     """
     Розраховує сигнали MACD.
     """
-    df['macd'] = df['close'].ewm(span=short_period, adjust=False).mean() - df['close'].ewm(span=long_period,
-                                                                                           adjust=False).mean()
+    df['macd'] = df['close'].ewm(span=short_period, adjust=False).mean() - df['close'].ewm(span=long_period, adjust=False).mean()
     df['macd_signal_line'] = df['macd'].ewm(span=signal_period, adjust=False).mean()
     df['MACD Signal'] = np.where(
         (df['macd'] > df['macd_signal_line']) & (df['macd'].shift(1) <= df['macd_signal_line'].shift(1)), 'Buy',
@@ -111,6 +121,15 @@ def signal_calc_function_from_file(file_path, asset_type, output_file=None):
     """
     Обробляє файл активів, розраховує сигнали та зберігає результати.
     """
+    def should_print_buy(metrics):
+        return all([
+            metrics.get('Gross Margin (%)', 0) and metrics['Gross Margin (%)'] > 0,
+            metrics.get('Profit Margin (%)', 0) and metrics['Profit Margin (%)'] > 0,
+            metrics.get('Operating Margin (%)', 0) and metrics['Operating Margin (%)'] > 0,
+            metrics.get('ROA (%)', 0) and metrics['ROA (%)'] > 0,
+            metrics.get('ROE (%)', 0) and metrics['ROE (%)'] > 0
+        ])
+
     asset_df = pd.read_csv(file_path)
     all_signals = []
 
@@ -137,23 +156,46 @@ def signal_calc_function_from_file(file_path, asset_type, output_file=None):
             for col, value in metrics.items():
                 last_signal[col] = value
 
-                for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
-                            'MACD Profit (%)', 'MACD Take Profit (%)', 'MACD Stop Loss (%)',
-                            'Market Cap', 'PE Ratio', 'PS Ratio', 'P/B Ratio', 'ROE (%)', 'ROA (%)',
-                            'Gross Margin (%)', 'Operating Margin (%)', 'EBIT Margin (%)',
-                            'EBITDA Margin (%)', 'Net Margin (%)', 'Current Ratio', 'Quick Ratio',
-                            'Debt to Assets', 'Debt to Equity', 'Long Term Debt to Assets', 'Book Value Per Share']:
-                    last_signal[col] = row[col]
-            else:
-                # Додавання тільки технічних метрик для форексу та криптовалют
-                for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
-                            'MACD Profit (%)', 'MACD Take Profit (%)', 'MACD Stop Loss (%)']:
-                    last_signal[col] = row[col]
+            # if (last_signal['MA Signal'].iloc[0] == 'Buy' or last_signal['MACD Signal'].iloc[0] == 'Buy') and should_print_buy(metrics):
+            #     print(f"📈 BUY SIGNAL for {symbol}")
+            # elif last_signal['MA Signal'].iloc[0] == 'Sell' or last_signal['MACD Signal'].iloc[0] == 'Sell':
+            #     print(f"📉 SELL SIGNAL for {symbol}")
 
-            last_signal['Symbol'] = symbol
-            all_signals.append(last_signal)
+            if (last_signal['MA Signal'].iloc[0] == 'Buy' or last_signal['MACD Signal'].iloc[
+                0] == 'Buy') and should_print_buy(metrics):
+                print(f"📈 BUY SIGNAL for {symbol}")
+                chart_path = generate_chart(symbol, ignore_state_check=True)
+                signal_type = "📈 *BUY SIGNAL*\n\n"
+                metrics_text = signal_type + get_stock_metrics(yf.Ticker(symbol), symbol)
 
-        time.sleep(1)  # Затримка для уникнення перевантаження
+                print(metrics_text)
+                send_chart_and_metrics_to_all_users(chart_path, metrics_text)
+
+            elif last_signal['MA Signal'].iloc[0] == 'Sell' or last_signal['MACD Signal'].iloc[0] == 'Sell':
+                print(f"📉 SELL SIGNAL for {symbol}")
+                chart_path = generate_chart(symbol, ignore_state_check=True)
+                signal_type = "📉 *SELL SIGNAL*\n\n"
+                metrics_text = signal_type + get_stock_metrics(yf.Ticker(symbol), symbol)
+
+                print(metrics_text)
+                send_chart_and_metrics_to_all_users(chart_path, metrics_text)
+
+
+            for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
+                        'MACD Profit (%)', 'MACD Take Profit (%)', 'MACD Stop Loss (%)',
+                        'Market Cap', 'PE Ratio', 'PS Ratio', 'P/B Ratio', 'ROE (%)', 'ROA (%)',
+                        'Gross Margin (%)', 'Operating Margin (%)', 'EBIT Margin (%)',
+                        'EBITDA Margin (%)', 'Net Margin (%)', 'Current Ratio', 'Quick Ratio',
+                        'Debt to Assets', 'Debt to Equity', 'Long Term Debt to Assets', 'Book Value Per Share']:
+                last_signal[col] = row.get(col, None)
+        else:
+            for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
+                        'MACD Profit (%)', 'MACD Take Profit (%)', 'MACD Stop Loss (%)']:
+                last_signal[col] = row.get(col, None)
+
+        last_signal['Symbol'] = symbol
+        all_signals.append(last_signal)
+        time.sleep(1)
 
     if all_signals:
         combined_signals = pd.concat(all_signals, ignore_index=True)
@@ -163,11 +205,9 @@ def signal_calc_function_from_file(file_path, asset_type, output_file=None):
         print("No signals found.")
 
     return all_signals
-
-
 def main():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    asset_type = input("Enter asset type (crypto/stock/forex): ").strip().lower()
+    asset_type = 'stock'  # або 'crypto' / 'forex' для інших активів
 
     file_map = {
         'crypto': ('crypto_backtest_optimized.csv', 'crypto_signal.csv'),
@@ -175,15 +215,11 @@ def main():
         'forex': ('forex_backtest_optimized.csv', 'forex_signal.csv'),
     }
 
-    if asset_type not in file_map:
-        print("Invalid asset type. Choose from 'crypto', 'stock', or 'forex'.")
-        return
-
     input_file, output_file = file_map[asset_type]
     file_path = os.path.join(BASE_DIR, '..', asset_type + '_dev', input_file)
-    output_file = os.path.join(BASE_DIR, '..', asset_type + '_dev', output_file)
+    output_path = os.path.join(BASE_DIR, '..', asset_type + '_dev', output_file)
 
-    signal_calc_function_from_file(file_path, asset_type, output_file=output_file)
+    signal_calc_function_from_file(file_path, asset_type, output_file=output_path)
 
 
 if __name__ == "__main__":

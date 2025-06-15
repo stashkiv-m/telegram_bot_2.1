@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 # Token for your bot (ensure to keep this token private in real-world applications)
 
 TOKEN = '7749471664:AAEp85bkb0szrSBDso9bxU2FSy8JU0RVSEY'
+ACCESS_CHECK_ENABLED = False  # ← Зміни на True, якщо хочеш увімкнути перевірку
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -68,7 +69,8 @@ def start(update: Update, context: CallbackContext) -> None:
 
 def menu(update, context):
     context.user_data['menu_stack'] = ['menu']
-    if user_activity_and_access(update, context):
+    if not ACCESS_CHECK_ENABLED or user_activity_and_access(update, context):
+
         keyboard = [
             [KeyboardButton("Stock")],
             [KeyboardButton("Back")],
@@ -119,7 +121,6 @@ def handle_photo(update: Update, context: CallbackContext) -> None:
         pass
 
 
-
 def clear_state_files():
     # Очищаємо файл language_state.csv
     with open("language_state.csv", "w") as file:
@@ -161,7 +162,8 @@ def main():
         update_menu_state('stock_menu')
 
     def stock_mrkt_overview_func_button_call(update: Update, context: CallbackContext) -> None:
-        if user_activity_and_access(update, context):
+        if not ACCESS_CHECK_ENABLED or user_activity_and_access(update, context):
+
             update_user_state('active')
             update_menu_state('mrkt_overview')
             send_market_overview(update, context)
@@ -169,7 +171,8 @@ def main():
             pass
 
     def stock_company_info_func_button_call(update: Update, context: CallbackContext) -> None:
-        if user_activity_and_access(update, context):
+        if not ACCESS_CHECK_ENABLED or user_activity_and_access(update, context):
+
             symbol_info(update, context)
             update_user_state('active')
             update_menu_state('stock_company_info')
@@ -177,7 +180,8 @@ def main():
             pass
 
     def stock_signal_func_button_call(update: Update, context: CallbackContext) -> None:
-        if user_activity_and_access(update, context):
+        if not ACCESS_CHECK_ENABLED or user_activity_and_access(update, context):
+
             update_menu_state('stock_signal')
             update_user_state('active')
             signal_list_for_user(update, context)
@@ -185,7 +189,6 @@ def main():
             pass
 
     schedule_func_call(all_signals_calc_run, 15, 1)
-    # all_signals_calc_run()
     schedule_func_call(send_daily_events, 7, 30)
     schedule_func_call(send_day_end_info, 15, 00)
 
@@ -213,7 +216,6 @@ def main():
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT, SIGTERM, or SIGABRT.
     updater.idle()
-
 
 
 if __name__ == '__main__':
