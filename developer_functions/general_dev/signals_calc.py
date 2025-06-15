@@ -117,10 +117,15 @@ def add_sector_industry_and_last_7_closes(df, symbol):
     return df
 
 
+import pandas as pd
+import time
+import yfinance as yf
+
 def signal_calc_function_from_file(file_path, asset_type, output_file=None):
     """
     Обробляє файл активів, розраховує сигнали та зберігає результати.
     """
+
     def should_print_buy(metrics):
         return all([
             metrics.get('Gross Margin (%)', 0) and metrics['Gross Margin (%)'] > 0,
@@ -135,6 +140,12 @@ def signal_calc_function_from_file(file_path, asset_type, output_file=None):
 
     for _, row in asset_df.iterrows():
         symbol = row['Symbol']
+
+        # 🔎 Фільтр: надсилати сигнали лише якщо MACD Profit > 20%
+        macd_profit = float(row.get('MACD Profit (%)', 0))
+        if macd_profit <= 20:
+            continue
+
         short_ma_window = int(row['Short MA Window'])
         long_ma_window = int(row['Long MA Window'])
         macd_short_period = int(row['MACD Short Period'])
@@ -150,24 +161,18 @@ def signal_calc_function_from_file(file_path, asset_type, output_file=None):
         df = calculate_macd_signals(df, macd_short_period, macd_long_period, macd_signal_period)
 
         last_signal = df.tail(1).copy()
+
         if asset_type == 'stock':
             metrics = get_price_dependent_metrics(symbol)
             last_signal = add_sector_industry_and_last_7_closes(last_signal, symbol)
             for col, value in metrics.items():
                 last_signal[col] = value
 
-            # if (last_signal['MA Signal'].iloc[0] == 'Buy' or last_signal['MACD Signal'].iloc[0] == 'Buy') and should_print_buy(metrics):
-            #     print(f"📈 BUY SIGNAL for {symbol}")
-            # elif last_signal['MA Signal'].iloc[0] == 'Sell' or last_signal['MACD Signal'].iloc[0] == 'Sell':
-            #     print(f"📉 SELL SIGNAL for {symbol}")
-
-            if (last_signal['MA Signal'].iloc[0] == 'Buy' or last_signal['MACD Signal'].iloc[
-                0] == 'Buy') and should_print_buy(metrics):
+            if (last_signal['MA Signal'].iloc[0] == 'Buy' or last_signal['MACD Signal'].iloc[0] == 'Buy') and should_print_buy(metrics):
                 print(f"📈 BUY SIGNAL for {symbol}")
                 chart_path = generate_chart(symbol, ignore_state_check=True)
                 signal_type = "📈 *BUY SIGNAL*\n\n"
                 metrics_text = signal_type + get_stock_metrics(yf.Ticker(symbol), symbol)
-
                 print(metrics_text)
                 send_chart_and_metrics_to_all_users(chart_path, metrics_text)
 
@@ -176,17 +181,16 @@ def signal_calc_function_from_file(file_path, asset_type, output_file=None):
                 chart_path = generate_chart(symbol, ignore_state_check=True)
                 signal_type = "📉 *SELL SIGNAL*\n\n"
                 metrics_text = signal_type + get_stock_metrics(yf.Ticker(symbol), symbol)
-
                 print(metrics_text)
                 send_chart_and_metrics_to_all_users(chart_path, metrics_text)
-
 
             for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
                         'MACD Profit (%)', 'MACD Take Profit (%)', 'MACD Stop Loss (%)',
                         'Market Cap', 'PE Ratio', 'PS Ratio', 'P/B Ratio', 'ROE (%)', 'ROA (%)',
                         'Gross Margin (%)', 'Operating Margin (%)', 'EBIT Margin (%)',
                         'EBITDA Margin (%)', 'Net Margin (%)', 'Current Ratio', 'Quick Ratio',
-                        'Debt to Assets', 'Debt to Equity', 'Long Term Debt to Assets', 'Book Value Per Share']:
+                        'Debt to Assets', 'Debt to Equity', 'Long Term Debt to Assets',
+                        'Book Value Per Share']:
                 last_signal[col] = row.get(col, None)
         else:
             for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
@@ -205,6 +209,8 @@ def signal_calc_function_from_file(file_path, asset_type, output_file=None):
         print("No signals found.")
 
     return all_signals
+
+
 def main():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     asset_type = 'stock'  # або 'crypto' / 'forex' для інших активів

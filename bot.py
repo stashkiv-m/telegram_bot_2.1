@@ -69,6 +69,7 @@ def start(update: Update, context: CallbackContext) -> None:
 
 def menu(update, context):
     context.user_data['menu_stack'] = ['menu']
+
     if not ACCESS_CHECK_ENABLED or user_activity_and_access(update, context):
 
         keyboard = [
@@ -142,26 +143,44 @@ def main():
     clear_state_files()
 
     def about_bot_func_button_call(update: Update, context: CallbackContext) -> None:
+        user_id = update.effective_user.id
+        username = update.effective_user.username or "No Username"
+        add_user_activity(user_id, username)  # 🔹 Завжди записуємо
         about_bot(update, context)
         update_menu_state('about')
 
     def language_func_button_call(update: Update, context: CallbackContext) -> None:
+        user_id = update.effective_user.id
+        username = update.effective_user.username or "No Username"
+        add_user_activity(user_id, username)  # 🔹 Завжди записуємо
         language_keyboard(update, context)
         update_menu_state('language')
 
     def ukr_language(update: Update, context: CallbackContext) -> None:
+        user_id = update.effective_user.id
+        username = update.effective_user.username or "No Username"
+        add_user_activity(user_id, username)  # 🔹 Завжди записуємо
         update_language_state('Ukrainian')
         context.bot.send_message(chat_id=update.effective_chat.id, text="Мова змінена на українську 🇺🇦")
 
     def english_language(update: Update, context: CallbackContext) -> None:
+        user_id = update.effective_user.id
+        username = update.effective_user.username or "No Username"
+        add_user_activity(user_id, username)  # 🔹 Завжди записуємо
         update_language_state('English')
         context.bot.send_message(chat_id=update.effective_chat.id, text="Language changed to English. 🇬🇧")
 
     def stock_func_button_call(update: Update, context: CallbackContext) -> None:
+        user_id = update.effective_user.id
+        username = update.effective_user.username or "No Username"
+        add_user_activity(user_id, username)  # 🔹 Завжди записуємо
         stock_keyboard(update, context)
         update_menu_state('stock_menu')
 
     def stock_mrkt_overview_func_button_call(update: Update, context: CallbackContext) -> None:
+        user_id = update.effective_user.id
+        username = update.effective_user.username or "No Username"
+        add_user_activity(user_id, username)  # 🔹 Завжди записуємо
         if not ACCESS_CHECK_ENABLED or user_activity_and_access(update, context):
 
             update_user_state('active')
@@ -171,6 +190,9 @@ def main():
             pass
 
     def stock_company_info_func_button_call(update: Update, context: CallbackContext) -> None:
+        user_id = update.effective_user.id
+        username = update.effective_user.username or "No Username"
+        add_user_activity(user_id, username)  # 🔹 Завжди записуємо
         if not ACCESS_CHECK_ENABLED or user_activity_and_access(update, context):
 
             symbol_info(update, context)
@@ -179,14 +201,18 @@ def main():
         else:
             pass
 
-    def stock_signal_func_button_call(update: Update, context: CallbackContext) -> None:
-        if not ACCESS_CHECK_ENABLED or user_activity_and_access(update, context):
+    from general.user_list import add_user_activity
 
+    def stock_signal_func_button_call(update: Update, context: CallbackContext) -> None:
+        user_id = update.effective_user.id
+        username = update.effective_user.username or "No Username"
+        add_user_activity(user_id, username)  # 🔹 Завжди записуємо
+
+        if not ACCESS_CHECK_ENABLED or user_activity_and_access(update, context):
             update_menu_state('stock_signal')
             update_user_state('active')
             signal_list_for_user(update, context)
-        else:
-            pass
+
 
     schedule_func_call(all_signals_calc_run, 15, 1)
     schedule_func_call(send_daily_events, 7, 30)
