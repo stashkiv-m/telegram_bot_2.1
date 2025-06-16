@@ -4,10 +4,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-
 from developer_functions.general_dev.massage_and_img_send import send_chart_and_metrics_to_all_users
-
-
 from developer_functions.general_dev.chart import generate_chart
 from stock.get_stock_data import get_stock_metrics
 
@@ -116,10 +113,6 @@ def add_sector_industry_and_last_7_closes(df, symbol):
         print(f"Error adding sector/industry or closes for {symbol}: {e}")
     return df
 
-
-import pandas as pd
-import time
-import yfinance as yf
 
 def signal_calc_function_from_file(file_path, asset_type, output_file=None):
     """
