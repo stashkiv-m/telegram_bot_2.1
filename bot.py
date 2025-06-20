@@ -5,14 +5,16 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackContex
 from buttoms_and_function_call import *
 from developer_functions.general_dev.send_signal_to_user import signal_list_for_user
 from general.daily_information import send_daily_events, send_day_end_info
-from general.universal_functions import symbol_info
-from general.user_list import user_activity_and_access, add_user_activity
+from general.universal_functions import symbol_info, show_watchlist_with_changes
+from general.user_list import user_activity_and_access, add_user_activity, remove_from_watchlist, add_to_watchlist
 from keyboards import *
 from language_state import update_language_state, language_state
 from run_all_siganlas_calc import schedule_func_call, all_signals_calc_run
 from state_update_menu import update_menu_state, menu_state
-from stock.market_overwiev import send_market_overview
 from user_state import update_user_state, user_state
+from general.user_list import add_to_watchlist, remove_from_watchlist  # якщо ці функції в цьому файлі
+from telegram.ext import CallbackQueryHandler
+
 
 # Logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -105,6 +107,26 @@ def handle_photo(update: Update, context: CallbackContext) -> None:
         os.remove(file_path)
 
 
+def watchlist_callback(update, context):
+    query = update.callback_query
+    user_id = query.from_user.id
+    username = query.from_user.username
+    data = query.data  # типу "add_AAPL" або "remove_AAPL"
+    action, ticker = data.split('_', 1)
+
+    if action == "add":
+        if add_to_watchlist(user_id, username, ticker):
+            query.answer("Додано до Watchlist!")
+        else:
+            query.answer("Вже у вашому Watchlist!")
+    elif action == "remove":
+        if remove_from_watchlist(user_id, ticker):
+            query.answer("Видалено з Watchlist!")
+        else:
+            query.answer("Цього тікера немає у вашому Watchlist.")
+
+
+
 # Clear user states
 
 def clear_state_files():
@@ -117,22 +139,85 @@ def clear_state_files():
 def main():
     updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
+    dp.add_handler(CallbackQueryHandler(watchlist_callback))
+
+
+
     clear_state_files()
 
     # Register command handlers
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(MessageHandler(Filters.photo, handle_photo))
-    dp.add_handler(MessageHandler(Filters.regex(r'^📋 Menu$'), menu))
-    dp.add_handler(MessageHandler(Filters.regex(r'^ℹ️ About Bot$'), lambda u, c:
-    about_bot(u, c) or update_menu_state('about')))
-    dp.add_handler(MessageHandler(Filters.regex(r'^🌐 Language'), lambda u, c: language_keyboard(u, c) or update_menu_state('language')))
-    dp.add_handler(MessageHandler(Filters.regex(r'^🇺🇦 Ukrainian'), lambda u, c: update_language_state('Ukrainian') or c.bot.send_message(chat_id=u.effective_chat.id, text="Мова змінена на українську 🇺🇦")))
-    dp.add_handler(MessageHandler(Filters.regex(r'^🇬🇧 English'), lambda u, c: update_language_state('English') or c.bot.send_message(chat_id=u.effective_chat.id, text="Language changed to English. 🇬🇧")))
+    def regex_multilang(*variants):
+        return r'^(' + '|'.join(variants) + ')$'
 
-    dp.add_handler(MessageHandler(Filters.regex(r'^Stock$'), lambda u, c: stock_keyboard(u, c) or update_menu_state('stock_menu')))
-    dp.add_handler(MessageHandler(Filters.regex(r'^🏢 Company information$'), lambda u, c: symbol_info(u, c) or update_menu_state('stock_company_info')))
-    dp.add_handler(MessageHandler(Filters.regex(r'^📊 Stock Signals$'), lambda u, c: signal_list_for_user(u, c) or update_menu_state('stock_signal')))
-    dp.add_handler(MessageHandler(Filters.regex(r'^Back$'), back_function))
+    # Меню (Menu)
+    dp.add_handler(MessageHandler(
+        Filters.regex(regex_multilang("📋 Menu", "📋 Меню")),
+        menu
+    ))
+
+    # Про бота (About Bot)
+    dp.add_handler(MessageHandler(
+        Filters.regex(regex_multilang("ℹ️ About Bot", "ℹ️ Про бота")),
+        lambda u, c: about_bot(u, c) or update_menu_state('about')
+    ))
+
+    # Мова (Language)
+    dp.add_handler(MessageHandler(
+        Filters.regex(regex_multilang("🌐 Language", "🌐 Мова")),
+        lambda u, c: language_keyboard(u, c) or update_menu_state('language')
+    ))
+
+    # Українська / English
+    dp.add_handler(MessageHandler(
+        Filters.regex(r'^🇺🇦 Ukrainian$'),
+        lambda u, c: update_language_state('Ukrainian') or c.bot.send_message(chat_id=u.effective_chat.id,
+                                                                              text="Мова змінена на українську 🇺🇦")
+    ))
+    dp.add_handler(MessageHandler(
+        Filters.regex(r'^🇬🇧 English$'),
+        lambda u, c: update_language_state('English') or c.bot.send_message(chat_id=u.effective_chat.id,
+                                                                            text="Language changed to English. 🇬🇧")
+    ))
+
+    # Stock розділ
+    dp.add_handler(MessageHandler(
+        Filters.regex(regex_multilang("Stock", "Акції")),
+        lambda u, c: stock_keyboard(u, c) or update_menu_state('stock_menu')
+    ))
+    dp.add_handler(MessageHandler(
+        Filters.regex(regex_multilang("🏢 Company information", "🏢 Інформація про компанію")),
+        lambda u, c: symbol_info(u, c) or update_menu_state('stock_company_info')
+    ))
+    dp.add_handler(MessageHandler(
+        Filters.regex(regex_multilang("📊 Stock Signals", "📊 Сигнали акцій")),
+        lambda u, c: update_menu_state('stock_signal') or signal_list_for_user(u, c)
+    ))
+
+    # Watchlist розділ
+    dp.add_handler(MessageHandler(
+        Filters.regex(regex_multilang("📑 Watchlist", "📑 Watchlist")),  # назва однакова, залишено для сумісності
+        show_watchlist_with_changes
+    ))
+    dp.add_handler(MessageHandler(
+        Filters.regex(regex_multilang("👀 Show My Watchlist", "👀 Показати мій Watchlist")),
+        show_watchlist_with_changes
+    ))
+    dp.add_handler(MessageHandler(
+        Filters.regex(regex_multilang("➕ Add to Watchlist", "➕ Додати у Watchlist")),
+        lambda u, c: c.bot.send_message(chat_id=u.effective_chat.id, text="Введіть тікер для додавання у Watchlist:")
+    ))
+    dp.add_handler(MessageHandler(
+        Filters.regex(regex_multilang("➖ Remove from Watchlist", "➖ Видалити з Watchlist")),
+        lambda u, c: c.bot.send_message(chat_id=u.effective_chat.id, text="Введіть тікер для видалення з Watchlist:")
+    ))
+
+    # Back (Назад)
+    dp.add_handler(MessageHandler(
+        Filters.regex(regex_multilang("Back", "Назад")),
+        back_function
+    ))
+
+    # Додай сюди інші кнопки та розділи за аналогією (crypto, forex, інше меню...)
 
     # Schedulers
     schedule_func_call(all_signals_calc_run, 15, 1)

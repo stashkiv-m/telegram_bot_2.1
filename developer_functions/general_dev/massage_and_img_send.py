@@ -5,6 +5,7 @@ import os
 import json
 import random
 
+from keyboards import get_watchlist_inline_keyboard
 
 # Ініціалізація глобальних змінних
 bot = None
@@ -88,6 +89,7 @@ def send_image_to_all_users(image_path=None):
             except Exception as e:
                 print(f"Не вдалося надіслати зображення користувачу {user_id}. Помилка: {e}")
 
+
 def send_file_to_all_users(file_path: str):
     unique_user_ids = set()
     users_data = worksheet.get_all_records()
@@ -103,7 +105,8 @@ def send_file_to_all_users(file_path: str):
                 print(f"Не вдалося надіслати файл користувачу {user_id}. Помилка: {e}")
 
 
-def send_chart_and_metrics_to_all_users(image_path: str, metrics_text: str):
+def send_chart_and_metrics_to_all_users(image_path: str, metrics_text: str, symbol):
+
     """
     Надсилає зображення з графіком та текст з метриками всім користувачам.
     """
@@ -114,13 +117,16 @@ def send_chart_and_metrics_to_all_users(image_path: str, metrics_text: str):
         if user_id and user_id not in unique_user_ids:
             unique_user_ids.add(user_id)
             try:
-                with open(image_path, 'rb') as photo:
-                    bot.send_photo(chat_id=user_id, photo=photo, caption=metrics_text[:1024], parse_mode='Markdown')
-                    if len(metrics_text) > 1024:
-                        bot.send_message(chat_id=user_id, text=metrics_text[1024:], parse_mode='Markdown')
-                print(f"Графік + метрики надіслано користувачу {user_id}")
+                reply_markup = get_watchlist_inline_keyboard(symbol) # ОСЬ ТУТ! — Додаємо reply_markup
+                bot.send_photo(
+                    chat_id=user_id,
+                    photo=open(image_path, 'rb'),
+                    caption=metrics_text,
+                    reply_markup=reply_markup
+                )
+
             except Exception as e:
-                print(f"Не вдалося надіслати повідомлення користувачу {user_id}. Помилка: {e}")
+                print(f"Не вдалося надіслати файл користувачу {user_id}. Помилка: {e}")
 
 text_3 = [
     "🇺🇦 Привіт! Це Міша — я створив цього бота! 😊\n\n"

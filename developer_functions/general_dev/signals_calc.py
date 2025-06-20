@@ -167,7 +167,7 @@ def signal_calc_function_from_file(file_path, asset_type, output_file=None):
                 signal_type = "📈 *BUY SIGNAL*\n\n"
                 metrics_text = signal_type + get_stock_metrics(yf.Ticker(symbol), symbol)
                 print(metrics_text)
-                send_chart_and_metrics_to_all_users(chart_path, metrics_text)
+                send_chart_and_metrics_to_all_users(chart_path, metrics_text, symbol)
 
             elif last_signal['MA Signal'].iloc[0] == 'Sell' or last_signal['MACD Signal'].iloc[0] == 'Sell':
                 print(f"📉 SELL SIGNAL for {symbol}")
@@ -175,7 +175,7 @@ def signal_calc_function_from_file(file_path, asset_type, output_file=None):
                 signal_type = "📉 *SELL SIGNAL*\n\n"
                 metrics_text = signal_type + get_stock_metrics(yf.Ticker(symbol), symbol)
                 print(metrics_text)
-                send_chart_and_metrics_to_all_users(chart_path, metrics_text)
+                send_chart_and_metrics_to_all_users(chart_path, metrics_text, symbol)
 
             for col in ['MA Profit (%)', 'MA Take Profit (%)', 'MA Stop Loss (%)',
                         'MACD Profit (%)', 'MACD Take Profit (%)', 'MACD Stop Loss (%)',

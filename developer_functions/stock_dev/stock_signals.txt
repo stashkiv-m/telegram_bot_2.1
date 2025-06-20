@@ -4,29 +4,186 @@
 --- MixFund ---
 | Symb | MACD | TProfit | SLoss | Profit% | Industry |
 |----|----|-------|-----|-------|--------|
-CVNA   | Buy    | 80.00  |        | 80.00  | Aut&Tr
+CPIX   | Sell   | 92.05  | -9.35  | 92.05  | DruMan
+BZ     | Sell   | 54.20  | -0.61  | 54.20  | IntCon
+HDSN   | Sell   | 46.87  | -1.77  | 46.87  | SpeChe
+ENIC   | Buy    | 41.29  |        | 41.29  | Uti-Re
+PGNY   | Sell   | 37.64  | -5.49  | 37.64  | HeaPla
+AEM    | Buy    | 33.11  | -2.80  | 33.11  | Gol   
+DHT    | Buy    | 30.87  |        | 30.87  | Oil&Ga
+WWD    | Sell   | 27.66  | -3.86  | 27.66  | Aer&De
+TRS    | Sell   | 27.34  | -3.36  | 27.34  | Pac&Co
+PLD    | Sell   | 23.36  | -4.85  | 23.36  | Rei-In
+FRO    | Buy    | 23.03  | -0.68  | 23.03  | Oil&Ga
+IMAX   | Buy    | 22.02  |        | 22.02  | Ent   
+
+--- ModInc ---
+| Symb | MACD | TProfit | SLoss | Profit% | Industry |
+|----|----|-------|-----|-------|--------|
+KALU   | Sell   | 36.50  |        | 36.50  | Alu   
+SNX    | Sell   | 27.83  | -3.14  | 27.83  | Ele&Co
+LXP    | Sell   | 24.43  | -2.56  | 24.43  | Rei-In
+HII    | Buy    | 22.06  |        | 22.06  | Aer&De
+
+--- NegRet ---
+| Symb | MACD | TProfit | SLoss | Profit% | Industry |
+|----|----|-------|-----|-------|--------|
+BSGM   | Sell   | 588.75 | -8.27  | 588.75 | MedDev
+VHC    | Sell   | 56.34  | -5.27  | 56.34  | Sof-In
+DDC    | Sell   | 520.83 | -26.40 | 520.83 | PacFoo
+CGEN   | Sell   | 48.43  | -7.22  | 48.43  | Bio   
+FTEK   | Sell   | 47.36  |        | 47.36  | Pol&Tr
+PHAR   | Sell   | 46.04  | -6.06  | 46.04  | Bio   
+HYMC   | Sell   | 45.26  | -5.30  | 45.26  | Gol   
+KALV   | Sell   | 45.25  | -3.38  | 45.25  | Bio   
+IHS    | Sell   | 43.26  | -2.76  | 43.26  | TelSer
+LXU    | Buy    | 42.89  |        | 42.89  | Che   
+AXSM   | Sell   | 41.34  | -2.52  | 41.34  | Bio   
+APYX   | Sell   | 40.26  |        | 40.26  | MedDev
+CE     | Sell   | 33.11  |        | 33.11  | Che   
+MYSZ   | Sell   | 32.45  | -4.87  | 32.45  | Sof-Ap
+EDAP   | Sell   | 30.93  | -4.84  | 30.93  | MedDis
+VNET   | Sell   | 262.17 | -9.02  | 262.17 | InfTec
+ANGO   | Sell   | 20.91  | -3.04  | 20.91  | MedIns
+BOXL   | Sell   | 127.41 | -3.91  | 127.41 | ConEle
+CRSR   | Sell   | 114.74 | -3.55  | 114.74 | ComHar
+VUZI   | Sell   | 112.78 | -3.02  | 112.78 | ConEle
+TRVG   | Sell   | 110.87 | -10.86 | 110.87 | IntCon
+AGEN   | Sell   | 108.13 | -6.03  | 108.13 | Bio   
+VRME   | Sell   | 101.58 | -9.25  | 101.58 | Sec&Pr
+
+--- Unk ---
+| Symb | MACD | TProfit | SLoss | Profit% | Industry |
+|----|----|-------|-----|-------|--------|
+ARRY   | Buy    | 73.23  | -5.42  | 73.23  | Sol   
+PAYS   | Sell   | 71.65  |        | 71.65  | Sof-In
+CRNC   | Sell   | 62.36  | -7.27  | 62.36  | Sof-Ap
+GOGO   | Buy    | 50.36  | -4.93  | 50.36  | TelSer
+NU     | Sell   | 47.62  | -3.40  | 47.62  | Ban-Re
+TZA    | Buy    | 40.23  | -3.07  | 40.23  | nan   
+KB     | Sell   | 39.87  |        | 39.87  | Ban-Re
+SRTY   | Buy    | 39.38  | -6.34  | 39.38  | nan   
+BAOS   | Sell   | 37.83  |        | 37.83  | AdvAge
+ARKW   | Sell   | 36.43  |        | 36.43  | nan   
+SHG    | Sell   | 36.38  | -2.84  | 36.38  | Ban-Re
+SDD    | Buy    | 30.47  | -1.48  | 30.47  | nan   
+DFIN   | Sell   | 30.44  |        | 30.44  | Sof-Ap
+DKL    | Buy    | 29.01  | -2.37  | 29.01  | Oil&Ga
+HAS    | Sell   | 26.91  | -1.69  | 26.91  | Lei   
+TWM    | Buy    | 23.80  | -1.44  | 23.80  | nan   
+BSBR   | Buy    | 23.61  | -1.17  | 23.61  | Ban-Re
+JBL    | Sell   | 23.23  | -3.99  | 23.23  | EleCom
+UNB    | Buy    | 22.83  | -1.91  | 22.83  | Ban-Re
+SPXL   | Sell   | 22.16  |        | 22.16  | nan   
+CUBA   | Buy    | 21.94  |        | 21.94  | AssMan
+UPRO   | Sell   | 21.89  |        | 21.89  | nan   
+EZA    | Sell   | 21.89  |        | 21.89  | nan   
+LTL    | Sell   | 21.76  | -5.37  | 21.76  | nan   
+IDV    | Sell   | 21.25  |        | 21.25  | nan   
+TG     | Sell   | 20.86  | -5.64  | 20.86  | MetFab
+VITL   | Buy    | 20.35  | -4.85  | 20.35  | FarPro
+EWZ    | Buy    | 20.08  |        | 20.08  | nan   
+ERO    | Sell   | 20.03  | -1.82  | 20.03  | Cop   
+
+--- ValPl ---
+| Symb | MACD | TProfit | SLoss | Profit% | Industry |
+|----|----|-------|-----|-------|--------|
+BABA   | Sell   | 49.31  | -2.33  | 49.31  | IntRet
+GSL    | Buy    | 28.50  |        | 28.50  | MarShi
 
 === MA Signals ===
-No data available.
+
+--- MixFund ---
+| Symb | MA | TProfit | SLoss | Profit% | Industry |
+|----|--|-------|-----|-------|--------|
+ACAD   | Sell   | 50.82  | -4.38  | 50.82  | Bio   
+URBN   | Sell   | 37.17  | -2.27  | 37.17  | AppRet
+FNV    | Buy    | 36.54  | -1.27  | 36.54  | Gol   
+GASS   | Sell   | 22.81  | -2.37  | 22.81  | MarShi
+CPSH   | Buy    | 106.76 | -1.76  | 106.76 | EleCom
+
+--- NegRet ---
+| Symb | MA | TProfit | SLoss | Profit% | Industry |
+|----|--|-------|-----|-------|--------|
+ALGM   | Sell   | 70.84  | -1.04  | 70.84  | Sem   
+BNTC   | Sell   | 48.79  | -9.05  | 48.79  | Bio   
+ZH     | Buy    | 44.96  | -3.81  | 44.96  | IntCon
+AKRO   | Sell   | 44.47  | -1.58  | 44.47  | Bio   
+FSI    | Sell   | 32.93  | -10.13 | 32.93  | SpeChe
+BBIO   | Buy    | 29.79  | -8.93  | 29.79  | Bio   
+OMI    | Sell   | 22.68  | -1.42  | 22.68  | MedDis
+CMCM   | Sell   | 20.52  | -3.82  | 20.52  | IntCon
+XNET   | Sell   | 141.16 | -5.67  | 141.16 | Sof-In
+ICAD   | Buy    | 123.39 | -4.69  | 123.39 | MedDev
+
+--- Unk ---
+| Symb | MA | TProfit | SLoss | Profit% | Industry |
+|----|--|-------|-----|-------|--------|
+DFS    | Sell   | 32.59  | -3.64  | 32.59  | CreSer
+ECNS   | Sell   | 32.06  | -1.54  | 32.06  | nan   
+FBP    | Buy    | 18.82  | -2.82  | 18.82  | Ban-Re
+ZKIN   | Buy    | 165.93 | -15.87 | 165.93 | Ste   
 
 
 === Industry Abbreviations ===
 | Abbreviation | Full Industry Name |
 |--------------|---------------------|
-| Aut&TruDea   | Auto & Truck Dealerships |
+| AdvAge       | Advertising Agencies |
+| Aer&Def      | Aerospace & Defense |
+| Alu          | Aluminum |
+| AppRet       | Apparel Retail |
+| AssMan       | Asset Management |
+| Ban-Reg      | Banks - Regional |
+| Bio          | Biotechnology |
+| Che          | Chemicals |
+| ComHar       | Computer Hardware |
+| ConEle       | Consumer Electronics |
+| Cop          | Copper |
+| CreSer       | Credit Services |
+| DruMan-Spe&Gen | Drug Manufacturers - Specialty & Generic |
+| Ele&ComDis   | Electronics & Computer Distribution |
+| EleCom       | Electronic Components |
+| Ent          | Entertainment |
+| FarPro       | Farm Products |
+| Gol          | Gold |
+| HeaPla       | Healthcare Plans |
+| InfTecSer    | Information Technology Services |
+| IntCon&Inf   | Internet Content & Information |
+| IntRet       | Internet Retail |
+| Lei          | Leisure |
+| MarShi       | Marine Shipping |
+| MedDev       | Medical Devices |
+| MedDis       | Medical Distribution |
+| MedIns&Sup   | Medical Instruments & Supplies |
+| MetFab       | Metal Fabrication |
+| Oil&GasMid   | Oil & Gas Midstream |
+| Oil&GasRef&Mar | Oil & Gas Refining & Marketing |
+| Pac&Con      | Packaging & Containers |
+| PacFoo       | Packaged Foods |
+| Pol&TreCon   | Pollution & Treatment Controls |
+| Rei-Ind      | REIT - Industrial |
+| Sec&ProSer   | Security & Protection Services |
+| Sem          | Semiconductors |
+| Sof-App      | Software - Application |
+| Sof-Inf      | Software - Infrastructure |
+| Sol          | Solar |
+| SpeChe       | Specialty Chemicals |
+| Ste          | Steel |
+| TelSer       | Telecom Services |
+| Uti-RegEle   | Utilities - Regulated Electric |
 
 
 === Strategy Descriptions ===
-HG_Und: High Growth and Undervalued: High ROE, ROA, low Debt, high margins, and undervalued.
-HQ: High Quality: High ROE, ROA, low Debt, and high margins.
-DivGr: Dividend Growth: High ROE, ROA, low Debt, high margins, with dividends.
-DivLd: Dividend Leader: High ROE, ROA, and strong dividend payout.
-Dist: Distressed: High debt, negative earnings, and poor margins.
-StblFin: Stable Financial: High liquidity ratios, positive margins, and strong financial stability.
-ValPl: Value Play: Low PE and P/B ratio, indicating undervalued stocks.
-AggGr: Aggressive Growth: High revenue and asset turnover ratios, focusing on growth.
-BalOp: Balanced Opportunity: Mixed fundamentals but some growth potential.
-ModInc: Moderate Income: Mixed income metrics with low to moderate risk.
-MixFund: Mixed Fundamentals: Stable with low growth potential, but not at risk.
-NegRet: Negative Returns: Stocks with negative ROE or ROA.
-Unk: Unknown: No specific strategy classification available.
+HG_Und: Високий ріст і недооціненість: високий ROE, ROA, низький борг, високі маржі та недооціненість.
+HQ: Висока якість: високий ROE, ROA, низький борг і високі маржі.
+DivGr: Зростання дивідендів: високий ROE, ROA, низький борг, високі маржі та дивіденди.
+DivLd: Лідер дивідендів: високий ROE, ROA та сильна виплата дивідендів.
+Dist: Складне становище: високий борг, негативні прибутки та низькі маржі.
+StblFin: Стабільність фінансів: високі коефіцієнти ліквідності, позитивні маржі та фінансова стабільність.
+ValPl: Цінова гра: низький PE та P/B коефіцієнти, що вказують на недооціненість.
+AggGr: Агресивне зростання: високі доходи та оборот активів, зосередження на зростанні.
+BalOp: Збалансована можливість: змішані фінансові показники, але є потенціал зростання.
+ModInc: Помірний дохід: змішані доходи з низьким або помірним ризиком.
+MixFund: Змішані фінанси: стабільність з низьким потенціалом зростання, але без ризиків.
+NegRet: Негативна дохідність: акції з негативним ROE або ROA.
+Unk: Невідомо: конкретна стратегія не визначена.

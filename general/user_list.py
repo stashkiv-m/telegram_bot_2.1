@@ -3,10 +3,6 @@ import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
-
-from telegram import Update
-from telegram.ext import CallbackContext, Updater
-
 from language_state import language_state
 from state_update_menu import menu_state, update_menu_state
 from user_state import user_state, update_user_state
@@ -30,6 +26,7 @@ client = gspread.authorize(creds)
 # Ідентифікатори таблиць
 spreadsheet_id_access = '1y8q73J6wiwNhQLkWyzBBRTOwh0yy5TdGglIpNNOCgEo'  # замініть на ID таблиці з контролем доступу
 spreadsheet_id_activity = '1nZv5QBo_excPo402Ul-a278hyB2-rQbYfqlCcHu-524'  # замініть на ID таблиці для запису активності
+spreadsheet_id_watchlist = '1W2NsupkY8ObRH2beFAN7n6XTCoqC2-0YZsZbA98UNLU'  # замініть на ID таблиці для запису активності
 
 # Отримання аркушів з таблиць
 access_sheet = client.open_by_key(spreadsheet_id_access)
@@ -37,6 +34,9 @@ access_worksheet = access_sheet.get_worksheet(0)  # Аркуш для контр
 
 activity_sheet = client.open_by_key(spreadsheet_id_activity)
 activity_worksheet = activity_sheet.get_worksheet(0)  # Аркуш для запису активності
+
+watchlist_sheet = client.open_by_key(spreadsheet_id_watchlist)
+watchlist_worksheet = watchlist_sheet.get_worksheet(0)  # перший аркуш
 
 
 # Функція для перевірки доступу користувача
@@ -102,6 +102,36 @@ def handle_user_access(user_id, username):
         print("Доступ заборонено. Надсилаємо повідомлення з реквізитами для оплати.")
         # Надсилання повідомлення з реквізитами для оплати
         send_payment_message(user_id)
+
+
+# Додаємо акцію в Watchlist
+def add_to_watchlist(user_id, username, ticker):
+    # Перевіряємо, чи вже додано цей тікер для користувача
+    records = watchlist_worksheet.get_all_records()
+    for row in records:
+        if str(row['User ID']) == str(user_id) and row['Ticker'] == ticker:
+            return False  # Вже існує
+    watchlist_worksheet.append_row([user_id, username, ticker])
+    return True
+
+
+# Видаляємо акцію з Watchlist
+def remove_from_watchlist(user_id, ticker):
+    cell = watchlist_worksheet.find(str(user_id))
+    if not cell:
+        return False
+    records = watchlist_worksheet.get_all_records()
+    for idx, row in enumerate(records, start=2):  # start=2 бо перший рядок — заголовки
+        if str(row['User ID']) == str(user_id) and row['Ticker'] == ticker:
+            watchlist_worksheet.delete_rows(idx)
+            return True
+    return False
+
+
+# Отримуємо список акцій користувача
+def get_user_watchlist(user_id):
+    records = watchlist_worksheet.get_all_records()
+    return [row['Ticker'] for row in records if str(row['User ID']) == str(user_id)]
 
 
 def user_activity_and_access(update, context):

@@ -240,7 +240,6 @@ def signal_list_for_user(update: Update, context: CallbackContext):
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     state = menu_state().rstrip('\n')
 
-
     if state == 'crypto_signals':
         file_path = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signal.csv')
         output_file = os.path.join(BASE_DIR, '..', 'crypto_dev', 'crypto_signals.txt')

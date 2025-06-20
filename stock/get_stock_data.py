@@ -1,6 +1,3 @@
-import pandas as pd
-
-
 def format_number(value, is_currency=True):
     if value is None:
         return "N/A"
@@ -41,6 +38,7 @@ def explain_metric(name, lang='English'):
     }
     return explanations.get(name, {}).get('ua' if lang == 'Ukrainian' else 'en', "No description")
 
+
 def analyze_metric(name, value):
     if value is None:
         return "N/A", "Н/Д"
@@ -73,6 +71,7 @@ def analyze_metric(name, value):
         analysis_en, analysis_ua = "No analysis", "Без аналізу"
     return analysis_en, analysis_ua
 
+
 def get_stock_metrics(stock, ticker, language='English'):
     info = stock.info
     balance_sheet = stock.quarterly_balance_sheet
@@ -85,7 +84,7 @@ def get_stock_metrics(stock, ticker, language='English'):
     roe = safe_get(lambda: round((income.loc["Net Income"].iloc[0] / balance_sheet.loc["Stockholders Equity"].iloc[0]) * 100, 2))
     pe_ratio = safe_get(lambda: round(info.get("trailingPE", 0), 2))
     price_to_book = safe_get(lambda: round(info.get("priceToBook", 0), 2))
-    dividend_yield = safe_get(lambda: round(info.get("dividendYield", 0) * 100, 2))
+    dividend_yield = safe_get(lambda: round(info.get("dividendYield", 0), 2))
     debt_to_equity = safe_get(lambda: round(
         (balance_sheet.loc["Long Term Debt"].iloc[0] + balance_sheet.loc["Current Debt"].iloc[0]) /
         balance_sheet.loc["Stockholders Equity"].iloc[0], 2
