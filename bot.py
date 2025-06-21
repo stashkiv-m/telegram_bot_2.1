@@ -163,13 +163,14 @@ def main():
     dp = updater.dispatcher
     dp.add_handler(CallbackQueryHandler(watchlist_callback))
 
-
-
     clear_state_files()
 
     # Register command handlers
     def regex_multilang(*variants):
         return r'^(' + '|'.join(variants) + ')$'
+
+    dp.add_handler(CommandHandler("start", start))
+
 
     # Меню (Menu)
     dp.add_handler(MessageHandler(
