@@ -73,18 +73,41 @@ def start(update: Update, context: CallbackContext) -> None:
 
 # Menu handler
 
-def menu(update: Update, context: CallbackContext):
-    context.user_data['menu_stack'] = ['menu']
-    if not ACCESS_CHECK_ENABLED or user_activity_and_access(update, context):
-        keyboard = ReplyKeyboardMarkup(
-            [[KeyboardButton("Stock")], [KeyboardButton("Back")]], resize_keyboard=True
-        )
-        context.bot.send_message(chat_id=update.effective_chat.id, text='Menu:', reply_markup=keyboard)
-        update_user_state('active')
-        update_menu_state('menu')
+# def menu(update: Update, context: CallbackContext):
+#     context.user_data['menu_stack'] = ['menu']
+#     if not ACCESS_CHECK_ENABLED or user_activity_and_access(update, context):
+#         keyboard = ReplyKeyboardMarkup(
+#             [[KeyboardButton("Stock")], [KeyboardButton("Back")]], resize_keyboard=True
+#         )
+#         context.bot.send_message(chat_id=update.effective_chat.id, text='Menu:', reply_markup=keyboard)
+#         update_user_state('active')
+#         update_menu_state('menu')
 
+def menu(update, context):
+    language = language_state().rstrip('\n')
+    context.user_data['menu_stack'] = context.user_data.get('menu_stack', []) + ['stock']
+    if language == "Ukrainian":
+        keyboard = [
+            [KeyboardButton("🏢 Інформація про компанію")],
+            [KeyboardButton("📑 Watchlist")],
+            [KeyboardButton("📊 Сигнали акцій")],
+            [KeyboardButton("⬅️ Назад")]
+        ]
+        text = "Ласкаво просимо у розділ Акцій"
+    else:
+        keyboard = [
+            [KeyboardButton("🏢 Company information")],
+            [KeyboardButton("📑 Watchlist")],
+            [KeyboardButton("📊 Stock Signals")],
+            [KeyboardButton("⬅️ Back")]
+        ]
+        text = "Welcome to Stock"
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    context.bot.send_message(chat_id=update.effective_chat.id, text=text, reply_markup=reply_markup)
+    update_menu_state('stock')
 
 # Handle photo
+
 
 def handle_photo(update: Update, context: CallbackContext) -> None:
     if user_state().rstrip('\n') in ('guest', 'expired'):
@@ -124,7 +147,6 @@ def watchlist_callback(update, context):
             query.answer("Видалено з Watchlist!")
         else:
             query.answer("Цього тікера немає у вашому Watchlist.")
-
 
 
 # Clear user states
@@ -213,7 +235,7 @@ def main():
 
     # Back (Назад)
     dp.add_handler(MessageHandler(
-        Filters.regex(regex_multilang("Back", "Назад")),
+        Filters.regex(regex_multilang("⬅️ Back", "⬅️ Назад")),
         back_function
     ))
 

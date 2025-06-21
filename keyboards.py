@@ -48,7 +48,7 @@ def watchlist_keyboard(update, context):
             [KeyboardButton("👀 Показати мій Watchlist")],
             [KeyboardButton("➕ Додати у Watchlist")],
             [KeyboardButton("➖ Видалити з Watchlist")],
-            [KeyboardButton("Назад")]
+            [KeyboardButton("⬅️ Назад")]
         ]
         menu_text = "Меню Watchlist:\n— Додавайте, переглядайте або видаляйте акції зі свого Watchlist!"
     else:
@@ -56,7 +56,7 @@ def watchlist_keyboard(update, context):
             [KeyboardButton("👀 Show My Watchlist")],
             [KeyboardButton("➕ Add to Watchlist")],
             [KeyboardButton("➖ Remove from Watchlist")],
-            [KeyboardButton("Back")]
+            [KeyboardButton("⬅️ Back")]
         ]
         menu_text = "Watchlist Menu:\n— Додавайте, переглядайте або видаляйте акції зі свого Watchlist!"
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -70,7 +70,7 @@ def watchlist_keyboard(update, context):
 
 def create_back_keyboard():
     language = language_state().rstrip('\n')
-    button = "Назад" if language == "Ukrainian" else "Back"
+    button = "⬅️ Назад" if language == "Ukrainian" else "️⬅️ Back"
     return ReplyKeyboardMarkup([[KeyboardButton(button)]], resize_keyboard=True)
 
 
@@ -82,7 +82,7 @@ def stock_keyboard(update, context):
             [KeyboardButton("🏢 Інформація про компанію")],
             [KeyboardButton("📑 Watchlist")],
             [KeyboardButton("📊 Сигнали акцій")],
-            [KeyboardButton("Назад")]
+            [KeyboardButton("⬅️ Назад")]
         ]
         text = "Ласкаво просимо у розділ Акцій"
     else:
@@ -90,7 +90,7 @@ def stock_keyboard(update, context):
             [KeyboardButton("🏢 Company information")],
             [KeyboardButton("📑 Watchlist")],
             [KeyboardButton("📊 Stock Signals")],
-            [KeyboardButton("Back")]
+            [KeyboardButton("⬅️ Back")]
         ]
         text = "Welcome to Stock"
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -104,7 +104,7 @@ def crypto_keyboard(update, context):
         [KeyboardButton("📈 Crypto Market Overview")],
         [KeyboardButton("🪙 Cryptocurrencies info")],
         [KeyboardButton("📉 Crypto Signals")],
-        [KeyboardButton("Back")]
+        [KeyboardButton("⬅️ Back")]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome to Crypto", reply_markup=reply_markup)
@@ -117,7 +117,7 @@ def forex_keyboard(update, context):
         [KeyboardButton("📈 Forex Market Overview")],
         [KeyboardButton("💱 Pairs info")],
         [KeyboardButton("📉 Forex Signals")],
-        [KeyboardButton("Back")]
+        [KeyboardButton("⬅️ Back")]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome to Forex", reply_markup=reply_markup)
@@ -129,7 +129,7 @@ def language_keyboard(update, context):
     keyboard = [
         [KeyboardButton("🇺🇦 Ukrainian")],
         [KeyboardButton("🇬🇧 English")],
-        [KeyboardButton("Back")]
+        [KeyboardButton("⬅️ Back")]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     context.bot.send_message(chat_id=update.effective_chat.id,

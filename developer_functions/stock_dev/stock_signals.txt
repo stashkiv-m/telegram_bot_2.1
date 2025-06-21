@@ -174,16 +174,16 @@ ZKIN   | Buy    | 165.93 | -15.87 | 165.93 | Ste
 
 
 === Strategy Descriptions ===
-HG_Und: Високий ріст і недооціненість: високий ROE, ROA, низький борг, високі маржі та недооціненість.
-HQ: Висока якість: високий ROE, ROA, низький борг і високі маржі.
-DivGr: Зростання дивідендів: високий ROE, ROA, низький борг, високі маржі та дивіденди.
-DivLd: Лідер дивідендів: високий ROE, ROA та сильна виплата дивідендів.
-Dist: Складне становище: високий борг, негативні прибутки та низькі маржі.
-StblFin: Стабільність фінансів: високі коефіцієнти ліквідності, позитивні маржі та фінансова стабільність.
-ValPl: Цінова гра: низький PE та P/B коефіцієнти, що вказують на недооціненість.
-AggGr: Агресивне зростання: високі доходи та оборот активів, зосередження на зростанні.
-BalOp: Збалансована можливість: змішані фінансові показники, але є потенціал зростання.
-ModInc: Помірний дохід: змішані доходи з низьким або помірним ризиком.
-MixFund: Змішані фінанси: стабільність з низьким потенціалом зростання, але без ризиків.
-NegRet: Негативна дохідність: акції з негативним ROE або ROA.
-Unk: Невідомо: конкретна стратегія не визначена.
+HG_Und: High Growth and Undervalued: High ROE, ROA, low Debt, high margins, and undervalued.
+HQ: High Quality: High ROE, ROA, low Debt, and high margins.
+DivGr: Dividend Growth: High ROE, ROA, low Debt, high margins, with dividends.
+DivLd: Dividend Leader: High ROE, ROA, and strong dividend payout.
+Dist: Distressed: High debt, negative earnings, and poor margins.
+StblFin: Stable Financial: High liquidity ratios, positive margins, and strong financial stability.
+ValPl: Value Play: Low PE and P/B ratio, indicating undervalued stocks.
+AggGr: Aggressive Growth: High revenue and asset turnover ratios, focusing on growth.
+BalOp: Balanced Opportunity: Mixed fundamentals but some growth potential.
+ModInc: Moderate Income: Mixed income metrics with low to moderate risk.
+MixFund: Mixed Fundamentals: Stable with low growth potential, but not at risk.
+NegRet: Negative Returns: Stocks with negative ROE or ROA.
+Unk: Unknown: No specific strategy classification available.
