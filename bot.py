@@ -48,23 +48,29 @@ def start(update: Update, context: CallbackContext) -> None:
     language = language_state().rstrip('\n')
 
     greeting = (
+        "🔥 You’ve received **full free access** to all bot features — forever!\n\n"
         "https://t.me/stashkiv_mykhailo\n\n"
-        "This bot analyzes financial markets and provides useful information for making decisions.\n"
+        "🤖 This bot automatically analyzes the financial markets and helps you make smarter investment decisions:\n"
         "- 📈 Stock analysis: fundamental and technical indicators.\n"
         "- 📊 Buy/sell signals based on MACD and MA indicators.\n"
-        "- 🗂 Industry/profitability classification.\n"
-        "- 🔔 Economic event alerts.\n\n"
-        "Crypto and forex coming soon.\n"
-        "The bot doesn't guarantee profits."
+        "- 🧠 Clear explanations of each metric.\n"
+        "- 🗂 Classification by industry and profitability.\n"
+        "- 🔔 Daily economic event alerts.\n\n"
+        "💡 Soon: support for crypto and forex.\n"
+        "🚫 The bot doesn’t guarantee profits, but helps you invest more wisely.\n\n"
+        "🙌 Like the bot? **Share it with friends** — that’s the best way to support the project!"
     ) if language != 'Ukrainian' else (
+        "🔥 Ви отримали **повний безкоштовний доступ** до всіх функцій бота — назавжди!\n\n"
         "https://t.me/stashkiv_mykhailo\n\n"
-        "Цей бот аналізує фінансові ринки та надає корисну інформацію.\n"
+        "🤖 Цей бот автоматично аналізує фінансові ринки та допомагає приймати обґрунтовані інвестиційні рішення:\n"
         "- 📈 Фундаментальний і технічний аналіз акцій.\n"
         "- 📊 Сигнали купівлі/продажу (MACD, MA).\n"
+        "- 🧠 Прості пояснення кожного показника.\n"
         "- 🗂 Класифікація за галузями та прибутковістю.\n"
-        "- 🔔 Економічний календар.\n\n"
-        "Незабаром крипта і форекс.\n"
-        "Бот не гарантує прибутків."
+        "- 🔔 Щоденні сповіщення про економічні події.\n\n"
+        "💡 Незабаром — підтримка крипти та форексу.\n"
+        "🚫 Бот не гарантує прибутків, але допомагає інвестувати розумніше.\n\n"
+        "🙌 Подобається бот? **Поділіться з друзями** — це найкраща підтримка проєкту!"
     )
 
     context.bot.send_message(chat_id=update.effective_chat.id, text=greeting, reply_markup=create_start_keyboard())
